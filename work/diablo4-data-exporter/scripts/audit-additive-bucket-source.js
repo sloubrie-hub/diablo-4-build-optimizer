@@ -63,6 +63,12 @@ const selectorFamiliesClassified = selectorSourceProof?.summary?.selectorFamilie
 const selectorStructuralAssessment = selectorSourceProof?.summary?.structuralFamilyAssessment ?? null;
 const strongSelectorStructuralCandidates = selectorSourceProof?.summary?.strongStructuralCandidates ?? null;
 const selectorSpecificWindowSignatures = selectorSourceProof?.summary?.selectorSpecificWindowSignatures ?? null;
+const selectorStructuralCorpusAssessment = selectorSourceProof?.summary?.structuralCorpusAssessment ?? null;
+const selectorStructuralCorpusExactMatches = selectorSourceProof?.summary?.structuralCorpusExactMatches ?? null;
+const selectorStructuralCorpusNewExactAssets = selectorSourceProof?.summary?.structuralCorpusNewExactAssets ?? [];
+const selectorStructuralCorpusExactMatchesWithSelectorAnchors = selectorSourceProof?.summary?.structuralCorpusExactMatchesWithSelectorAnchors ?? null;
+const selectorStructuralCorpusNewExactAssetsWithSelectorAnchors = selectorSourceProof?.summary?.structuralCorpusNewExactAssetsWithSelectorAnchors ?? [];
+const selectorStructuralCorpusSourceNamedMatches = selectorSourceProof?.summary?.structuralCorpusSourceNamedMatches ?? null;
 const sourceProofReady = selectorSourceProof?.summary?.promotionReady === true;
 const fieldOwnershipProven = sf32Decision?.summary?.promotionReady === true;
 const hasBonusPercentCorpus = explicitAssets.length > 0 || matrixAssets.length > 0;
@@ -134,6 +140,12 @@ const report = {
     selectorStructuralAssessment,
     strongSelectorStructuralCandidates,
     selectorSpecificWindowSignatures,
+    selectorStructuralCorpusAssessment,
+    selectorStructuralCorpusExactMatches,
+    selectorStructuralCorpusNewExactAssets,
+    selectorStructuralCorpusExactMatchesWithSelectorAnchors,
+    selectorStructuralCorpusNewExactAssetsWithSelectorAnchors,
+    selectorStructuralCorpusSourceNamedMatches,
     sourceProofReady,
     fieldOwnershipProven,
     hasUnanchoredUseful,
@@ -155,6 +167,7 @@ const report = {
         sf32Assessment: sf32Decision?.summary?.assessment?.kind ?? null,
         selectorSourceProofAssessment: selectorSourceProof?.summary?.assessment?.kind ?? null,
         selectorStructuralAssessment,
+        selectorStructuralCorpusAssessment,
       },
     },
   },

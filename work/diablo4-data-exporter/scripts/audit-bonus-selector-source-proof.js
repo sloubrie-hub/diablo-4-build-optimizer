@@ -8,7 +8,8 @@ const dictionaryScanFile = process.argv[5] ?? "outputs/diablo4-decoded-dictionar
 const tableNumericContextsFile = process.argv[6] ?? "outputs/diablo4-sf32-table-numeric-contexts/sf32-table-numeric-contexts.json";
 const additiveBucketSourceFile = process.argv[7] ?? "outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json";
 const structuralFamilyFile = process.argv[8] ?? "outputs/diablo4-bonus-selector-structural-family/bonus-selector-structural-family.json";
-const outDir = process.argv[9] ?? "outputs/diablo4-bonus-selector-source-proof";
+const structuralCorpusFile = process.argv[9] ?? "outputs/diablo4-bonus-selector-structural-corpus/bonus-selector-structural-corpus.json";
+const outDir = process.argv[10] ?? "outputs/diablo4-bonus-selector-source-proof";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -37,6 +38,7 @@ const dictionaryScan = readOptionalJson(dictionaryScanFile);
 const tableNumericContexts = readOptionalJson(tableNumericContextsFile);
 const additiveBucketSource = readOptionalJson(additiveBucketSourceFile);
 const structuralFamily = readOptionalJson(structuralFamilyFile);
+const structuralCorpus = readOptionalJson(structuralCorpusFile);
 
 const matrixGroups = selectorMatrix?.groups ?? [];
 const matrixRows = selectorMatrix?.rows ?? [];
@@ -107,6 +109,17 @@ const sourceSignals = {
     sourceProofReady: structuralFamily?.summary?.sourceProofReady === true,
     promotionReady: structuralFamily?.summary?.promotionReady === true,
   },
+  structuralCorpus: {
+    assessment: assessmentKind(structuralCorpus),
+    matches: structuralCorpus?.summary?.matches ?? null,
+    exactMatches: structuralCorpus?.summary?.exactMatches ?? null,
+    newExactAssets: structuralCorpus?.summary?.newExactAssets ?? [],
+    exactMatchesWithSelectorAnchors: structuralCorpus?.summary?.exactMatchesWithSelectorAnchors ?? null,
+    newExactAssetsWithSelectorAnchors: structuralCorpus?.summary?.newExactAssetsWithSelectorAnchors ?? [],
+    sourceNamedMatches: structuralCorpus?.summary?.sourceNamedMatches ?? null,
+    sourceProofReady: structuralCorpus?.summary?.sourceProofReady === true,
+    promotionReady: structuralCorpus?.summary?.promotionReady === true,
+  },
 };
 
 const sourceNamed =
@@ -114,7 +127,8 @@ const sourceNamed =
   Number(sourceSignals.localTableAlternatives.independentTableCandidates || 0) > 0 ||
   Number(sourceSignals.localTableAlternatives.usefulTableCandidateContexts || 0) > 0 ||
   Number(sourceSignals.tableNumericContexts.potentialSourceContexts || 0) > 0 ||
-  Number(sourceSignals.decodedDictionary.dictionaryHitsNearWatchedNumbers || 0) > 0;
+  Number(sourceSignals.decodedDictionary.dictionaryHitsNearWatchedNumbers || 0) > 0 ||
+  Number(sourceSignals.structuralCorpus.sourceNamedMatches || 0) > 0;
 
 const selectorFamiliesClassified = readyFamilies.length;
 const assessment = sourceNamed && readyFamilies.length === selectorFamilies.length
@@ -147,6 +161,7 @@ const report = {
     tableNumericContextsFile: tableNumericContexts ? tableNumericContextsFile : null,
     additiveBucketSourceFile: additiveBucketSource ? additiveBucketSourceFile : null,
     structuralFamilyFile: structuralFamily ? structuralFamilyFile : null,
+    structuralCorpusFile: structuralCorpus ? structuralCorpusFile : null,
   },
   summary: {
     selectorsObserved: selectorFamilies.length,
@@ -158,6 +173,13 @@ const report = {
     structuralFamilyAssessment: sourceSignals.structuralFamily.assessment,
     strongStructuralCandidates: sourceSignals.structuralFamily.strongStructuralCandidates,
     selectorSpecificWindowSignatures: sourceSignals.structuralFamily.selectorSpecificWindowSignatures,
+    structuralCorpusAssessment: sourceSignals.structuralCorpus.assessment,
+    structuralCorpusMatches: sourceSignals.structuralCorpus.matches,
+    structuralCorpusExactMatches: sourceSignals.structuralCorpus.exactMatches,
+    structuralCorpusNewExactAssets: sourceSignals.structuralCorpus.newExactAssets,
+    structuralCorpusExactMatchesWithSelectorAnchors: sourceSignals.structuralCorpus.exactMatchesWithSelectorAnchors,
+    structuralCorpusNewExactAssetsWithSelectorAnchors: sourceSignals.structuralCorpus.newExactAssetsWithSelectorAnchors,
+    structuralCorpusSourceNamedMatches: sourceSignals.structuralCorpus.sourceNamedMatches,
     promotionReady: assessment.promotionReady,
     matrixAssessment: assessmentKind(selectorMatrix),
     additiveSourceAssessment: assessmentKind(additiveBucketSource),

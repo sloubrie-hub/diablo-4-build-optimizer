@@ -8827,3 +8827,66 @@ L'audit source additive reste bloque :
 Decision :
 
 Utiliser les offsets `949/994` comme indices pour chercher une table ou un champ source nomme. Ne pas classer `949` ou `994` en additif/multiplicatif, ne pas alimenter `reliableDps`, et garder le delta `48960` de `1663210` en candidat bloque tant que la source, le trigger et l'uptime ne sont pas prouves.
+
+## Scan corpus des empreintes structurelles de selecteurs
+
+Les offsets structurels `949/994` ont ensuite ete utilises comme empreintes de corpus pour verifier s'ils reapparaissent dans d'autres payloads decodes. Le but etait de distinguer deux cas : un simple layout commun, ou un vrai peer ancre par selecteur et potentiellement utile pour prouver une famille de bucket.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/scan-bonus-selector-structural-corpus.js`
+- `outputs/diablo4-bonus-selector-structural-corpus/bonus-selector-structural-corpus.json`
+- `work/diablo4-data-exporter/scripts/audit-bonus-selector-source-proof.js`
+- `outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json`
+- `work/diablo4-data-exporter/scripts/audit-additive-bucket-source.js`
+- `outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json`
+- `work/diablo4-data-exporter/scripts/build-fine-bucket-extraction-plan.js`
+- `outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Methode :
+
+- prendre les `18` offsets forts du rapport structurel
+- construire deux signatures fixes : `949` et `994`
+- scanner tous les fichiers `*.decoded.bin` sous `outputs`
+- mesurer les matches partiels et exacts
+- separer les peers exacts connus des peers exacts nouveaux
+- verifier si les nouveaux peers ont une ancre selecteur `949/994`
+- chercher des chaines nommant explicitement une famille source/bucket
+
+Resultats :
+
+- payloads scannes : `123`
+- signatures : `2`
+- mots par signature : `18`
+- matches : `38`
+- matches exacts : `10`
+- matches exacts connus : `5`
+- nouveaux assets de layout exact : `216638`, `421661`, `493422`, `1092943`, `2123320`
+- matches exacts avec ancres selecteur : `5`
+- nouveaux assets exacts avec ancres selecteur : `0`
+- matches avec source nommee : `0`
+- assessment : `bonus-selector-structural-corpus-has-layout-only-peers`
+- promotion : `false`
+
+Lecture :
+
+Le scan a bien retrouve des peers de layout, ce qui confirme que les offsets fixes capturent une structure binaire reelle. Mais les `5` nouveaux assets exacts ne portent pas d'ancre `949/994`. Ils contiennent surtout des chaines de formules, `SF_*`, `Affix_Value_*` ou des references item/power, sans champ nommant `additive`, `multiplicative` ou une famille de bucket.
+
+Impact :
+
+La preuve source des selecteurs expose maintenant :
+
+- `structuralCorpusAssessment bonus-selector-structural-corpus-has-layout-only-peers`
+- `structuralCorpusMatches 38`
+- `structuralCorpusExactMatches 10`
+- `structuralCorpusNewExactAssets [216638,421661,493422,1092943,2123320]`
+- `structuralCorpusExactMatchesWithSelectorAnchors 5`
+- `structuralCorpusNewExactAssetsWithSelectorAnchors []`
+- `structuralCorpusSourceNamedMatches 0`
+- `promotionReady false`
+
+Decision :
+
+Ne pas utiliser les nouveaux peers comme preuve `949/994`. Ils valident un layout commun, pas une semantique de bucket. La prochaine piste doit chercher une table source hors empreinte fixe ou decoder un champ proprietaire qui relie explicitement le selecteur a une famille additive/multiplicative.

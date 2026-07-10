@@ -669,3 +669,11 @@ Build de reference :
 - audit source additive regenere : `7` candidats, `7` bloques, `0` pret, `selectorStructuralAssessment bonus-selector-structural-family-candidates-need-source-proof`
 - plan buckets fins regenere : `6` etapes, `0` prete, `6` bloquees ; prochaine action = trouver une table/champ source nomme pour les selecteurs `Bonus_Percent_Per_Power`
 - decision : les offsets structurels servent d'indices de recherche seulement ; ne pas classer `949/994` en additif/multiplicatif et ne pas alimenter `reliableDps` sans source nommee
+- scan corpus empreintes selecteurs ajoute : `work/diablo4-data-exporter/scripts/scan-bonus-selector-structural-corpus.js`
+- rapport genere : `outputs/diablo4-bonus-selector-structural-corpus/bonus-selector-structural-corpus.json`
+- corpus scanne : `123` payloads decodes, `2` signatures (`949`, `994`), `18` mots par signature
+- resultats : `38` matches partiels, `10` matches exacts, `5` matches exacts connus, `5` nouveaux assets de layout (`216638`, `421661`, `493422`, `1092943`, `2123320`)
+- controle ancrage : `5` matches exacts avec ancres selecteur, mais `0` nouvel asset exact avec ancre selecteur
+- source nommee : `0` match source ; assessment `bonus-selector-structural-corpus-has-layout-only-peers`, promotion `false`
+- preuve source selecteurs regeneree : `structuralCorpusAssessment bonus-selector-structural-corpus-has-layout-only-peers`, `structuralCorpusSourceNamedMatches 0`
+- decision : les nouveaux peers prouvent seulement un layout commun ; ils ne prouvent ni `949/994`, ni additif/multiplicatif, ni `reliableDps`
