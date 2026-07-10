@@ -7,7 +7,8 @@ const localTableAuditFile = process.argv[4] ?? "outputs/diablo4-local-table-sour
 const dictionaryScanFile = process.argv[5] ?? "outputs/diablo4-decoded-dictionary-string-scan/decoded-dictionary-string-scan.json";
 const tableNumericContextsFile = process.argv[6] ?? "outputs/diablo4-sf32-table-numeric-contexts/sf32-table-numeric-contexts.json";
 const additiveBucketSourceFile = process.argv[7] ?? "outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json";
-const outDir = process.argv[8] ?? "outputs/diablo4-bonus-selector-source-proof";
+const structuralFamilyFile = process.argv[8] ?? "outputs/diablo4-bonus-selector-structural-family/bonus-selector-structural-family.json";
+const outDir = process.argv[9] ?? "outputs/diablo4-bonus-selector-source-proof";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -35,6 +36,7 @@ const localTableAudit = readOptionalJson(localTableAuditFile);
 const dictionaryScan = readOptionalJson(dictionaryScanFile);
 const tableNumericContexts = readOptionalJson(tableNumericContextsFile);
 const additiveBucketSource = readOptionalJson(additiveBucketSourceFile);
+const structuralFamily = readOptionalJson(structuralFamilyFile);
 
 const matrixGroups = selectorMatrix?.groups ?? [];
 const matrixRows = selectorMatrix?.rows ?? [];
@@ -97,6 +99,14 @@ const sourceSignals = {
     usefulContexts: tableNumericContexts?.summary?.usefulContexts ?? null,
     potentialSourceContexts: tableNumericContexts?.summary?.potentialSourceContexts ?? null,
   },
+  structuralFamily: {
+    assessment: assessmentKind(structuralFamily),
+    samples: structuralFamily?.summary?.samples ?? null,
+    strongStructuralCandidates: structuralFamily?.summary?.strongStructuralCandidates ?? null,
+    selectorSpecificWindowSignatures: structuralFamily?.summary?.selectorSpecificWindowSignatures ?? null,
+    sourceProofReady: structuralFamily?.summary?.sourceProofReady === true,
+    promotionReady: structuralFamily?.summary?.promotionReady === true,
+  },
 };
 
 const sourceNamed =
@@ -136,6 +146,7 @@ const report = {
     dictionaryScanFile: dictionaryScan ? dictionaryScanFile : null,
     tableNumericContextsFile: tableNumericContexts ? tableNumericContextsFile : null,
     additiveBucketSourceFile: additiveBucketSource ? additiveBucketSourceFile : null,
+    structuralFamilyFile: structuralFamily ? structuralFamilyFile : null,
   },
   summary: {
     selectorsObserved: selectorFamilies.length,
@@ -144,6 +155,9 @@ const report = {
     readyFamilies: readyFamilies.length,
     blockedFamilies: blockedFamilies.length,
     additiveBucketReady: false,
+    structuralFamilyAssessment: sourceSignals.structuralFamily.assessment,
+    strongStructuralCandidates: sourceSignals.structuralFamily.strongStructuralCandidates,
+    selectorSpecificWindowSignatures: sourceSignals.structuralFamily.selectorSpecificWindowSignatures,
     promotionReady: assessment.promotionReady,
     matrixAssessment: assessmentKind(selectorMatrix),
     additiveSourceAssessment: assessmentKind(additiveBucketSource),

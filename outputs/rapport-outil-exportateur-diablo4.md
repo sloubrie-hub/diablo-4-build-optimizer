@@ -8758,3 +8758,72 @@ La conclusion de blocage slots contient maintenant `10` probes. Toutes restent b
 Decision :
 
 Ne pas convertir un offset numerique ou une signature de layout en `allowedSlots`. Sur le corpus actuel, aucun discriminateur binaire stable ne relie les payloads aux slots autorises. La suite doit chercher une autre famille de records binaires ou une source externe fiable.
+
+## Audit structurel des selecteurs Bonus_Percent_Per_Power
+
+Apres l'epuisement de la piste locale des slots, la voie la plus prometteuse etait le verrou des buckets fins/additifs. Un audit structurel dedie aux selecteurs `Bonus_Percent_Per_Power` a ete ajoute pour verifier si les payloads deja decodes distinguent les familles `949` et `994`.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/audit-bonus-selector-structural-family.js`
+- `outputs/diablo4-bonus-selector-structural-family/bonus-selector-structural-family.json`
+- `work/diablo4-data-exporter/scripts/audit-bonus-selector-source-proof.js`
+- `outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json`
+- `work/diablo4-data-exporter/scripts/audit-additive-bucket-source.js`
+- `outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json`
+- `work/diablo4-data-exporter/scripts/build-fine-bucket-extraction-plan.js`
+- `outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Methode :
+
+- lire la matrice `Bonus_Percent_Per_Power`
+- charger les payloads decodes des assets `199516`, `202484`, `1489641`, `1663210` et `1953817`
+- grouper les anchors par selecteur `949` et `994`
+- scanner les offsets fixes `0..512`
+- comparer les signatures binaires autour des chaines cibles
+- refuser toute promotion sans table/champ source nomme et sans semantique additive/multiplicative prouvee
+
+Resultats :
+
+- samples : `5`
+- selecteurs : `2`
+- familles decodees : `2`
+- assets decodes manquants : `0`
+- offsets fixes testes : `129`
+- candidats structurels : `18`
+- candidats structurels forts : `18`
+- signatures de fenetres autour des anchors : `5`
+- signatures reutilisables par selecteur : `0`
+- assessment : `bonus-selector-structural-family-candidates-need-source-proof`
+- confiance : `medium`
+- promotion : `false`
+
+Lecture :
+
+Les offsets fixes distinguent bien `949` et `994` dans le petit corpus. Exemple : `offset 120` vaut `3176` pour `949` et `3256` pour `994`; plusieurs offsets binaires suivent le meme motif. En revanche, ces offsets prouvent seulement une difference de layout ou de structure. Ils ne nomment pas une famille de bucket et ne prouvent pas si le bonus doit etre additif ou multiplicatif.
+
+Impact :
+
+La preuve source des selecteurs expose maintenant :
+
+- `structuralFamilyAssessment bonus-selector-structural-family-candidates-need-source-proof`
+- `strongStructuralCandidates 18`
+- `selectorSpecificWindowSignatures 0`
+- `sourceNamed false`
+- `selectorFamiliesClassified 0`
+- `promotionReady false`
+
+L'audit source additive reste bloque :
+
+- `7` candidats
+- `7` candidats bloques
+- `0` ligne prete
+- `selectorStructuralAssessment bonus-selector-structural-family-candidates-need-source-proof`
+- `sourceProofReady false`
+- `fieldOwnershipProven false`
+
+Decision :
+
+Utiliser les offsets `949/994` comme indices pour chercher une table ou un champ source nomme. Ne pas classer `949` ou `994` en additif/multiplicatif, ne pas alimenter `reliableDps`, et garder le delta `48960` de `1663210` en candidat bloque tant que la source, le trigger et l'uptime ne sont pas prouves.

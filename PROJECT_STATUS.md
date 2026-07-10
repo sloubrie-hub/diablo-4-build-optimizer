@@ -660,3 +660,12 @@ Build de reference :
 - conclusion slots regeneree : `10` probes, `0` prete, `0` signal utilisable ; les discriminateurs structurels rejoignent les pistes non promouvables
 - sous-plan slots regenere : `strongStructuralCandidates 0`; etape binaire #2 conseille d'abandonner les discriminateurs fixes sur ce corpus
 - decision : ne pas convertir un offset numerique stable/absent en slot ; la prochaine piste doit viser une autre famille de records binaires ou une source externe fiable
+- audit structurel selecteurs bonus ajoute : `work/diablo4-data-exporter/scripts/audit-bonus-selector-structural-family.js`
+- rapport genere : `outputs/diablo4-bonus-selector-structural-family/bonus-selector-structural-family.json`
+- corpus selecteurs : `5` samples, `2` selecteurs (`949`, `994`), `2` familles decodees, `0` asset decode manquant
+- resultat structurel : `18` offsets fixes distinguent `949` et `994`, `18` candidats forts, mais `0` signature de fenetre reutilisable par selecteur
+- assessment : `bonus-selector-structural-family-candidates-need-source-proof`, confiance `medium`, promotion `false`
+- preuve source selecteurs regeneree : `sourceNamed false`, `selectorFamiliesClassified 0`, `structuralFamilyAssessment bonus-selector-structural-family-candidates-need-source-proof`
+- audit source additive regenere : `7` candidats, `7` bloques, `0` pret, `selectorStructuralAssessment bonus-selector-structural-family-candidates-need-source-proof`
+- plan buckets fins regenere : `6` etapes, `0` prete, `6` bloquees ; prochaine action = trouver une table/champ source nomme pour les selecteurs `Bonus_Percent_Per_Power`
+- decision : les offsets structurels servent d'indices de recherche seulement ; ne pas classer `949/994` en additif/multiplicatif et ne pas alimenter `reliableDps` sans source nommee

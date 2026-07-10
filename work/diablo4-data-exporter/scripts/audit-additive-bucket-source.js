@@ -60,6 +60,9 @@ const selector994Assets = uniqueSorted(selectorMatrix?.summary?.assessment?.evid
 const sourceNamed = false;
 const selectorSourceNamed = selectorSourceProof?.summary?.sourceNamed === true;
 const selectorFamiliesClassified = selectorSourceProof?.summary?.selectorFamiliesClassified ?? 0;
+const selectorStructuralAssessment = selectorSourceProof?.summary?.structuralFamilyAssessment ?? null;
+const strongSelectorStructuralCandidates = selectorSourceProof?.summary?.strongStructuralCandidates ?? null;
+const selectorSpecificWindowSignatures = selectorSourceProof?.summary?.selectorSpecificWindowSignatures ?? null;
 const sourceProofReady = selectorSourceProof?.summary?.promotionReady === true;
 const fieldOwnershipProven = sf32Decision?.summary?.promotionReady === true;
 const hasBonusPercentCorpus = explicitAssets.length > 0 || matrixAssets.length > 0;
@@ -128,6 +131,9 @@ const report = {
     sourceNamed,
     selectorSourceNamed,
     selectorFamiliesClassified,
+    selectorStructuralAssessment,
+    strongSelectorStructuralCandidates,
+    selectorSpecificWindowSignatures,
     sourceProofReady,
     fieldOwnershipProven,
     hasUnanchoredUseful,
@@ -148,6 +154,7 @@ const report = {
         unanchoredAssessment: unanchored?.summary?.assessment?.kind ?? null,
         sf32Assessment: sf32Decision?.summary?.assessment?.kind ?? null,
         selectorSourceProofAssessment: selectorSourceProof?.summary?.assessment?.kind ?? null,
+        selectorStructuralAssessment,
       },
     },
   },
