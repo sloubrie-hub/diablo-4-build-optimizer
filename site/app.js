@@ -1,0 +1,1958 @@
+const DATASET_URL = "../outputs/diablo4-optimizer-dataset/optimizer-dataset.json";
+const TARGET_DATASET_URL = "../outputs/diablo4-target-dataset/target-dataset.json";
+const TARGET_VALIDATION_URL = "../outputs/diablo4-target-dataset-validation/target-dataset-validation.json";
+const BLOCKER_AUDIT_URL = "../outputs/diablo4-target-blocker-resolution/target-blocker-resolution.json";
+const TARGET_OPTIMIZER_PLAN_URL = "../outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json";
+const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
+const STORAGE_KEY = "d4-build-optimizer-state-v1";
+
+const state = {
+  dataset: null,
+  targetDataset: null,
+  targetValidation: null,
+  blockerAudit: null,
+  targetOptimizerPlan: null,
+  bonusSelectorSourceProof: null,
+  selectedAssetId: null,
+  filter: "all",
+  includeCandidates: false,
+  optimizerMode: "effective",
+  optimizerTag: "all",
+  optimizerSearch: "",
+  targetEntityType: "all",
+  targetEntityClass: "all",
+  targetEntitySearch: "",
+  selectedTargetEntityId: null,
+  buildAssetIds: [],
+};
+
+const formatNumber = (value) =>
+  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Number(value || 0));
+
+const formatPercent = (value) =>
+  `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 1 }).format(Number(value || 0))}%`;
+
+const formatMultiplier = (value) =>
+  new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(Number(value || 0));
+
+const safePercent = (delta, base) => {
+  const numericDelta = Number(delta);
+  const numericBase = Number(base);
+  if (!Number.isFinite(numericDelta) || !Number.isFinite(numericBase) || numericBase === 0) return 0;
+  return (numericDelta / numericBase) * 100;
+};
+
+const byId = (id) => document.getElementById(id);
+
+async function boot() {
+  try {
+    const response = await fetch(DATASET_URL);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    state.dataset = await response.json();
+    await loadTargetDataset();
+    await loadBlockerAudit();
+    await loadTargetOptimizerPlan();
+    await loadBonusSelectorSourceProof();
+    restoreState();
+    state.selectedAssetId = selectRestoredAsset(state.dataset);
+    byId("datasetStatus").textContent = "Dataset charge";
+    renderOptimizerTagOptions();
+    renderTargetFilterOptions();
+    normalizeRestoredState();
+    syncControls();
+    byId("assetFilter").addEventListener("change", (event) => {
+      state.filter = event.target.value;
+      render();
+    });
+    byId("candidateToggle").addEventListener("change", (event) => {
+      state.includeCandidates = event.target.checked;
+      render();
+    });
+    byId("optimizerMode").addEventListener("change", (event) => {
+      state.optimizerMode = event.target.value;
+      render();
+    });
+    byId("optimizerTag").addEventListener("change", (event) => {
+      state.optimizerTag = event.target.value;
+      render();
+    });
+    byId("optimizerSearch").addEventListener("input", (event) => {
+      state.optimizerSearch = event.target.value.trim().toLowerCase();
+      render();
+    });
+    byId("targetEntityType").addEventListener("change", (event) => {
+      state.targetEntityType = event.target.value;
+      render();
+    });
+    byId("targetEntityClass").addEventListener("change", (event) => {
+      state.targetEntityClass = event.target.value;
+      render();
+    });
+    byId("targetEntitySearch").addEventListener("input", (event) => {
+      state.targetEntitySearch = event.target.value.trim().toLowerCase();
+      render();
+    });
+    byId("clearBuild").addEventListener("click", () => {
+      state.buildAssetIds = [];
+      setBuildExportStatus("");
+      render();
+    });
+    byId("exportBuild").addEventListener("click", exportBuildJson);
+    byId("importBuild").addEventListener("click", importBuildJson);
+    document.addEventListener("click", handleGlobalClick);
+    render();
+  } catch (error) {
+    byId("datasetStatus").textContent = "Dataset indisponible";
+    byId("assetDetail").innerHTML = `<div class="empty-state">Impossible de charger ${DATASET_URL}</div>`;
+  }
+}
+
+function selectInitialAsset(dataset) {
+  const withCandidate = dataset.assets.find((asset) => asset.candidates.length);
+  return (withCandidate ?? dataset.assets[0])?.assetId ?? null;
+}
+
+function selectRestoredAsset(dataset) {
+  const exists = dataset.assets.some((asset) => String(asset.assetId) === String(state.selectedAssetId));
+  return exists ? state.selectedAssetId : selectInitialAsset(dataset);
+}
+
+function restoreState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    state.selectedAssetId = saved.selectedAssetId ?? state.selectedAssetId;
+    state.filter = saved.filter ?? state.filter;
+    state.includeCandidates = Boolean(saved.includeCandidates);
+    state.optimizerMode = saved.optimizerMode ?? state.optimizerMode;
+    state.optimizerTag = saved.optimizerTag ?? state.optimizerTag;
+    state.optimizerSearch = saved.optimizerSearch ?? state.optimizerSearch;
+    state.targetEntityType = saved.targetEntityType ?? state.targetEntityType;
+    state.targetEntityClass = saved.targetEntityClass ?? state.targetEntityClass;
+    state.targetEntitySearch = saved.targetEntitySearch ?? state.targetEntitySearch;
+    state.selectedTargetEntityId = saved.selectedTargetEntityId ?? state.selectedTargetEntityId;
+    state.buildAssetIds = Array.isArray(saved.buildAssetIds) ? saved.buildAssetIds.map(Number) : [];
+  } catch {
+    state.buildAssetIds = [];
+  }
+}
+
+function persistState() {
+  const snapshot = {
+    selectedAssetId: state.selectedAssetId,
+    filter: state.filter,
+    includeCandidates: state.includeCandidates,
+    optimizerMode: state.optimizerMode,
+    optimizerTag: state.optimizerTag,
+    optimizerSearch: state.optimizerSearch,
+    targetEntityType: state.targetEntityType,
+    targetEntityClass: state.targetEntityClass,
+    targetEntitySearch: state.targetEntitySearch,
+    selectedTargetEntityId: state.selectedTargetEntityId,
+    buildAssetIds: state.buildAssetIds,
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  } catch {
+    // Local storage can be disabled in some browser contexts.
+  }
+}
+
+function normalizeRestoredState() {
+  const knownAssetIds = new Set(state.dataset.assets.map((asset) => Number(asset.assetId)));
+  const knownTags = new Set(["all", ...state.dataset.assets.flatMap((asset) => asset.tags || [])]);
+  const knownModes = new Set(["effective", "strict", "candidate"]);
+  const knownFilters = new Set(["all", "strict", "candidate"]);
+  const knownTargetTypes = new Set(["all", ...targetAllEntities().map((entity) => entity.collection)]);
+  const knownTargetClasses = new Set(["all", ...targetAllEntities().map((entity) => entity.class ?? "generic")]);
+
+  state.buildAssetIds = state.buildAssetIds.filter((assetId) => knownAssetIds.has(Number(assetId)));
+  if (!knownAssetIds.has(Number(state.selectedAssetId))) state.selectedAssetId = selectInitialAsset(state.dataset);
+  if (!knownTags.has(state.optimizerTag)) state.optimizerTag = "all";
+  if (!knownModes.has(state.optimizerMode)) state.optimizerMode = "effective";
+  if (!knownFilters.has(state.filter)) state.filter = "all";
+  if (!knownTargetTypes.has(state.targetEntityType)) state.targetEntityType = "all";
+  if (!knownTargetClasses.has(state.targetEntityClass)) state.targetEntityClass = "all";
+  if (state.selectedTargetEntityId && !targetAllEntities().some((entity) => entity.id === state.selectedTargetEntityId)) {
+    state.selectedTargetEntityId = null;
+  }
+}
+
+function syncControls() {
+  byId("assetFilter").value = state.filter;
+  byId("candidateToggle").checked = state.includeCandidates;
+  byId("optimizerMode").value = state.optimizerMode;
+  byId("optimizerTag").value = state.optimizerTag;
+  byId("optimizerSearch").value = state.optimizerSearch;
+  byId("targetEntityType").value = state.targetEntityType;
+  byId("targetEntityClass").value = state.targetEntityClass;
+  byId("targetEntitySearch").value = state.targetEntitySearch;
+}
+
+function render() {
+  persistState();
+  renderSummary();
+  renderTargetDatasetPanel();
+  renderOptimizerRanking();
+  renderTargetOptimizerPlan();
+  renderBuildSelection();
+  renderBlockerAuditPanel();
+  renderAssetList();
+  renderDetail();
+}
+
+async function loadTargetDataset() {
+  const [targetDataset, targetValidation] = await Promise.all([
+    fetchOptionalJson(TARGET_DATASET_URL),
+    fetchOptionalJson(TARGET_VALIDATION_URL),
+  ]);
+  state.targetDataset = targetDataset;
+  state.targetValidation = targetValidation;
+  byId("targetDatasetStatus").textContent = targetDataset ? "Schema cible charge" : "Schema cible absent";
+}
+
+async function loadBlockerAudit() {
+  state.blockerAudit = await fetchOptionalJson(BLOCKER_AUDIT_URL);
+  byId("blockerAuditStatus").textContent = state.blockerAudit ? "Diagnostic charge" : "Diagnostic absent";
+}
+
+async function loadTargetOptimizerPlan() {
+  state.targetOptimizerPlan = await fetchOptionalJson(TARGET_OPTIMIZER_PLAN_URL);
+  byId("targetOptimizerStatus").textContent = state.targetOptimizerPlan ? "Plan charge" : "Plan absent";
+}
+
+async function loadBonusSelectorSourceProof() {
+  state.bonusSelectorSourceProof = await fetchOptionalJson(BONUS_SELECTOR_SOURCE_PROOF_URL);
+}
+
+async function fetchOptionalJson(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+function renderTargetOptimizerPlan() {
+  const plan = state.targetOptimizerPlan;
+  if (!plan) {
+    byId("targetOptimizerPlan").innerHTML = `<div class="optimizer-empty">Aucun plan optimiseur cible genere.</div>`;
+    return;
+  }
+
+  const summary = plan.summary ?? {};
+  const current = plan.currentBuild ?? {};
+  const recommendations = plan.recommendedStrictByClass ?? [];
+  const readiness = current.readiness ?? {};
+  byId("targetOptimizerPlan").innerHTML = `
+    <div class="target-optimizer-grid">
+      ${targetMetric("Entites scorees", summary.scoredEntities)}
+      ${targetMetric("Classes", summary.classes)}
+      ${targetMetric("Strict", summary.strictOnlyReady ? "pret" : "bloque")}
+      ${targetMetric("Optimiseur fiable", summary.reliableOptimizerReady ? "pret" : "bloque")}
+      ${targetMetric("Build valide", summary.currentBuildValid ? "oui" : "non")}
+      ${targetMetric("Candidats bloques", summary.blockedCandidates)}
+      ${targetMetric("Plans valides", summary.validStrictBuilds)}
+      ${targetMetric("Fiables", summary.reliableStrictBuilds)}
+      ${targetMetric("Actions", summary.actionQueueSize)}
+    </div>
+    <div class="target-optimizer-gate-summary">
+      ${(summary.reliabilityGateFailures ?? []).map((gate) => `<span>${gate}</span>`).join("") || `<span>Toutes les portes de fiabilite sont ouvertes.</span>`}
+    </div>
+    <div class="target-optimizer-current">
+      <strong>Build courant ${current.assetIds?.join(" + ") || "n/a"}</strong>
+      <span>Strict ${formatNumber(current.strictDps)} - what-if ${formatNumber(current.whatIfDps)} - delta bloque +${formatNumber(current.candidateDelta)}</span>
+      <span>Qualite ${current.quality?.level ?? "n/a"} ${current.quality?.score != null ? `${formatNumber(current.quality.score)}/100` : ""}</span>
+      ${plan.bestValidStrictBuild ? `<span>Meilleur plan strict valide : ${plan.bestValidStrictBuild.class} - ${formatNumber(plan.bestValidStrictBuild.strictDps)} DPS strict</span>` : `<span>Aucun plan strict valide pour le moment.</span>`}
+      <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
+    </div>
+    ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
+    ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
+    ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
+    <div class="target-optimizer-recommendations">
+      ${recommendations.map(renderTargetOptimizerRecommendation).join("") || `<div class="optimizer-empty">Aucune recommandation stricte exploitable.</div>`}
+    </div>
+    <div class="target-optimizer-safeguards">
+      ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderBonusSelectorSourceProof(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const signals = report.sourceSignals ?? {};
+  const families = report.selectorFamilies ?? [];
+  return `
+    <div class="bonus-selector-proof">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Preuve selecteurs Bonus %</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.promotionReady ? "positive" : "blocked"}">
+          ${summary.promotionReady ? "promotion possible" : "promotion bloquee"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Selecteurs", summary.selectorsObserved)}
+        ${targetMetric("Source nommee", summary.sourceNamed ? "oui" : "non")}
+        ${targetMetric("Familles classees", summary.selectorFamiliesClassified)}
+        ${targetMetric("Familles bloquees", summary.blockedFamilies)}
+      </div>
+      <div class="bonus-selector-family-list">
+        ${families.map(renderBonusSelectorFamily).join("")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Tables nommees ${formatNumber(signals.namedTable?.independentCandidates)} - contextes generes ${formatNumber(signals.namedTable?.generatedContexts)}</span>
+        <span>Dictionnaire proche ${formatNumber(signals.decodedDictionary?.dictionaryHitsNearWatchedNumbers)} - bonus hits ${formatNumber(signals.decodedDictionary?.bonusPercentHits)}</span>
+        <span>Contextes table utiles ${formatNumber(signals.localTableAlternatives?.usefulTableCandidateContexts)} - source potentielle ${formatNumber(signals.tableNumericContexts?.potentialSourceContexts)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function renderBonusSelectorFamily(family) {
+  return `
+    <article class="bonus-selector-family ${family.ready ? "ready" : "blocked"}">
+      <div>
+        <span>Selector</span>
+        <strong>${family.selector}</strong>
+      </div>
+      <div>
+        <span>Assets</span>
+        <strong>${family.assets?.join(", ") || "n/a"}</strong>
+      </div>
+      <div>
+        <span>Bucket</span>
+        <strong>${family.bucketFamily ?? "unknown"}</strong>
+      </div>
+      <p>${(family.blockers ?? []).join(" - ")}</p>
+    </article>
+  `;
+}
+
+function renderTargetBucketEnginePlan(bucketEngine) {
+  if (!bucketEngine) return "";
+  const summary = bucketEngine.summary ?? {};
+  const buckets = bucketEngine.buckets ?? {};
+  const gates = bucketEngine.gates ?? [];
+  return `
+    <div class="target-bucket-engine-plan">
+      <div>
+        <strong>Moteur buckets</strong>
+        <span>${summary.status ?? "n/a"}</span>
+      </div>
+      <div class="target-bucket-engine-metrics">
+        ${targetMetric("Strict calcule", summary.calculatedStrictDps)}
+        ${targetMetric("Parite", summary.parityDelta)}
+        ${targetMetric("Delta bloque", `+${formatNumber(summary.blockedCandidateDelta)}`)}
+        ${targetMetric("What-if", summary.whatIfDps)}
+      </div>
+      <div class="target-bucket-breakdown">
+        <span>Base ${formatNumber(buckets.strictBase)}</span>
+        <span>Additif ${formatPercent(buckets.additivePct)}</span>
+        <span>Multi x${formatMultiplier(buckets.multiplicativeProduct)}</span>
+        <span>Uptime x${formatMultiplier(buckets.uptimeProduct)}</span>
+        <span>Caps ${formatNumber(buckets.caps)}</span>
+      </div>
+      <div class="target-bucket-gates">
+        ${gates.map((gate) => `<span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}</span>`).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderTargetOptimizerActionQueue(actions) {
+  if (!actions.length) return "";
+  return `
+    <div class="target-action-queue">
+      <strong>File d'actions</strong>
+      ${actions.slice(0, 6).map((action) => `
+        <article class="target-action-card ${action.priority}">
+          <span>#${action.rank} ${action.priority}</span>
+          <strong>${action.title}</strong>
+          <p>${action.action}</p>
+          ${renderActionSubPlan(action.subPlan)}
+          <em>${action.focus} - ${action.classes?.join(", ") || "global"}</em>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderActionSubPlan(subPlan) {
+  if (!subPlan) return "";
+  return `
+    <div class="target-action-subplan">
+      <span>${subPlan.blockedSteps ?? 0} bloquees / ${subPlan.readySteps ?? 0} pretes</span>
+      <strong>${subPlan.nextStepTitle ?? "Sous-plan"}</strong>
+    </div>
+  `;
+}
+
+function renderTargetOptimizerRecommendation(row) {
+  const blocked = Number(row.blockedCandidateDelta || 0) > 0;
+  const constraintBlocked = row.strictConstraintValid === false;
+  const issues = row.constraintSummary?.issueKinds ?? [];
+  return `
+    <article class="target-optimizer-card ${blocked || constraintBlocked ? "blocked-plan" : ""}">
+      <div>
+        <span>Classe</span>
+        <strong>${row.class}</strong>
+      </div>
+      <div>
+        <span>DPS strict</span>
+        <strong>${formatNumber(row.strictDps)}</strong>
+      </div>
+      <div>
+        <span>Delta bloque</span>
+        <strong class="${blocked ? "blocked" : ""}">+${formatNumber(row.blockedCandidateDelta)}</strong>
+      </div>
+      <div>
+        <span>Statut</span>
+        <strong class="${constraintBlocked || blocked ? "blocked" : "positive"}">${row.status}</strong>
+      </div>
+      <p>${row.note}</p>
+      ${issues.length ? `<p>Blocages contraintes : ${issues.join(", ")}</p>` : `<p>Contraintes minimales : OK</p>`}
+      ${renderTargetOptimizerReliability(row)}
+      <button class="ghost-button target-optimizer-apply" type="button" data-asset-ids="${row.assetIds.join(",")}">Charger</button>
+    </article>
+  `;
+}
+
+function renderTargetOptimizerReliability(row) {
+  const reliability = row.reliability;
+  if (!reliability) return "";
+  const decision = row.optimizerDecision ?? {};
+  return `
+    <div class="target-reliability">
+      <div>
+        <strong>Fiabilite ${reliability.passed}/${reliability.passed + reliability.failed}</strong>
+        <span>Ranking ${decision.rankingMode ?? "strict-only"} - prochaine porte ${decision.nextGate ?? "aucune"}</span>
+      </div>
+      <div class="target-reliability-gates">
+        ${(reliability.gates ?? []).map((gate) => `
+          <span class="${gate.status === "passed" ? "passed" : "failed"}">
+            <strong>${gate.id}</strong>
+            <em>${gate.status}</em>
+          </span>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderBlockerAuditPanel() {
+  const audit = state.blockerAudit;
+  if (!audit) {
+    byId("blockerAuditPanel").innerHTML = `<div class="optimizer-empty">Aucun diagnostic de blocages genere.</div>`;
+    return;
+  }
+
+  byId("blockerAuditPanel").innerHTML = `
+    <div class="blocker-audit-grid">
+      ${targetMetric("Assets", audit.summary.assets)}
+      ${targetMetric("Blocages", audit.summary.blockers)}
+      ${targetMetric("Resolus", audit.summary.resolved)}
+      ${targetMetric("Actifs", audit.summary.blocked)}
+    </div>
+    <div class="blocker-promotion ${audit.summary.promotionReady ? "ready" : "blocked"}">
+      Promotion DPS fiable : ${audit.summary.promotionReady ? "possible" : "bloquee"}
+    </div>
+    <div class="blocker-action-list">
+      ${(audit.summary.nextActions ?? []).map((action) => `<span>${action}</span>`).join("")}
+    </div>
+    <div class="blocker-asset-list">
+      ${(audit.assets ?? []).map(renderBlockerAuditAsset).join("")}
+    </div>
+  `;
+
+  document.querySelectorAll(".blocker-audit-row").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedAssetId = Number(button.dataset.assetId);
+      render();
+      byId("assetDetail").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function renderBlockerAuditAsset(asset) {
+  return `
+    <article class="blocker-audit-asset">
+      <button class="blocker-audit-row" type="button" data-asset-id="${asset.assetId}">
+        <span>
+          <strong>${asset.entityId ?? asset.assetId}</strong>
+          <span>${asset.class} - strict ${formatNumber(asset.strictDps)} - what-if ${formatNumber(asset.candidateDps)} - delta +${formatNumber(asset.candidateDeltaDps)}</span>
+        </span>
+        <span>${asset.promotionDecision?.kind ?? "blocked"}</span>
+      </button>
+      <div class="blocker-audit-cards">
+        ${(asset.blockers ?? []).map(renderBlockerAuditCard).join("")}
+      </div>
+      ${renderBlockerEvidenceSummary(asset.evidenceSummary)}
+    </article>
+  `;
+}
+
+function renderBlockerAuditCard(blocker) {
+  return `
+    <div class="blocker-audit-card ${blocker.status}">
+      <div>
+        <strong>${blocker.kind}</strong>
+        <span>${blocker.priority}</span>
+      </div>
+      <p>${blocker.finding}</p>
+      <p>${blocker.proofState}</p>
+      <span>${blocker.nextAction}</span>
+    </div>
+  `;
+}
+
+function renderBlockerEvidenceSummary(summary) {
+  if (!summary) return "";
+  const sf32Decision = summary.sf32FieldPromotionDecisionAssessment;
+  return `
+    <div class="blocker-evidence-summary">
+      <span>Formule candidate : ${summary.candidateFormula ?? "n/a"}</span>
+      <span>Scenario : ${summary.scenarioImpact?.scenarioId ?? "n/a"} (${formatNumber(summary.scenarioImpact?.estimatedDps)} DPS)</span>
+      ${renderSf32PromotionDecision(sf32Decision)}
+      <span>Record champ : ${summary.fieldRecordAssessment?.fieldOwnership ?? "n/a"} (${summary.fieldRecordAssessment?.confidence ?? "n/a"})</span>
+      <span>Segments : ${summary.recordSegmentAssessment?.kind ?? "n/a"} (${summary.recordSegmentAssessment?.confidence ?? "n/a"})</span>
+      <span>Headers : ${summary.recordHeaderAssessment?.kind ?? "n/a"} (${summary.recordHeaderAssessment?.fieldOwnership ?? "n/a"})</span>
+      <span>Patterns : ${summary.recordHeaderPatternAssessment?.kind ?? "n/a"} (${summary.recordHeaderPatternAssessment?.confidence ?? "n/a"})</span>
+      <span>Cross : ${summary.crossHeaderPatternAssessment?.kind ?? "n/a"} (${summary.crossHeaderPatternAssessment?.evidence?.repeatedSignatures ?? "n/a"} repetee)</span>
+      <span>Layout : ${summary.normalizedHeaderLayoutAssessment?.kind ?? "n/a"} (${summary.normalizedHeaderLayoutAssessment?.confidence ?? "n/a"})</span>
+      <span>Focus : ${summary.formulaHashLayoutFocusAssessment?.kind ?? "n/a"} (${summary.formulaHashLayoutFocusAssessment?.confidence ?? "n/a"})</span>
+      <span>Frontiere : ${summary.formulaHashFieldBoundaryAssessment?.kind ?? "n/a"} (${summary.formulaHashFieldBoundaryAssessment?.confidence ?? "n/a"})</span>
+      <span>Prelude : ${summary.formulaHashHeaderPreludeAssessment?.kind ?? "n/a"} (${summary.formulaHashHeaderPreludeAssessment?.confidence ?? "n/a"})</span>
+      <span>Suffixe : ${summary.hashSuffixDefinitionAssessment?.kind ?? "n/a"} (${summary.hashSuffixDefinitionAssessment?.confidence ?? "n/a"})</span>
+      <span>Motifs suffixe : ${summary.hashSuffixValuePatternAssessment?.kind ?? "n/a"} (${summary.hashSuffixValuePatternAssessment?.confidence ?? "n/a"})</span>
+      <span>Semantique suffixe : ${summary.hashSuffixCandidateSemanticAssessment?.kind ?? "n/a"} (${summary.hashSuffixCandidateSemanticAssessment?.confidence ?? "n/a"})</span>
+      <span>Dico suffixe : ${summary.hashSuffixDictionaryMiningAssessment?.kind ?? "n/a"} (${summary.hashSuffixDictionaryMiningAssessment?.confidence ?? "n/a"})</span>
+      <span>Famille suffixe : ${summary.hashSuffixFamilyEvidenceAssessment?.kind ?? "n/a"} (${summary.hashSuffixFamilyEvidenceAssessment?.confidence ?? "n/a"})</span>
+      <span>Source suffixe : ${summary.hashSuffixSourceNameAssessment?.kind ?? "n/a"} (${summary.hashSuffixSourceNameAssessment?.confidence ?? "n/a"})</span>
+      <span>Binaire suffixe : ${summary.hashSuffixBinarySourceAssessment?.kind ?? "n/a"} (${summary.hashSuffixBinarySourceAssessment?.confidence ?? "n/a"})</span>
+      <span>Comparaison suffixe : ${summary.hashSuffixBinaryContextAssessment?.kind ?? "n/a"} (${summary.hashSuffixBinaryContextAssessment?.confidence ?? "n/a"})</span>
+      <span>Classification suffixe : ${summary.hashSuffixSublayoutAssessment?.kind ?? "n/a"} (${summary.hashSuffixSublayoutAssessment?.confidence ?? "n/a"})</span>
+      <span>Champs suffixe : ${summary.hashSuffixSublayoutFieldAssessment?.kind ?? "n/a"} (${summary.hashSuffixSublayoutFieldAssessment?.confidence ?? "n/a"})</span>
+      <span>Decodeurs suffixe : ${summary.hashSuffixFieldShapeDecoderAssessment?.kind ?? "n/a"} (${summary.hashSuffixFieldShapeDecoderAssessment?.confidence ?? "n/a"})</span>
+      <span>Offsets suffixe : ${summary.hashSuffixDecodedOffsetLinkAssessment?.kind ?? "n/a"} (${summary.hashSuffixDecodedOffsetLinkAssessment?.confidence ?? "n/a"})</span>
+      <span>Records suffixe : ${summary.hashSuffixOffsetRecordAssessment?.kind ?? "n/a"} (${summary.hashSuffixOffsetRecordAssessment?.confidence ?? "n/a"})</span>
+      <span>Bornes suffixe : ${summary.hashSuffixRecordBoundaryAssessment?.kind ?? "n/a"} (${summary.hashSuffixRecordBoundaryAssessment?.confidence ?? "n/a"})</span>
+      <span>Preludes suffixe : ${summary.hashSuffixBoundaryPreludeAssessment?.kind ?? "n/a"} (${summary.hashSuffixBoundaryPreludeAssessment?.confidence ?? "n/a"})</span>
+      <span>Prelude/header suffixe : ${summary.hashSuffixPreludeHeaderAssessment?.kind ?? "n/a"} (${summary.hashSuffixPreludeHeaderAssessment?.confidence ?? "n/a"})</span>
+      <span>Shapes header suffixe : ${summary.hashSuffixHeaderShapeAssessment?.kind ?? "n/a"} (${summary.hashSuffixHeaderShapeAssessment?.confidence ?? "n/a"})</span>
+      <span>Compact suffixe : ${summary.hashSuffixCompactPatternAssessment?.kind ?? "n/a"} (${summary.hashSuffixCompactPatternAssessment?.confidence ?? "n/a"})</span>
+      <span>Table suffixe : ${summary.hashSuffixNamedTableAssessment?.kind ?? "n/a"} (${summary.hashSuffixNamedTableAssessment?.confidence ?? "n/a"})</span>
+      <span>Matrice bonus : ${summary.bonusPercentSelectorMatrixAssessment?.kind ?? "n/a"} (949 ${(summary.bonusPercentSelectorMatrixAssessment?.evidence?.selector949Assets ?? []).length}, 994 ${(summary.bonusPercentSelectorMatrixAssessment?.evidence?.selector994Assets ?? []).length})</span>
+      <span>Peers 949 : ${summary.selector949PeerAssessment?.kind ?? "n/a"} (compact ${(summary.selector949PeerAssessment?.evidence?.compactCandidates ?? []).length}/${summary.selector949PeerAssessment?.evidence?.peers ?? 0})</span>
+      <span>Corpus 949 : ${summary.selector949CompactCorpusAssessment?.kind ?? "n/a"} (compact ${summary.selector949CompactCorpusAssessment?.compactOccurrences ?? 0}/${summary.selector949CompactCorpusAssessment?.selector949Occurrences ?? 0})</span>
+      <span>Strings dict : ${summary.decodedDictionaryStringAssessment?.kind ?? "n/a"} (near ${summary.decodedDictionaryStringAssessment?.dictionaryHitsNearWatchedNumbers ?? 0}/${summary.decodedDictionaryStringAssessment?.dictionaryHits ?? 0})</span>
+      <span>Sans ancre : ${summary.unanchoredBonusPercentAssessment?.kind ?? "n/a"} (utile ${summary.unanchoredBonusPercentAssessment?.usefulAnchorCandidates ?? 0}/${summary.unanchoredBonusPercentAssessment?.rows ?? 0})</span>
+      <span>Metadata 12337 : ${summary.metadata12337ContextAssessment?.kind ?? "n/a"} (${(summary.metadata12337ContextAssessment?.selectors ?? []).join("/") || "n/a"})</span>
+      <span>Corpus 12337 : ${summary.metadata12337ScaleCorpusAssessment?.kind ?? "n/a"} (${summary.metadata12337ScaleCorpusAssessment?.hits ?? 0} hits)</span>
+      <span>Pairs selector : ${summary.selectorAssetPairAssessment?.kind ?? "n/a"} (${summary.selectorAssetPairAssessment?.groups ?? 0} groupes)</span>
+      <span>Layouts selector : ${summary.selectorAssetLayoutAssessment?.kind ?? "n/a"} (${summary.selectorAssetLayoutAssessment?.selector949CompactLayouts ?? 0}/${summary.selectorAssetLayoutAssessment?.selector949NonCompactLayouts ?? 0} pour 949)</span>
+      <span>Champs selector : ${summary.selectorAssetOwnerFieldAssessment?.kind ?? "n/a"} (${summary.selectorAssetOwnerFieldAssessment?.candidateFields ?? 0} candidats)</span>
+      <span>Couverture bonus : ${summary.bonusPercentCoverageAssessment?.kind ?? "n/a"} (${summary.bonusPercentCoverageAssessment?.decodedAssets ?? 0}/${summary.bonusPercentCoverageAssessment?.externalAssets ?? 0} decodes)</span>
+      <span>Source locale : ${summary.localTableSourceAssessment?.kind ?? "n/a"} (${summary.localTableSourceAssessment?.independentTableCandidates ?? 0} tables)</span>
+      <span>Trigger SF33 : ${summary.sf33BuildStateTriggerAssessment?.kind ?? "n/a"} (${summary.sf33BuildStateTriggerAssessment?.hasStructuralRelation ? "relation oui" : "relation non"}, ${summary.sf33BuildStateTriggerAssessment?.hasBuildStateEntry ? "flag oui" : "flag non"})</span>
+      <span>Activation SF33 : ${summary.sf33ActivationSourceAssessment?.kind ?? "n/a"} (${(summary.sf33ActivationSourceAssessment?.externalExactAssetIds ?? []).length} externe, ${summary.sf33ActivationSourceAssessment?.filesWithHits ?? 0} fichiers)</span>
+      <span>Uptime : ${summary.uptimeProofAssessment?.kind ?? "n/a"} (${summary.uptimeProofAssessment?.linkedProbabilityNeighbors ?? 0}/${summary.uptimeProofAssessment?.probabilityNeighbors ?? 0} liees)</span>
+      <span>SF28/SF29 : ${summary.sf28Sf29RoleAssessment?.kind ?? "n/a"} (${summary.sf28Sf29RoleAssessment?.compiledProbabilityMatches ?? 0} proba, ${summary.sf28Sf29RoleAssessment?.hasUptimeRole ? "uptime oui" : "uptime non"})</span>
+      <span>Source header : ${summary.recordHeaderSourceFreshnessAssessment?.kind ?? "n/a"} (stale ${summary.recordHeaderSourceFreshnessAssessment?.staleOffsets ?? 0}, fresh ${summary.recordHeaderSourceFreshnessAssessment?.freshMatches ?? 0}, voisins ${summary.recordHeaderSourceFreshnessAssessment?.neighborHits ?? 0})</span>
+      <span>Slots : ${(summary.sfSlots ?? []).map((slot) => `${slot.canonicalId} ${slot.localSymbolStatus}`).join(" - ") || "n/a"}</span>
+      <span>Cibles : ${(summary.definitionTargets ?? []).map((target) => `${target.role} ${target.assessment}`).join(" - ") || "n/a"}</span>
+    </div>
+  `;
+}
+
+function renderSf32PromotionDecision(decision) {
+  if (!decision) return "";
+  const gates = decision.promotionGates ?? [];
+  const policy = decision.optimizerPolicy ?? {};
+  const evidence = decision.evidence ?? {};
+  return `
+    <div class="sf32-promotion-decision">
+      <div class="sf32-policy">
+        <strong>Decision SF_32</strong>
+        <span>${decision.fieldOwnership ?? "not-proven"} - ${decision.promotionReady ? "promotion possible" : "promotion bloquee"}</span>
+        <span>Ranking : ${policy.canUseForRanking ? "autorise" : "strict-only"} - scenario : ${policy.canExposeAsScenario ? "visible" : "masque"}</span>
+        <span>Portes ${evidence.gatesPassed ?? 0}/${(evidence.gatesPassed ?? 0) + (evidence.gatesFailed ?? 0)} - delta ${policy.candidateDelta ?? "blocked-what-if"}</span>
+      </div>
+      <div class="sf32-gate-grid">
+        ${gates.map(renderSf32PromotionGate).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderSf32PromotionGate(gate) {
+  const status = gate.status === "passed" ? "passed" : "failed";
+  return `
+    <span class="sf32-gate ${status}">
+      <strong>${gate.id}</strong>
+      <em>${status}</em>
+    </span>
+  `;
+}
+
+function renderSummary() {
+  const summary = state.dataset.summary;
+  const selected = selectedAsset();
+  const effective = selected ? effectiveDps(selected) : null;
+  const metrics = [
+    ["Assets", summary.assets],
+    ["DPS strict", summary.assetsWithStrictDps],
+    ["Candidats", summary.candidateCount],
+    ["Bloques", summary.blockedCandidates],
+    [state.includeCandidates ? "DPS selection" : "DPS strict selection", effective ? effective.displayDps : 0],
+  ];
+  byId("summaryGrid").innerHTML = metrics
+    .map(([label, value]) => `<article class="metric"><span>${label}</span><strong>${formatNumber(value)}</strong></article>`)
+    .join("");
+}
+
+function renderTargetDatasetPanel() {
+  if (!state.targetDataset) {
+    byId("targetDatasetPanel").innerHTML = `<div class="optimizer-empty">Dataset cible indisponible.</div>`;
+    return;
+  }
+
+  const collections = state.targetValidation?.summary?.collections ?? targetCollectionCounts();
+  const warningCount = state.targetValidation?.summary?.warnings ?? 0;
+  const issueCount = state.targetValidation?.summary?.issues ?? 0;
+  const warning = state.targetValidation?.warnings?.[0] ?? "Aucun warning.";
+  const filteredEntities = targetEntities();
+  const filteredTotal = targetFilteredEntityCount();
+  const selectedEntity = selectedTargetEntity() ?? filteredEntities[0] ?? null;
+  if (!state.selectedTargetEntityId && selectedEntity) state.selectedTargetEntityId = selectedEntity.id;
+  byId("targetDatasetPanel").innerHTML = `
+    <div class="target-grid">
+      ${targetMetric("Skills", collections.skills)}
+      ${targetMetric("Affixes", collections.affixes)}
+      ${targetMetric("Aspects", collections.aspects)}
+      ${targetMetric("Formules", collections.formulas)}
+      ${targetMetric("Conditions", collections.conditions)}
+      ${targetMetric("Relations", state.targetValidation?.summary?.relations ?? state.targetDataset.relations?.length ?? 0)}
+      ${targetMetric("Issues", issueCount)}
+      ${targetMetric("Warnings", warningCount)}
+    </div>
+    <div class="target-warning ${warningCount ? "has-warning" : ""}">
+      ${warning}
+    </div>
+    <div class="target-entity-count">
+      ${formatNumber(filteredEntities.length)} affichees / ${formatNumber(filteredTotal)} filtrees
+    </div>
+    <div class="target-entity-list">
+      ${filteredEntities.map(renderTargetEntity).join("") || `<div class="optimizer-empty">Aucune entite pour ce filtre.</div>`}
+    </div>
+    ${renderTargetEntityDetail(selectedTargetEntity() ?? selectedEntity)}
+  `;
+}
+
+function targetCollectionCounts() {
+  return Object.fromEntries(
+    Object.entries(state.targetDataset.entities ?? {}).map(([key, value]) => [key, Array.isArray(value) ? value.length : 0])
+  );
+}
+
+function targetMetric(label, value) {
+  return `
+    <article class="target-metric">
+      <span>${label}</span>
+      <strong>${formatNumber(value)}</strong>
+    </article>
+  `;
+}
+
+function targetEntities() {
+  return targetAllEntities()
+    .filter(matchesTargetEntityFilters)
+    .slice(0, 12);
+}
+
+function targetFilteredEntityCount() {
+  return targetAllEntities()
+    .filter(matchesTargetEntityFilters)
+    .length;
+}
+
+function matchesTargetEntityFilters(entity) {
+  const matchesType = state.targetEntityType === "all" || entity.collection === state.targetEntityType;
+  const matchesClass = state.targetEntityClass === "all" || (entity.class ?? "generic") === state.targetEntityClass;
+  const matchesSearch = !state.targetEntitySearch || targetEntitySearchText(entity).includes(state.targetEntitySearch);
+  return matchesType && matchesClass && matchesSearch;
+}
+
+function targetEntitySearchText(entity) {
+  return [
+    entity.id,
+    entity.name,
+    entity.assetId,
+    entity.collection,
+    entity.class,
+    ...(entity.tags ?? []),
+    ...(entity.modifiers ?? []).flatMap((modifier) => [
+      modifier.id,
+      modifier.stat,
+      modifier.operation,
+      modifier.bucket,
+      modifier.evidence?.confidence,
+    ]),
+  ].join(" ").toLowerCase();
+}
+
+function targetAllEntities() {
+  const entities = state.targetDataset?.entities ?? {};
+  return [
+    ...(entities.skills ?? []).map((entity) => ({ ...entity, collection: "skill" })),
+    ...(entities.aspects ?? []).map((entity) => ({ ...entity, collection: "aspect" })),
+    ...(entities.affixes ?? []).map((entity) => ({ ...entity, collection: "affix" })),
+  ];
+}
+
+function renderTargetFilterOptions() {
+  if (!state.targetDataset) return;
+  const entities = targetAllEntities();
+  const types = [...new Set(entities.map((entity) => entity.collection))].sort();
+  const classes = [...new Set(entities.map((entity) => entity.class ?? "generic"))].sort();
+  byId("targetEntityType").innerHTML = [
+    `<option value="all">Tous types</option>`,
+    ...types.map((type) => `<option value="${type}">${type}</option>`),
+  ].join("");
+  byId("targetEntityClass").innerHTML = [
+    `<option value="all">Toutes classes</option>`,
+    ...classes.map((className) => `<option value="${className}">${className}</option>`),
+  ].join("");
+}
+
+function renderTargetEntity(entity) {
+  const hasAsset = entity.assetId != null;
+  const active = entity.id === state.selectedTargetEntityId ? " active" : "";
+  return `
+    <button class="target-entity-row${active}" type="button" data-target-entity-id="${entity.id}" ${hasAsset ? `data-target-asset-id="${entity.assetId}"` : ""}>
+      <span>
+        <span class="asset-title">${entity.name}</span>
+        <span class="asset-meta">${entity.collection} - ${entity.class ?? "generic"} - asset ${entity.assetId ?? "n/a"}</span>
+      </span>
+      <span class="candidate-dot">${entity.modifiers?.length ?? 0} mod</span>
+    </button>
+  `;
+}
+
+function handleGlobalClick(event) {
+  const targetOptimizerApply = event.target.closest("[data-asset-ids]");
+  if (targetOptimizerApply) {
+    state.buildAssetIds = targetOptimizerApply.dataset.assetIds
+      .split(",")
+      .map((assetId) => Number(assetId))
+      .filter((assetId) => Number.isFinite(assetId));
+    state.selectedAssetId = state.buildAssetIds[0] ?? state.selectedAssetId;
+    setBuildExportStatus(`Plan charge (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})`);
+    render();
+    byId("buildSummary").scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  const targetEntitySelection = event.target.closest("[data-target-entity-id]");
+  if (targetEntitySelection) {
+    state.selectedTargetEntityId = targetEntitySelection.dataset.targetEntityId;
+  }
+
+  const targetAsset = event.target.closest("[data-target-asset-id]");
+  if (!targetAsset) {
+    if (targetEntitySelection) render();
+    return;
+  }
+  const assetId = Number(targetAsset.dataset.targetAssetId);
+  if (!state.dataset.assets.some((asset) => Number(asset.assetId) === assetId)) return;
+  state.selectedAssetId = assetId;
+  render();
+  byId("assetDetail").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function selectedTargetEntity() {
+  if (!state.selectedTargetEntityId) return null;
+  return targetAllEntities().find((entity) => entity.id === state.selectedTargetEntityId) ?? null;
+}
+
+function renderTargetEntityDetail(entity) {
+  if (!entity) return "";
+  return `
+    <section class="target-entity-detail">
+      <div class="target-detail-head">
+        <div>
+          <h3>${entity.name}</h3>
+          <div class="asset-meta">${entity.id} - ${entity.collection} - ${entity.class ?? "generic"}</div>
+        </div>
+        <span class="status-pill">asset ${entity.assetId ?? "n/a"}</span>
+      </div>
+      <div class="target-modifier-list">
+        ${(entity.modifiers ?? []).map(renderTargetModifier).join("") || `<div class="optimizer-empty">Aucun modifier.</div>`}
+      </div>
+      ${renderTargetEvidence(entity.evidence)}
+    </section>
+  `;
+}
+
+function renderTargetModifier(modifier) {
+  const blocked = modifier.operation === "unknown" || modifier.bucket === "blocked-candidate";
+  const family = modifierCalculationFamily(modifier);
+  return `
+    <article class="target-modifier ${blocked ? "blocked-modifier" : ""}">
+      <div><strong>${modifier.stat}</strong> - ${modifier.operation}</div>
+      <div class="asset-meta">${modifier.id}</div>
+      ${kv("Valeur", formatNumber(modifier.value))}
+      ${kv("Bucket", modifier.bucket ?? "n/a")}
+      ${kv("Famille", family)}
+      ${kv("Confiance", modifier.evidence?.confidence ?? "n/a")}
+      ${(modifier.evidence?.notes ?? []).length ? `<ul class="evidence-list">${modifier.evidence.notes.map((note) => `<li>${note}</li>`).join("")}</ul>` : ""}
+    </article>
+  `;
+}
+
+function renderTargetEvidence(evidence) {
+  if (!evidence) return "";
+  return `
+    <div class="target-evidence">
+      <strong>Preuve entite</strong>
+      <span>${evidence.source} - ${evidence.file ?? "fichier n/a"} @ ${evidence.offset ?? "n/a"} - ${evidence.confidence}</span>
+    </div>
+  `;
+}
+
+function renderOptimizerTagOptions() {
+  const tags = [...new Set(state.dataset.assets.flatMap((asset) => asset.tags || []))].sort();
+  byId("optimizerTag").innerHTML = [
+    `<option value="all">Tous les tags</option>`,
+    ...tags.map((tag) => `<option value="${tag}">${tag}</option>`),
+  ].join("");
+}
+
+function filteredAssets() {
+  return state.dataset.assets.filter((asset) => {
+    if (state.filter === "strict") return asset.strict.estimatedDps > 0;
+    if (state.filter === "candidate") return asset.candidates.length > 0;
+    return true;
+  });
+}
+
+function renderAssetList() {
+  const assets = filteredAssets();
+  if (!assets.some((asset) => String(asset.assetId) === String(state.selectedAssetId))) {
+    state.selectedAssetId = assets[0]?.assetId ?? null;
+  }
+  byId("assetList").innerHTML = assets
+    .map((asset) => {
+      const active = String(asset.assetId) === String(state.selectedAssetId) ? " active" : "";
+      return `
+        <button class="asset-row${active}" type="button" data-asset-id="${asset.assetId}">
+          <span>
+            <span class="asset-title">${asset.label}</span>
+            <span class="asset-meta">Asset ${asset.assetId} - ${asset.tags.join(", ") || "sans tag"}</span>
+          </span>
+          <span class="dps-stack">
+            <span class="dps-value">${formatNumber(effectiveDps(asset).displayDps)}</span>
+            ${asset.candidates.length ? `<span class="candidate-dot">+${formatNumber(bestCandidateDelta(asset))}</span>` : ""}
+          </span>
+        </button>
+      `;
+    })
+    .join("");
+
+  document.querySelectorAll(".asset-row").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedAssetId = Number(button.dataset.assetId);
+      render();
+    });
+  });
+}
+
+function renderOptimizerRanking() {
+  const ranked = rankedAssets().slice(0, 5);
+  const best = ranked[0];
+  const total = optimizerFilteredAssets().length;
+  byId("optimizerRanking").innerHTML = `
+    <div class="optimizer-best">
+      <span>Meilleur choix</span>
+      <strong>${best ? best.label : "Aucun asset"}</strong>
+      <small>${best ? optimizerScoreLabel(best) : ""}</small>
+      <small>${optimizerScopeLabel(total)}</small>
+    </div>
+    <div class="optimizer-list">
+      ${ranked.map((asset, index) => `
+        <button class="optimizer-row${String(asset.assetId) === String(state.selectedAssetId) ? " active" : ""}" type="button" data-asset-id="${asset.assetId}">
+          <span class="rank-index">${index + 1}</span>
+          <span class="rank-body">
+            <span class="asset-title">${asset.label}</span>
+            <span class="asset-meta">${optimizerMeta(asset)}</span>
+          </span>
+          <span class="dps-stack">
+            <span class="dps-value">${formatNumber(optimizerScore(asset))}</span>
+            ${bestCandidate(asset) ? `<span class="candidate-dot">what-if</span>` : ""}
+          </span>
+        </button>
+      `).join("") || `<div class="optimizer-empty">Aucun asset pour ce filtre.</div>`}
+    </div>
+  `;
+
+  document.querySelectorAll(".optimizer-row").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedAssetId = Number(button.dataset.assetId);
+      render();
+    });
+  });
+}
+
+function renderBuildSelection() {
+  const assets = buildAssets();
+  const composition = buildComposition(assets);
+  const totals = composition.totals;
+  byId("buildSummary").innerHTML = `
+    <article class="build-metric">
+      <span>Assets retenus</span>
+      <strong>${formatNumber(assets.length)}</strong>
+    </article>
+    <article class="build-metric">
+      <span>DPS strict total</span>
+      <strong>${formatNumber(totals.strict)}</strong>
+    </article>
+    <article class="build-metric">
+      <span>DPS actif total</span>
+      <strong>${formatNumber(totals.effective)}</strong>
+    </article>
+    <article class="build-metric">
+      <span>Delta what-if</span>
+      <strong class="${totals.candidateDelta > 0 ? "positive" : ""}">${totals.candidateDelta > 0 ? "+" : ""}${formatNumber(totals.candidateDelta)}</strong>
+    </article>
+    <article class="build-metric">
+      <span>Hypotheses bloquees</span>
+      <strong>${formatNumber(totals.blockedCandidates)}</strong>
+    </article>
+    <article class="build-metric">
+      <span>Couverture cible</span>
+      <strong>${formatNumber(composition.coverage.targetScored)} / ${formatNumber(composition.coverage.assets)}</strong>
+    </article>
+    <article class="build-metric">
+      <span>Qualite modele</span>
+      <strong class="${composition.quality.level}">${composition.quality.label}</strong>
+    </article>
+  `;
+
+  byId("buildList").innerHTML = assets.map((asset) => `
+    <button class="build-row" type="button" data-asset-id="${asset.assetId}">
+      <span>
+        <span class="asset-title">${asset.label}</span>
+        <span class="asset-meta">${buildAssetMeta(asset)}</span>
+      </span>
+      <span class="candidate-dot">retirer</span>
+    </button>
+  `).join("") || `<div class="optimizer-empty">Aucun asset dans le build.</div>`;
+
+  if (assets.length) {
+    byId("buildList").insertAdjacentHTML("afterbegin", renderBuildCompositionNotice(composition));
+  }
+
+  document.querySelectorAll(".build-row").forEach((button) => {
+    button.addEventListener("click", () => {
+      toggleBuildAsset(Number(button.dataset.assetId));
+    });
+  });
+
+  document.querySelectorAll(".build-blocker-row").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedAssetId = Number(button.dataset.assetId);
+      render();
+      byId("assetDetail").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function buildAssets() {
+  return state.buildAssetIds
+    .map((assetId) => state.dataset.assets.find((asset) => Number(asset.assetId) === Number(assetId)))
+    .filter(Boolean);
+}
+
+function buildTotals(assets) {
+  return buildComposition(assets).totals;
+}
+
+function buildComposition(assets) {
+  const rows = assets.map((asset) => {
+    const score = dpsScore(asset);
+    const candidateDelta = score.candidateDps == null ? 0 : score.candidateDps - score.strictDps;
+    const blockers = buildAssetBlockers(asset, score);
+    return {
+      assetId: asset.assetId,
+      label: asset.label,
+      strictDps: score.strictDps,
+      candidateDps: score.candidateDps,
+      candidateDelta,
+      activeDps: state.includeCandidates && score.candidateDps != null ? score.candidateDps : score.strictDps,
+      blockedCandidates: score.blockedCandidates,
+      scoringSource: score.source,
+      targetEntityId: score.targetEntityId,
+      class: score.class,
+      allowedSlots: score.allowedSlots,
+      buckets: score.buckets,
+      blockers,
+    };
+  });
+
+  const totals = rows.reduce((totals, row) => {
+    totals.strict += Number(row.strictDps || 0);
+    totals.whatIf += Number(row.candidateDps ?? row.strictDps ?? 0);
+    totals.candidateDelta += Number(row.candidateDelta || 0);
+    totals.effective += Number(row.activeDps || 0);
+    totals.blockedCandidates += row.blockedCandidates;
+    return totals;
+  }, { strict: 0, whatIf: 0, effective: 0, candidateDelta: 0, blockedCandidates: 0 });
+  const buckets = rows.reduce((totals, row) => mergeBucketTotals(totals, row.buckets), emptyBucketTotals());
+
+  const coverage = {
+    assets: rows.length,
+    targetScored: rows.filter((row) => row.scoringSource === "target-dataset").length,
+    fallbackScored: rows.filter((row) => row.scoringSource !== "target-dataset").length,
+  };
+  const blockers = buildCompositionBlockers(rows);
+  const constraints = assessBuildConstraints(rows);
+  const bucketEngine = buildBucketEnginePreview(totals, buckets, coverage, blockers, rows, constraints);
+
+  return {
+    schemaVersion: 1,
+    method: "target-modifier-sum-v1",
+    mode: state.includeCandidates ? "what-if" : "strict",
+    note: "Prototype composition: sums normalized estimatedDps modifiers. It does not yet model Diablo IV additive/multiplicative buckets, caps, conflicts, uptime, or equipment slots.",
+    totals,
+    buckets,
+    bucketEngine,
+    constraints,
+    coverage,
+    rows,
+    blockers,
+    quality: buildCompositionQuality(totals, coverage, buckets),
+    warnings: buildCompositionWarnings(totals, coverage, buckets),
+  };
+}
+
+function buildBucketEnginePreview(totals, buckets, coverage, blockers, rows, constraints = null) {
+  const blockerKinds = Array.from(new Set((blockers ?? []).map((blocker) => blocker.kind))).sort();
+  const calculatedDps = Number(buckets.strictBase || 0)
+    * (1 + Number(buckets.additive || 0) / 100)
+    * Number(buckets.multiplicative || 1)
+    * Number(buckets.uptime || 1);
+  const strictDps = Number(totals.strict || 0);
+  const readiness = assessBucketReadiness(totals, buckets, coverage, blockers, rows, constraints);
+  const promotionReady = blockerKinds.length === 0
+    && Number(totals.blockedCandidates || 0) === 0
+    && Number(coverage.fallbackScored || 0) === 0
+    && Number(buckets.unknown || 0) === 0
+    && constraints?.valid !== false;
+
+  return {
+    version: "diablo4-bucket-engine-preview-v1",
+    status: promotionReady ? "strict-ready" : "strict-only-blocked-candidates",
+    promotionReady,
+    strict: {
+      dps: strictDps,
+      calculatedDps,
+      parityDelta: calculatedDps - strictDps,
+    },
+    whatIf: {
+      dps: Number(totals.whatIf || 0),
+      blockedCandidateDelta: Number(totals.candidateDelta || 0),
+      reliableCandidateDelta: 0,
+      usedForReliableDps: false,
+    },
+    blocked: {
+      candidates: Number(totals.blockedCandidates || 0),
+      dps: Number(buckets.blockedCandidate || 0),
+      deltaVsStrict: Number(totals.candidateDelta || 0),
+      blockerKinds,
+    },
+    readiness,
+    constraints,
+    coverage: {
+      requestedAssets: rows.length,
+      resolvedAssets: rows.length,
+      missingAssets: 0,
+    },
+  };
+}
+
+function assessBucketReadiness(totals, buckets, coverage, blockers, rows, constraints = null) {
+  const blockerKinds = Array.from(new Set((blockers ?? []).map((blocker) => blocker.kind))).sort();
+  const rowsWithStrictDps = (rows ?? []).filter((row) => Number(row.strictDps || 0) > 0).length;
+  const strictOnlyReady = Number(coverage.fallbackScored || 0) === 0 && rowsWithStrictDps === rows.length;
+  const fineBucketsReady = Number(buckets.additive || 0) !== 0
+    || Number(buckets.multiplicative || 1) !== 1
+    || Number(buckets.uptime || 1) !== 1
+    || Number(buckets.caps || 0) !== 0;
+  const families = [
+    {
+      family: "strict-base",
+      status: strictOnlyReady ? "ready" : "blocked",
+      contribution: Number(buckets.strictBase || 0),
+      reason: strictOnlyReady ? "DPS strict disponible pour les assets composes." : "Certains assets utilisent encore un score de secours.",
+    },
+    {
+      family: "additive",
+      status: Number(buckets.additive || 0) !== 0 ? "mapped" : "empty",
+      contribution: Number(buckets.additive || 0),
+      reason: Number(buckets.additive || 0) !== 0 ? "Modifiers additifs separes." : "Aucun modifier additif fin extrait.",
+    },
+    {
+      family: "multiplicative",
+      status: Number(buckets.multiplicative || 1) !== 1 ? "mapped" : "empty",
+      contribution: Number(buckets.multiplicative || 1),
+      reason: Number(buckets.multiplicative || 1) !== 1 ? "Multiplicateurs separes." : "Aucun multiplicateur fin extrait.",
+    },
+    {
+      family: "uptime",
+      status: Number(buckets.uptime || 1) !== 1 ? "mapped" : "blocked",
+      contribution: Number(buckets.uptime || 1),
+      reason: Number(buckets.uptime || 1) !== 1 ? "Uptime exploitable mappee." : "Aucune uptime prouvee.",
+    },
+    {
+      family: "blocked-candidates",
+      status: Number(totals.blockedCandidates || 0) ? "blocked" : "empty",
+      contribution: Number(buckets.blockedCandidate || 0),
+      reason: Number(totals.blockedCandidates || 0) ? "What-if exclu du DPS fiable." : "Aucun candidat bloque.",
+    },
+  ];
+  return {
+    version: "target-bucket-readiness-v1",
+    reliableOptimizerReady: strictOnlyReady
+      && fineBucketsReady
+      && blockerKinds.length === 0
+      && Number(totals.blockedCandidates || 0) === 0
+      && constraints?.valid !== false,
+    strictOnlyReady,
+    fineBucketsReady,
+    blockedCandidateCount: Number(totals.blockedCandidates || 0),
+    blockerKinds,
+    invalidConstraintKinds: (constraints?.issues ?? []).map((issue) => issue.kind),
+    families,
+    nextMilestones: [
+      fineBucketsReady ? null : "extraire des modifiers fins additifs/multiplicatifs/uptime",
+      constraints?.valid === false ? "corriger les contraintes de build avant optimisation automatique" : null,
+      blockerKinds.length ? "garder les candidats conditionnels hors DPS fiable" : null,
+    ].filter(Boolean),
+  };
+}
+
+function assessBuildConstraints(rows) {
+  const heroClasses = [...new Set(rows
+    .map((row) => normalizeClassName(row.class))
+    .filter((className) => !["all", "generic", "unknown"].includes(className)))]
+    .sort();
+  const issues = [];
+  if (heroClasses.length > 1) {
+    issues.push({
+      kind: "mixed-hero-classes",
+      priority: "high",
+      classes: heroClasses,
+      assetIds: rows
+        .filter((row) => heroClasses.includes(normalizeClassName(row.class)))
+        .map((row) => row.assetId),
+      reason: "build multi-classes",
+      action: "choisir une seule classe avant optimisation",
+    });
+  }
+  const missingSlotAssets = rows
+    .filter((row) => String(row.targetEntityId ?? "").startsWith("aspect:") && (row.allowedSlots ?? []).length === 0)
+    .map((row) => row.assetId);
+  if (missingSlotAssets.length) {
+    issues.push({
+      kind: "slot-data-not-normalized",
+      priority: "medium",
+      assetIds: missingSlotAssets,
+      reason: "slots aspect non normalises",
+      action: "extraire les slots autorises avant contraintes equipement",
+    });
+  }
+  return {
+    version: "target-build-constraints-v1",
+    valid: issues.length === 0,
+    optimizerReady: issues.length === 0,
+    selectedHeroClass: heroClasses.length === 1 ? heroClasses[0] : null,
+    heroClasses,
+    issues,
+  };
+}
+
+function buildAssetBlockers(asset, score) {
+  const blockers = [];
+  if (score.source !== "target-dataset") {
+    blockers.push({
+      kind: "fallback-score",
+      priority: "medium",
+      assetId: asset.assetId,
+      label: asset.label,
+      reason: "score encore lu depuis le dataset prototype",
+      action: "convertir cet asset vers une entite cible avec modifier strict prouve",
+    });
+  }
+
+  for (const candidate of asset.candidates ?? []) {
+    if (candidate.promotionStatus?.kind !== "blocked-for-real-dps") continue;
+    for (const blocker of candidate.promotionStatus.blockers ?? ["unknown-blocker"]) {
+      blockers.push({
+        kind: blocker,
+        priority: blockerPriority(blocker),
+        assetId: asset.assetId,
+        label: asset.label,
+        candidateId: candidate.canonicalId,
+        reason: blockerLabel(blocker),
+        action: blockerAction(blocker),
+      });
+    }
+  }
+
+  if (score.buckets?.unknown > 0) {
+    blockers.push({
+      kind: "unknown-modifier-family",
+      priority: "medium",
+      assetId: asset.assetId,
+      label: asset.label,
+      reason: "modifier cible non classe",
+      action: "mapper le modifier vers additif, multiplicatif, uptime, cap ou ressource",
+    });
+  }
+
+  return blockers;
+}
+
+function buildCompositionBlockers(rows) {
+  return rows
+    .flatMap((row) => row.blockers ?? [])
+    .sort((a, b) => blockerPriorityRank(b.priority) - blockerPriorityRank(a.priority) || String(a.assetId).localeCompare(String(b.assetId)))
+    .slice(0, 12);
+}
+
+function blockerPriority(blocker) {
+  if (blocker === "field-level-parser-required") return "high";
+  if (blocker === "sf33-trigger-build-state-unmapped") return "high";
+  if (blocker === "uptime-not-proven") return "high";
+  return "medium";
+}
+
+function blockerPriorityRank(priority) {
+  if (priority === "high") return 3;
+  if (priority === "medium") return 2;
+  return 1;
+}
+
+function blockerLabel(blocker) {
+  const labels = {
+    "field-level-parser-required": "champ exact du bonus non parse",
+    "sf33-trigger-build-state-unmapped": "trigger SF_33 non relie a l'etat de build",
+    "uptime-not-proven": "uptime non prouve",
+  };
+  return labels[blocker] ?? blocker;
+}
+
+function blockerAction(blocker) {
+  const actions = {
+    "field-level-parser-required": "parser le champ local qui porte la valeur candidate",
+    "sf33-trigger-build-state-unmapped": "mapper SF_33 vers une condition ou un toggle utilisateur",
+    "uptime-not-proven": "extraire ou definir l'uptime avant promotion DPS",
+  };
+  return actions[blocker] ?? "inspecter ce blocage avant promotion";
+}
+
+function emptyBucketTotals() {
+  return {
+    strictBase: 0,
+    additive: 0,
+    multiplicative: 1,
+    uptime: 1,
+    caps: 0,
+    blockedCandidate: 0,
+    unknown: 0,
+  };
+}
+
+function mergeBucketTotals(totals, buckets = emptyBucketTotals()) {
+  totals.strictBase += Number(buckets.strictBase || 0);
+  totals.additive += Number(buckets.additive || 0);
+  totals.multiplicative *= Number(buckets.multiplicative || 1);
+  totals.uptime *= Number(buckets.uptime || 1);
+  totals.caps += Number(buckets.caps || 0);
+  totals.blockedCandidate += Number(buckets.blockedCandidate || 0);
+  totals.unknown += Number(buckets.unknown || 0);
+  return totals;
+}
+
+function buildCompositionWarnings(totals, coverage, buckets) {
+  const warnings = [];
+  if (totals.blockedCandidates > 0) {
+    warnings.push(`${formatNumber(totals.blockedCandidates)} hypothese${totals.blockedCandidates > 1 ? "s" : ""} bloquee${totals.blockedCandidates > 1 ? "s" : ""}`);
+  }
+  if (buckets.unknown > 0) {
+    warnings.push(`${formatNumber(buckets.unknown)} modifier${buckets.unknown > 1 ? "s" : ""} non classe${buckets.unknown > 1 ? "s" : ""}`);
+  }
+  if (coverage.fallbackScored > 0) {
+    warnings.push(`${formatNumber(coverage.fallbackScored)} score${coverage.fallbackScored > 1 ? "s" : ""} hors dataset cible`);
+  }
+  warnings.push("cumul prototype, buckets Diablo IV non modelises");
+  return warnings;
+}
+
+function buildCompositionQuality(totals, coverage, buckets) {
+  const reasons = [];
+  const nextActions = [];
+
+  if (coverage.assets === 0) {
+    return {
+      level: "quality-empty",
+      label: "vide",
+      score: 0,
+      risk: "Aucun calcul disponible.",
+      reasons: ["aucun asset dans le build"],
+      nextActions: ["ajouter des assets au build"],
+    };
+  }
+
+  let score = 100;
+  if (coverage.fallbackScored > 0) {
+    score -= 25;
+    reasons.push("certains scores viennent encore du dataset prototype");
+    nextActions.push("convertir tous les assets du build vers le dataset cible");
+  }
+  if (totals.blockedCandidates > 0) {
+    score -= 30;
+    reasons.push("des hypotheses conditionnelles restent bloquees");
+    nextActions.push("prouver le champ exact, le trigger et l'uptime des candidats");
+  }
+  if (buckets.unknown > 0) {
+    score -= 20;
+    reasons.push("des modifiers ne sont pas encore classes");
+    nextActions.push("mapper les modifiers inconnus vers additif, multiplicatif, uptime, cap ou ressource");
+  }
+  if (buckets.additive === 0 && buckets.multiplicative === 1 && buckets.uptime === 1) {
+    score -= 10;
+    reasons.push("les familles additif/multiplicatif/uptime ne sont pas encore alimentees");
+    nextActions.push("extraire des modifiers plus fins que estimatedDps");
+  }
+  reasons.push("le cumul actuel reste un prototype");
+  nextActions.push("remplacer la somme simple par le calcul par buckets Diablo IV");
+
+  const clampedScore = Math.max(0, Math.min(100, score));
+  if (clampedScore >= 80 && totals.blockedCandidates === 0 && coverage.fallbackScored === 0) {
+    return {
+      level: "quality-reliable",
+      label: "fiable",
+      score: clampedScore,
+      risk: "Score strict exploitable, sous reserve du modele de buckets encore a remplacer.",
+      reasons,
+      nextActions,
+    };
+  }
+  if (clampedScore >= 50) {
+    return {
+      level: "quality-partial",
+      label: "partiel",
+      score: clampedScore,
+      risk: "Score utile pour comparer, mais pas encore assez prouve pour optimiser automatiquement.",
+      reasons,
+      nextActions,
+    };
+  }
+  return {
+    level: "quality-blocked",
+    label: "bloque",
+    score: clampedScore,
+    risk: "Score trop incertain pour guider une optimisation.",
+    reasons,
+    nextActions,
+  };
+}
+
+function renderBuildCompositionNotice(composition) {
+  return `
+    <div class="build-composition-note">
+      <strong>${composition.method} - ${composition.quality.label} (${formatNumber(composition.quality.score)}/100)</strong>
+      <span class="build-risk ${composition.quality.level}">${composition.quality.risk}</span>
+      <span>${composition.warnings.join(" - ")}</span>
+      <span>Base stricte ${formatNumber(composition.buckets.strictBase)} - additif ${formatNumber(composition.buckets.additive)} - multiplicatif x${formatMultiplier(composition.buckets.multiplicative)} - uptime x${formatMultiplier(composition.buckets.uptime)} - bloque ${formatNumber(composition.buckets.blockedCandidate)}</span>
+      ${renderBucketEngineStatus(composition.bucketEngine)}
+      ${renderBuildConstraints(composition.constraints)}
+      <span>${composition.quality.reasons.join(" - ")}</span>
+      <ul class="build-next-actions">
+        ${composition.quality.nextActions.slice(0, 3).map((action) => `<li>${action}</li>`).join("")}
+      </ul>
+      ${renderBuildBlockers(composition.blockers)}
+    </div>
+  `;
+}
+
+function renderBucketEngineStatus(bucketEngine) {
+  if (!bucketEngine) return "";
+  const strict = bucketEngine.strict ?? {};
+  const blocked = bucketEngine.blocked ?? {};
+  const readiness = bucketEngine.readiness ?? null;
+  const parityClass = Math.abs(Number(strict.parityDelta || 0)) < 0.0001 ? "positive" : "blocked";
+  return `
+    <span>Moteur buckets ${bucketEngine.status} - strict ${formatNumber(strict.dps)} - candidat fiable +${formatNumber(bucketEngine.whatIf?.reliableCandidateDelta ?? 0)} - bloque +${formatNumber(blocked.deltaVsStrict ?? 0)}</span>
+    <span>Parite buckets <span class="${parityClass}">${formatNumber(strict.parityDelta ?? 0)}</span> - ${bucketEngine.promotionReady ? "promotion possible" : "promotion bloquee"}</span>
+    ${readiness ? renderBucketReadiness(readiness) : ""}
+  `;
+}
+
+function renderBucketReadiness(readiness) {
+  const families = readiness.families ?? [];
+  return `
+    <div class="bucket-readiness">
+      <span>Readiness buckets - strict ${readiness.strictOnlyReady ? "pret" : "bloque"} - buckets fins ${readiness.fineBucketsReady ? "presents" : "vides"} - optimiseur ${readiness.reliableOptimizerReady ? "pret" : "bloque"}</span>
+      <div class="bucket-family-list">
+        ${families.map((family) => `
+          <span class="bucket-family ${family.status}">
+            ${family.family}: ${family.status}
+          </span>
+        `).join("")}
+      </div>
+      ${readiness.nextMilestones?.length ? `<ul class="build-next-actions">${readiness.nextMilestones.slice(0, 3).map((item) => `<li>${item}</li>`).join("")}</ul>` : ""}
+    </div>
+  `;
+}
+
+function renderBuildConstraints(constraints) {
+  if (!constraints) return "";
+  const status = constraints.valid ? "contraintes OK" : "contraintes bloquees";
+  const heroClass = constraints.selectedHeroClass ?? (constraints.heroClasses?.join(", ") || "non definie");
+  const issues = constraints.issues ?? [];
+  return `
+    <span>Contraintes build ${status} - classe ${heroClass} - optimiseur ${constraints.optimizerReady ? "pret" : "bloque"}</span>
+    ${issues.length ? `<ul class="build-next-actions">${issues.slice(0, 3).map((issue) => `<li>${issue.kind}: ${issue.action}</li>`).join("")}</ul>` : ""}
+  `;
+}
+
+function renderBuildBlockers(blockers) {
+  if (!blockers.length) return "";
+  return `
+    <div class="build-blockers">
+      ${blockers.slice(0, 5).map((blocker) => `
+        <button class="build-blocker-row" type="button" data-asset-id="${blocker.assetId}">
+          <span>
+            <strong>${blocker.label}</strong>
+            <span>${blocker.reason}</span>
+          </span>
+          <span>${blocker.priority}</span>
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function buildAssetMeta(asset) {
+  const score = dpsScore(asset);
+  const active = effectiveDps(asset).displayDps;
+  const delta = score.candidateDeltaDps > 0 ? ` - delta +${formatNumber(score.candidateDeltaDps)}` : "";
+  return `strict ${formatNumber(score.strictDps)} - actif ${formatNumber(active)} - ${score.source}${delta}`;
+}
+
+function buildExportPayload() {
+  const assets = buildAssets();
+  const composition = buildComposition(assets);
+  const totals = composition.totals;
+  return {
+    schemaVersion: 1,
+    exportedAt: new Date().toISOString(),
+    mode: state.includeCandidates ? "what-if" : "strict",
+    totals,
+    composition,
+    assetIds: assets.map((asset) => asset.assetId),
+    assets: assets.map((asset) => {
+      const candidate = bestCandidate(asset);
+      const score = dpsScore(asset);
+      return {
+        assetId: asset.assetId,
+        label: asset.label,
+        tags: asset.tags,
+        strictDps: score.strictDps,
+        activeDps: effectiveDps(asset).displayDps,
+        scoringSource: score.source,
+        targetEntityId: score.targetEntityId,
+        candidate: candidate ? {
+          canonicalId: candidate.canonicalId,
+          target: candidate.target,
+          formula: candidate.candidateFormula,
+          estimatedDps: score.candidateDps ?? candidate.scenarioImpact?.estimatedDps ?? 0,
+          deltaVsStrictDps: score.candidateDeltaDps ?? candidate.scenarioImpact?.deltaVsStrictDps ?? 0,
+          promotionStatus: candidate.promotionStatus?.kind ?? "unknown",
+          blockers: candidate.promotionStatus?.blockers ?? [],
+        } : null,
+      };
+    }),
+  };
+}
+
+async function exportBuildJson() {
+  const payload = buildExportPayload();
+  const text = JSON.stringify(payload, null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    setBuildExportStatus(`Export copie (${payload.assets.length} asset${payload.assets.length > 1 ? "s" : ""})`);
+  } catch {
+    setBuildExportStatus(text);
+  }
+}
+
+function importBuildJson() {
+  const raw = byId("buildImportText").value.trim();
+  if (!raw) {
+    setBuildExportStatus("Aucun JSON a importer.");
+    return;
+  }
+
+  try {
+    const payload = JSON.parse(raw);
+    const assetIds = importAssetIds(payload);
+    if (!assetIds.length) {
+      setBuildExportStatus("Import refuse : aucun asset valide trouve.");
+      return;
+    }
+
+    state.buildAssetIds = normalizeImportedAssetIds(assetIds);
+    state.selectedAssetId = state.buildAssetIds[0] ?? state.selectedAssetId;
+    if (payload.mode === "what-if") state.includeCandidates = true;
+    if (payload.mode === "strict") state.includeCandidates = false;
+    byId("buildImportText").value = "";
+    syncControls();
+    setBuildExportStatus(`Import OK (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})`);
+    render();
+  } catch {
+    setBuildExportStatus("Import refuse : JSON invalide.");
+  }
+}
+
+function importAssetIds(payload) {
+  if (!payload || typeof payload !== "object") return [];
+  if (Array.isArray(payload.assetIds)) return payload.assetIds;
+  if (Array.isArray(payload.assets)) return payload.assets.map((asset) => asset.assetId);
+  return [];
+}
+
+function normalizeImportedAssetIds(assetIds) {
+  const knownAssetIds = new Set(state.dataset.assets.map((asset) => Number(asset.assetId)));
+  return [...new Set(assetIds.map(Number))]
+    .filter((assetId) => knownAssetIds.has(assetId));
+}
+
+function setBuildExportStatus(message) {
+  byId("buildExportStatus").textContent = message;
+}
+
+function isInBuild(assetId) {
+  return state.buildAssetIds.some((item) => Number(item) === Number(assetId));
+}
+
+function toggleBuildAsset(assetId) {
+  if (isInBuild(assetId)) {
+    state.buildAssetIds = state.buildAssetIds.filter((item) => Number(item) !== Number(assetId));
+  } else {
+    state.buildAssetIds = [...state.buildAssetIds, Number(assetId)];
+  }
+  render();
+}
+
+function rankedAssets() {
+  return optimizerFilteredAssets()
+    .slice()
+    .sort((a, b) => optimizerScore(b) - optimizerScore(a));
+}
+
+function optimizerFilteredAssets() {
+  return state.dataset.assets.filter((asset) => {
+    const matchesTag = state.optimizerTag === "all" || asset.tags.includes(state.optimizerTag);
+    const matchesSearch = !state.optimizerSearch || optimizerSearchText(asset).includes(state.optimizerSearch);
+    return matchesTag && matchesSearch;
+  });
+}
+
+function optimizerScopeLabel(total) {
+  const scope = state.optimizerTag === "all" ? "tous les tags" : state.optimizerTag;
+  const search = state.optimizerSearch ? `, recherche "${state.optimizerSearch}"` : "";
+  return `${formatNumber(total)} asset${total > 1 ? "s" : ""} dans ${scope}${search}`;
+}
+
+function optimizerSearchText(asset) {
+  const candidates = asset.candidates.flatMap((candidate) => [
+    candidate.target,
+    candidate.candidateFormula,
+    candidate.canonicalId,
+    candidate.promotionStatus?.kind,
+  ]);
+  return [
+    asset.assetId,
+    asset.label,
+    asset.tags.join(" "),
+    ...candidates,
+  ].join(" ").toLowerCase();
+}
+
+function optimizerScore(asset) {
+  if (state.optimizerMode === "strict") return dpsScore(asset).strictDps;
+  if (state.optimizerMode === "candidate") return bestCandidateDelta(asset);
+  return effectiveDps(asset).displayDps;
+}
+
+function optimizerScoreLabel(asset) {
+  if (state.optimizerMode === "strict") return `DPS strict ${formatNumber(dpsScore(asset).strictDps)}`;
+  if (state.optimizerMode === "candidate") return `Gain candidat +${formatNumber(bestCandidateDelta(asset))}`;
+  return `${state.includeCandidates ? "DPS what-if" : "DPS strict"} ${formatNumber(effectiveDps(asset).displayDps)}`;
+}
+
+function optimizerMeta(asset) {
+  const strict = `strict ${formatNumber(dpsScore(asset).strictDps)}`;
+  const candidate = bestCandidate(asset);
+  if (!candidate) return `${strict} - ${asset.tags.join(", ") || "sans tag"}`;
+  return `${strict} - what-if ${formatNumber(dpsScore(asset).candidateDps ?? candidate.scenarioImpact.estimatedDps)} - bloque`;
+}
+
+function renderDetail() {
+  const asset = selectedAsset();
+  if (!asset) {
+    byId("assetDetail").innerHTML = `<div class="empty-state">Aucun asset selectionne</div>`;
+    return;
+  }
+
+  const effective = effectiveDps(asset);
+  byId("assetDetail").innerHTML = `
+    <div class="detail-header">
+      <div>
+        <h3>${asset.label}</h3>
+        <div class="tag-row">${asset.tags.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
+      </div>
+      <div class="strict-dps">
+        <span>${effective.label}</span>
+        <strong>${formatNumber(effective.displayDps)}</strong>
+        <button class="action-button" id="buildToggle" type="button">${isInBuild(asset.assetId) ? "Retirer du build" : "Ajouter au build"}</button>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      ${renderComparisonSection(asset)}
+      ${renderTargetScoreSection(asset)}
+      ${renderStrictSection(asset)}
+      ${renderCandidateSection(asset)}
+      ${renderEvidenceSection(asset)}
+      ${renderFormulaSection(asset)}
+    </div>
+  `;
+
+  byId("buildToggle").addEventListener("click", () => {
+    toggleBuildAsset(asset.assetId);
+  });
+}
+
+function selectedAsset() {
+  return state.dataset.assets.find((item) => String(item.assetId) === String(state.selectedAssetId));
+}
+
+function targetEntityForAsset(assetId) {
+  return targetAllEntities().find((entity) => Number(entity.assetId) === Number(assetId)) ?? null;
+}
+
+function modifiersForAsset(assetId) {
+  return targetEntityForAsset(assetId)?.modifiers ?? [];
+}
+
+function dpsScore(asset) {
+  const targetEntity = targetEntityForAsset(asset.assetId);
+  if (!targetEntity) return fallbackDpsScore(asset);
+
+  const modifiers = targetEntity.modifiers ?? [];
+  const strictModifiers = modifiers.filter(
+    (modifier) =>
+      modifier.stat === "estimatedDps" &&
+      modifier.operation === "add" &&
+      modifier.bucket === "strict-reviewed-dps"
+  );
+  const candidateModifiers = modifiers.filter(
+    (modifier) =>
+      modifier.stat === "estimatedDps" &&
+      (modifier.operation === "unknown" || modifier.bucket === "blocked-candidate")
+  );
+  const strictDps = strictModifiers.reduce((sum, modifier) => sum + Number(modifier.value || 0), 0);
+  const candidateDps = candidateModifiers.length
+    ? Math.max(...candidateModifiers.map((modifier) => Number(modifier.value || 0)))
+    : null;
+  const buckets = bucketTotalsFromModifiers(modifiers);
+  const resolvedStrictDps = strictModifiers.length ? strictDps : Number(asset.strict?.estimatedDps || 0);
+
+  return {
+    source: strictModifiers.length ? "target-dataset" : "optimizer-dataset",
+    targetEntityId: targetEntity.id,
+    class: targetEntity.class ?? "unknown",
+    allowedSlots: targetEntity.allowedSlots ?? [],
+    strictDps: resolvedStrictDps,
+    candidateDps,
+    candidateDeltaDps: candidateDps == null ? 0 : candidateDps - resolvedStrictDps,
+    blockedCandidates: candidateModifiers.length,
+    buckets,
+  };
+}
+
+function fallbackDpsScore(asset) {
+  const candidate = bestCandidate(asset);
+  return {
+    source: "optimizer-dataset",
+    targetEntityId: null,
+    class: classFromTags(asset.tags),
+    allowedSlots: [],
+    strictDps: Number(asset.strict?.estimatedDps || 0),
+    candidateDps: candidate?.scenarioImpact?.estimatedDps ?? null,
+    candidateDeltaDps: candidate?.scenarioImpact?.deltaVsStrictDps ?? 0,
+    blockedCandidates: asset.candidates.filter((item) => item.promotionStatus?.kind === "blocked-for-real-dps").length,
+    buckets: {
+      ...emptyBucketTotals(),
+      strictBase: Number(asset.strict?.estimatedDps || 0),
+      blockedCandidate: candidate?.scenarioImpact?.estimatedDps ?? 0,
+    },
+  };
+}
+
+function classFromTags(tags = []) {
+  const lowered = tags.join(" ").toLowerCase();
+  for (const className of ["barbarian", "druid", "necromancer", "rogue", "sorcerer", "spiritborn"]) {
+    if (lowered.includes(className)) return className;
+  }
+  return "generic";
+}
+
+function normalizeClassName(className) {
+  return String(className ?? "unknown").trim().toLowerCase() || "unknown";
+}
+
+function bucketTotalsFromModifiers(modifiers) {
+  return modifiers.reduce((totals, modifier) => {
+    const family = modifierCalculationFamily(modifier);
+    const value = Number(modifier.value || 0);
+    if (family === "strict-base") totals.strictBase += value;
+    else if (family === "additive") totals.additive += value;
+    else if (family === "multiplicative") totals.multiplicative *= normalizeMultiplierValue(value);
+    else if (family === "uptime") totals.uptime *= normalizeUptimeValue(modifier.uptime ?? value);
+    else if (family === "cap") totals.caps += value;
+    else if (family === "blocked-candidate") totals.blockedCandidate += value;
+    else totals.unknown += 1;
+    return totals;
+  }, emptyBucketTotals());
+}
+
+function modifierCalculationFamily(modifier) {
+  if (modifier.bucket === "strict-reviewed-dps") return "strict-base";
+  if (modifier.bucket === "blocked-candidate" || modifier.operation === "unknown") return "blocked-candidate";
+  if (modifier.operation === "add") return "additive";
+  if (modifier.operation === "multiply") return "multiplicative";
+  if (modifier.operation === "cap") return "cap";
+  if (modifier.operation === "proc" || modifier.uptime != null) return "uptime";
+  return "unknown";
+}
+
+function normalizeMultiplierValue(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric) || numeric <= 0) return 1;
+  if (numeric < 1) return 1 + numeric;
+  return numeric;
+}
+
+function normalizeUptimeValue(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 1;
+  return Math.max(0, Math.min(1, numeric));
+}
+
+function bestCandidate(asset) {
+  return asset.candidates
+    .filter((candidate) => candidate.scenarioImpact)
+    .slice()
+    .sort((a, b) => b.scenarioImpact.estimatedDps - a.scenarioImpact.estimatedDps)[0] ?? null;
+}
+
+function bestCandidateDelta(asset) {
+  return dpsScore(asset).candidateDeltaDps ?? bestCandidate(asset)?.scenarioImpact?.deltaVsStrictDps ?? 0;
+}
+
+function effectiveDps(asset) {
+  const candidate = bestCandidate(asset);
+  const score = dpsScore(asset);
+  if (state.includeCandidates && candidate) {
+    return {
+      label: "DPS what-if",
+      displayDps: score.candidateDps ?? candidate.scenarioImpact.estimatedDps,
+      candidate,
+    };
+  }
+  return {
+    label: "DPS strict",
+    displayDps: score.strictDps,
+    candidate: null,
+  };
+}
+
+function renderComparisonSection(asset) {
+  const candidate = bestCandidate(asset);
+  const score = dpsScore(asset);
+  const strict = score.strictDps;
+  const candidateDps = score.candidateDps ?? candidate?.scenarioImpact?.estimatedDps ?? strict;
+  const delta = score.candidateDeltaDps ?? candidate?.scenarioImpact?.deltaVsStrictDps ?? 0;
+  const deltaPct = safePercent(delta, strict);
+  return `
+    <section class="section compare-section full">
+      <h3>Comparaison</h3>
+      <div class="compare-grid">
+        <div>
+          <span>DPS strict</span>
+          <strong>${formatNumber(strict)}</strong>
+        </div>
+        <div>
+          <span>DPS what-if</span>
+          <strong>${formatNumber(candidateDps)}</strong>
+        </div>
+        <div>
+          <span>Delta</span>
+          <strong class="${delta > 0 ? "positive" : ""}">${delta > 0 ? "+" : ""}${formatNumber(delta)} / ${formatPercent(deltaPct)}</strong>
+        </div>
+        <div>
+          <span>Statut</span>
+          <strong class="${candidate ? "blocked" : ""}">${candidate?.promotionStatus?.kind ?? "strict-only"}</strong>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderTargetScoreSection(asset) {
+  const score = dpsScore(asset);
+  const prototypeStrict = Number(asset.strict?.estimatedDps || 0);
+  const parityDelta = score.strictDps - prototypeStrict;
+  const parityOk = Math.abs(parityDelta) < 1e-9;
+  return `
+    <section class="section score-section">
+      <h3>Score cible</h3>
+      ${kv("Source", score.source)}
+      ${kv("Entite cible", score.targetEntityId ?? "n/a")}
+      ${kv("DPS strict cible", formatNumber(score.strictDps))}
+      ${kv("Candidats bloques", formatNumber(score.blockedCandidates))}
+      ${kv("Parite prototype", `<span class="${parityOk ? "positive" : "blocked"}">${parityOk ? "OK" : formatNumber(parityDelta)}</span>`)}
+    </section>
+  `;
+}
+
+function renderStrictSection(asset) {
+  const c = asset.strict.components;
+  return `
+    <section class="section">
+      <h3>Calcul strict</h3>
+      ${kv("Methode", asset.strict.method)}
+      ${kv("Autorite", asset.strict.authority)}
+      ${kv("Coefficient primaire", formatNumber(c.primaryDamageCoefficient))}
+      ${kv("Degats arme", formatNumber(c.weaponDamage))}
+      ${kv("Vitesse attaque", c.attackSpeed)}
+      ${kv("Multiplicateurs", c.multiplierProduct)}
+    </section>
+  `;
+}
+
+function renderCandidateSection(asset) {
+  if (!asset.candidates.length) {
+    return `
+      <section class="section">
+        <h3>Candidats</h3>
+        <p class="empty-state">Aucun candidat conditionnel rattache.</p>
+      </section>
+    `;
+  }
+
+  return asset.candidates
+    .map((candidate) => `
+      <section class="section">
+        <h3>Candidat conditionnel</h3>
+        ${kv("Statut", `<span class="blocked">${candidate.promotionStatus.kind}</span>`)}
+        ${kv("Cible", candidate.target)}
+        ${kv("Formule", candidate.candidateFormula)}
+        ${kv("Confiance", candidate.confidence)}
+        ${kv("DPS theorique", `<span class="positive">${formatNumber(candidate.scenarioImpact?.estimatedDps)}</span>`)}
+        ${kv("Delta", `<span class="positive">+${formatNumber(candidate.scenarioImpact?.deltaVsStrictDps)} / ${formatPercent(candidate.scenarioImpact?.deltaVsStrictPct)}</span>`)}
+        <div class="warning">${candidate.promotionStatus.note}</div>
+        <ul class="evidence-list">
+          ${candidate.promotionStatus.blockers.map((blocker) => `<li>${blocker}</li>`).join("")}
+        </ul>
+      </section>
+    `)
+    .join("");
+}
+
+function renderEvidenceSection(asset) {
+  const candidate = bestCandidate(asset);
+  if (!candidate) {
+    return `
+      <section class="section">
+        <h3>Preuves</h3>
+        <p class="empty-state">Aucune preuve conditionnelle rattachee.</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="section proof-section full">
+      <h3>Preuves du candidat</h3>
+      <div class="proof-grid">
+        ${renderProofGroup("Valeur candidate", candidate.evidence)}
+        ${renderProofGroup("Proprietaire", candidate.ownerCandidate?.evidence ?? [])}
+        ${renderProofGroup("Trigger", candidate.triggerCandidate?.evidence ?? [])}
+      </div>
+    </section>
+  `;
+}
+
+function renderProofGroup(title, evidence) {
+  return `
+    <div class="proof-group">
+      <h4>${title}</h4>
+      <ul class="evidence-list">
+        ${evidence.map(renderEvidenceItem).join("") || "<li>Aucune preuve disponible.</li>"}
+      </ul>
+    </div>
+  `;
+}
+
+function renderEvidenceItem(item) {
+  const value = item.value ?? item.note ?? "";
+  const note = item.note ? `<div class="evidence-note">${item.note}</div>` : "";
+  return `
+    <li>
+      <div><strong>${item.type || "preuve"}</strong> @ ${item.offset ?? "n/a"} : ${value}</div>
+      ${note}
+    </li>
+  `;
+}
+
+function renderFormulaSection(asset) {
+  const formulas = asset.formulas.damage.slice(0, 8);
+  return `
+    <section class="section full">
+      <h3>Formules de degats</h3>
+      <ul class="formula-list">
+        ${formulas.map((formula) => `
+          <li>
+            <div><strong>${formula.nodeId}</strong> - ${formula.expression}</div>
+            <div class="formula-role">${formula.role?.role || "role inconnu"} - valeur ${formatNumber(formula.value)}</div>
+          </li>
+        `).join("") || "<li>Aucune formule de degats classee.</li>"}
+      </ul>
+    </section>
+  `;
+}
+
+function kv(label, value) {
+  return `<div class="kv"><span>${label}</span><span>${value}</span></div>`;
+}
+
+boot();

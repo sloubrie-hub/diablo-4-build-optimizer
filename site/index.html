@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Diablo IV Build Optimizer</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Prototype local</p>
+          <h1>Diablo IV Build Optimizer</h1>
+        </div>
+        <div class="top-actions">
+          <label class="mode-toggle">
+            <input type="checkbox" id="candidateToggle">
+            <span>What-if</span>
+          </label>
+          <div class="status-strip" id="datasetStatus">Chargement du dataset</div>
+        </div>
+      </header>
+
+      <section class="summary-grid" id="summaryGrid" aria-label="Synthese"></section>
+
+      <section class="target-panel" aria-label="Dataset cible">
+        <div class="panel-head">
+          <h2>Dataset cible</h2>
+          <div class="panel-controls">
+            <input id="targetEntitySearch" type="search" placeholder="Rechercher entite" aria-label="Rechercher dans les entites cible">
+            <select id="targetEntityType" aria-label="Filtrer les entites par type">
+              <option value="all">Tous types</option>
+            </select>
+            <select id="targetEntityClass" aria-label="Filtrer les entites par classe">
+              <option value="all">Toutes classes</option>
+            </select>
+            <div class="status-pill" id="targetDatasetStatus">Non charge</div>
+          </div>
+        </div>
+        <div id="targetDatasetPanel" class="target-dataset-panel"></div>
+      </section>
+
+      <section class="optimizer-panel" aria-label="Classement optimiseur">
+        <div class="panel-head">
+          <h2>Classement optimiseur</h2>
+          <div class="panel-controls">
+            <input id="optimizerSearch" type="search" placeholder="Rechercher" aria-label="Rechercher dans le classement">
+            <select id="optimizerTag" aria-label="Filtrer le classement par tag">
+              <option value="all">Tous les tags</option>
+            </select>
+            <select id="optimizerMode" aria-label="Mode de classement">
+              <option value="effective">DPS actif</option>
+              <option value="strict">DPS strict</option>
+              <option value="candidate">Gain candidat</option>
+            </select>
+          </div>
+        </div>
+        <div id="optimizerRanking" class="optimizer-ranking"></div>
+      </section>
+
+      <section class="target-optimizer-panel" aria-label="Plan optimiseur cible">
+        <div class="panel-head">
+          <h2>Plan optimiseur cible</h2>
+          <div class="status-pill" id="targetOptimizerStatus">Non charge</div>
+        </div>
+        <div id="targetOptimizerPlan" class="target-optimizer-plan"></div>
+      </section>
+
+      <section class="build-panel" aria-label="Build courant">
+        <div class="panel-head">
+          <h2>Build courant</h2>
+          <div class="panel-controls">
+            <button class="ghost-button" id="exportBuild" type="button">Exporter JSON</button>
+            <button class="ghost-button" id="clearBuild" type="button">Vider</button>
+          </div>
+        </div>
+        <div id="buildExportStatus" class="build-export-status" aria-live="polite"></div>
+        <div id="buildSummary" class="build-summary"></div>
+        <div id="buildList" class="build-list"></div>
+        <div class="build-import">
+          <textarea id="buildImportText" rows="4" placeholder="Coller un build JSON" aria-label="Importer un build JSON"></textarea>
+          <button class="ghost-button" id="importBuild" type="button">Importer JSON</button>
+        </div>
+      </section>
+
+      <section class="blocker-panel" aria-label="Diagnostic blocages">
+        <div class="panel-head">
+          <h2>Diagnostic blocages</h2>
+          <div class="status-pill" id="blockerAuditStatus">Non charge</div>
+        </div>
+        <div id="blockerAuditPanel" class="blocker-audit-panel"></div>
+      </section>
+
+      <section class="workspace">
+        <aside class="asset-list" aria-label="Assets">
+          <div class="panel-head">
+            <h2>Assets</h2>
+            <select id="assetFilter" aria-label="Filtrer les assets">
+              <option value="all">Tous</option>
+              <option value="strict">DPS strict</option>
+              <option value="candidate">Candidats</option>
+            </select>
+          </div>
+          <div id="assetList" class="asset-list-body"></div>
+        </aside>
+
+        <section class="detail-panel" id="assetDetail" aria-label="Detail asset"></section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

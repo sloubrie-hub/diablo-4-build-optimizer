@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-06-30T00:00:00.000Z",
+  "source": {
+    "game": "diablo4",
+    "build": "local-dev",
+    "season": "14",
+    "extractor": "diablo4-data-exporter",
+    "notes": [
+      "Example dataset for schema validation only."
+    ]
+  },
+  "entities": {
+    "skills": [
+      {
+        "id": "skill:spiritborn:centipede-ultimate",
+        "assetId": 1663210,
+        "name": "Centipede Ultimate",
+        "class": "spiritborn",
+        "kind": "ultimate",
+        "maxPoints": 1,
+        "tags": ["PowerTag", "Table"],
+        "cost": null,
+        "cooldownSeconds": null,
+        "modifiers": [
+          {
+            "id": "modifier:1663210:strict-damage",
+            "stat": "damage",
+            "operation": "add",
+            "value": 1360,
+            "formulaId": "formula:1663210:strict-damage",
+            "conditionIds": [],
+            "uptime": 1,
+            "bucket": "primary-damage-coefficient",
+            "evidence": {
+              "source": "reviewed-dps-model",
+              "assetId": 1663210,
+              "file": "outputs/diablo4-reviewed-dps-model/reviewed-dps-model.json",
+              "offset": null,
+              "field": "strict.components.primaryDamageCoefficient",
+              "confidence": "high",
+              "notes": []
+            }
+          }
+        ],
+        "evidence": {
+          "source": "optimizer-dataset",
+          "assetId": 1663210,
+          "file": "outputs/diablo4-optimizer-dataset/optimizer-dataset.json",
+          "offset": null,
+          "field": "assets[].label",
+          "confidence": "medium-high",
+          "notes": ["Name is still a technical label, not a localized game name."]
+        }
+      }
+    ],
+    "items": [],
+    "affixes": [],
+    "aspects": [],
+    "paragonNodes": [],
+    "glyphs": [],
+    "runes": [],
+    "formulas": [
+      {
+        "id": "formula:1663210:strict-damage",
+        "assetId": 1663210,
+        "expression": "1360",
+        "role": "damage",
+        "inputs": [],
+        "conditionIds": [],
+        "evidence": {
+          "source": "reviewed-dps-model",
+          "assetId": 1663210,
+          "file": "outputs/diablo4-reviewed-dps-model/reviewed-dps-model.json",
+          "offset": null,
+          "field": "strict.formulas.damage",
+          "confidence": "high",
+          "notes": []
+        }
+      }
+    ],
+    "conditions": [
+      {
+        "id": "condition:sf33-soilruler-b",
+        "name": "Mod.SoilRuler_B active",
+        "kind": "toggle",
+        "defaultState": false,
+        "evidence": {
+          "source": "conditional-candidate-context",
+          "assetId": 1663210,
+          "file": "outputs/diablo4-conditional-candidate-context/conditional-candidate-context.json",
+          "offset": 17444,
+          "field": "triggerCandidate",
+          "confidence": "medium-high",
+          "notes": ["Trigger candidate remains blocked for real DPS."]
+        }
+      }
+    ]
+  },
+  "relations": [
+    {
+      "from": "skill:spiritborn:centipede-ultimate",
+      "to": "formula:1663210:strict-damage",
+      "kind": "modifies",
+      "evidence": {
+        "source": "example",
+        "assetId": 1663210,
+        "file": "work/diablo4-data-exporter/schema/target-dataset.example.json",
+        "offset": null,
+        "field": "relations[0]",
+        "confidence": "medium",
+        "notes": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.diablo4-build-optimizer/schemas/target-dataset.schema.json",
+  "title": "Diablo IV Optimizer Target Dataset",
+  "type": "object",
+  "required": ["schemaVersion", "exportedAt", "source", "entities", "relations"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "exportedAt": { "type": "string" },
+    "source": {
+      "type": "object",
+      "required": ["game", "build", "extractor"],
+      "properties": {
+        "game": { "const": "diablo4" },
+        "build": { "type": "string" },
+        "season": { "type": ["string", "number", "null"] },
+        "extractor": { "type": "string" },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "entities": {
+      "type": "object",
+      "required": ["skills", "items", "affixes", "aspects", "paragonNodes", "glyphs", "runes", "formulas", "conditions"],
+      "properties": {
+        "skills": { "type": "array", "items": { "$ref": "#/$defs/skill" } },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/item" } },
+        "affixes": { "type": "array", "items": { "$ref": "#/$defs/affix" } },
+        "aspects": { "type": "array", "items": { "$ref": "#/$defs/aspect" } },
+        "paragonNodes": { "type": "array", "items": { "$ref": "#/$defs/paragonNode" } },
+        "glyphs": { "type": "array", "items": { "$ref": "#/$defs/glyph" } },
+        "runes": { "type": "array", "items": { "$ref": "#/$defs/rune" } },
+        "formulas": { "type": "array", "items": { "$ref": "#/$defs/formula" } },
+        "conditions": { "type": "array", "items": { "$ref": "#/$defs/condition" } }
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/relation" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "minLength": 1 },
+    "classTag": {
+      "enum": ["barbarian", "druid", "necromancer", "rogue", "sorcerer", "spiritborn", "generic", "unknown"]
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["source", "confidence"],
+      "properties": {
+        "source": { "type": "string" },
+        "assetId": { "type": ["number", "string", "null"] },
+        "file": { "type": ["string", "null"] },
+        "offset": { "type": ["number", "null"] },
+        "field": { "type": ["string", "null"] },
+        "confidence": { "enum": ["low", "medium", "medium-high", "high", "confirmed"] },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "modifier": {
+      "type": "object",
+      "required": ["id", "stat", "operation", "value"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "stat": { "type": "string" },
+        "operation": { "enum": ["add", "multiply", "override", "cap", "proc", "resource", "unknown"] },
+        "value": { "type": ["number", "string", "null"] },
+        "formulaId": { "type": ["string", "null"] },
+        "conditionIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "uptime": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "bucket": { "type": ["string", "null"] },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "skill": {
+      "type": "object",
+      "required": ["id", "name", "class", "kind", "maxPoints", "modifiers", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "assetId": { "type": ["number", "string", "null"] },
+        "name": { "type": "string" },
+        "class": { "$ref": "#/$defs/classTag" },
+        "kind": { "enum": ["basic", "core", "defensive", "conjuration", "companion", "subterfuge", "macabre", "ultimate", "passive", "keyPassive", "unknown"] },
+        "maxPoints": { "type": "number", "minimum": 0 },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "cost": { "type": ["object", "null"] },
+        "cooldownSeconds": { "type": ["number", "null"] },
+        "modifiers": { "type": "array", "items": { "$ref": "#/$defs/modifier" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "name", "slot", "rarity", "class", "affixIds", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "assetId": { "type": ["number", "string", "null"] },
+        "name": { "type": "string" },
+        "slot": { "type": "string" },
+        "rarity": { "enum": ["normal", "magic", "rare", "legendary", "unique", "mythic", "unknown"] },
+        "class": { "$ref": "#/$defs/classTag" },
+        "affixIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "aspectId": { "type": ["string", "null"] },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "affix": {
+      "type": "object",
+      "required": ["id", "name", "modifiers", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "assetId": { "type": ["number", "string", "null"] },
+        "name": { "type": "string" },
+        "rollRange": { "type": ["object", "null"] },
+        "modifiers": { "type": "array", "items": { "$ref": "#/$defs/modifier" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "aspect": {
+      "type": "object",
+      "required": ["id", "name", "class", "allowedSlots", "modifiers", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "assetId": { "type": ["number", "string", "null"] },
+        "name": { "type": "string" },
+        "class": { "$ref": "#/$defs/classTag" },
+        "allowedSlots": { "type": "array", "items": { "type": "string" } },
+        "modifiers": { "type": "array", "items": { "$ref": "#/$defs/modifier" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "paragonNode": {
+      "type": "object",
+      "required": ["id", "name", "class", "boardId", "kind", "modifiers", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "class": { "$ref": "#/$defs/classTag" },
+        "boardId": { "type": "string" },
+        "kind": { "enum": ["normal", "magic", "rare", "legendary", "gate", "glyphSocket", "unknown"] },
+        "position": { "type": ["object", "null"] },
+        "modifiers": { "type": "array", "items": { "$ref": "#/$defs/modifier" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "glyph": {
+      "type": "object",
+      "required": ["id", "name", "class", "radiusByLevel", "modifiers", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "class": { "$ref": "#/$defs/classTag" },
+        "radiusByLevel": { "type": "object" },
+        "modifiers": { "type": "array", "items": { "$ref": "#/$defs/modifier" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "rune": {
+      "type": "object",
+      "required": ["id", "name", "kind", "modifiers", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "kind": { "enum": ["ritual", "invocation", "unknown"] },
+        "offering": { "type": ["number", "null"] },
+        "modifiers": { "type": "array", "items": { "$ref": "#/$defs/modifier" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "formula": {
+      "type": "object",
+      "required": ["id", "expression", "role", "inputs", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "assetId": { "type": ["number", "string", "null"] },
+        "expression": { "type": "string" },
+        "role": { "enum": ["damage", "multiplier", "uptime", "condition", "resource", "display", "unknown"] },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "conditionIds": { "type": "array", "items": { "$ref": "#/$defs/id" } },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "required": ["id", "name", "kind", "defaultState", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string" },
+        "kind": { "enum": ["toggle", "uptime", "threshold", "enemyState", "playerState", "skillState", "proc", "unknown"] },
+        "defaultState": { "type": ["boolean", "number", "string", "null"] },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "required": ["from", "to", "kind", "evidence"],
+      "properties": {
+        "from": { "$ref": "#/$defs/id" },
+        "to": { "$ref": "#/$defs/id" },
+        "kind": { "enum": ["grants", "modifies", "requires", "scales", "triggers", "belongsTo", "conflictsWith", "unknown"] },
+        "evidence": { "$ref": "#/$defs/evidence" }
+      }
+    }
+  }
+}

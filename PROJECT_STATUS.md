@@ -1,0 +1,648 @@
+# Diablo IV Build Optimizer - Statut projet
+
+## Objectif
+
+Construire un outil local puis web capable d'extraire les donnees Diablo IV depuis les fichiers du jeu, de les normaliser, puis d'optimiser automatiquement les builds de heros avec calcul DPS, competences, parangon, objets, affixes, aspects, glyphes, runes et conditions.
+
+## Etat actuel
+
+Migration vers le Projet `Diablo 4` effectuee le 2026-06-30 depuis :
+
+- `C:\Users\FlowUP\Documents\Codex\2026-06-29\j-ai-un-projet-de-cr`
+
+Un prototype local existe deja dans ce Projet.
+
+Il contient :
+
+- un exporteur maison dans `work/diablo4-data-exporter`
+- un schema cible dans `work/diablo4-data-exporter/schema`
+- des datasets generes dans `outputs`
+- un site statique dans `site`
+- un rapport de suivi dans `outputs/rapport-outil-exportateur-diablo4.md`
+
+Le site sait actuellement :
+
+- charger `outputs/diablo4-optimizer-dataset/optimizer-dataset.json`
+- charger `outputs/diablo4-target-dataset/target-dataset.json`
+- afficher les entites cible normalisees
+- inspecter les modifiers, preuves et warnings
+- classer les assets par DPS strict, DPS actif ou gain candidat
+- composer un build courant
+- sauvegarder le build localement dans le navigateur
+- exporter/importer le build JSON
+- calculer une composition prototype depuis les modifiers cible
+- afficher une qualite de modele : fiable, partiel, bloque, vide
+- afficher les blocages techniques par asset
+- generer une composition cible par CLI avec `compose-target-build`
+- generer un diagnostic de resolution des blocages avec `audit-target-blockers`
+- afficher le diagnostic de blocages dans le site
+
+Verification migration :
+
+- fichiers de pilotage copies : `PROJECT_STATUS.md`, `PROJECT_INSTRUCTIONS.md`, `PROJECT_THREADS.md`
+- code exporteur copie dans `work/diablo4-data-exporter`
+- site copie dans `site`
+- sorties et datasets copies dans `outputs`
+- syntaxe `site/app.js` et `site/server.js` valide avec le Node embarque Codex
+- serveur local verifie sur `http://127.0.0.1:4173/site/`
+- ressources verifiees en HTTP 200 : page, JavaScript, CSS, dataset prototype, dataset cible
+- composition CLI du build `1461593` + `1663210` verifiee : strict `1276410`, what-if `1325370`, delta `48960`, qualite `partiel`, score `60 / 100`
+- diagnostic `1663210` verifie : `3` blocages actifs, `0` resolu, promotion DPS fiable impossible
+- inspection field-record `1663210` ajoutee : les constantes `0.3` et `34` appartiennent au bytecode suffixe de la formule precedente ; le hash bonus est adjacent mais l'ownership `SF_32` reste non prouve
+- inspection record-segments `1663210` ajoutee : le cluster `PowerTag -> formule bytecode -> hash bonus -> asset id` est confirme avec confiance `high`, mais sans ownership direct du champ bonus
+- inspection record-headers `1663210` ajoutee : les headers prouvent la chaine `PowerTag -> formule -> bytecode -> hash bonus -> asset id`, mais l'ownership du champ reste `not-proven`
+- comparaison header-patterns `1663210` ajoutee : `21` transitions pertinentes detectees, mais seulement `1` couple formule/hash et `1` hash/asset dans ce payload ; extension a d'autres payloads requise
+- comparaison croisee `1663210` + `2302974` ajoutee : `33` signatures, `0` signature exacte repetee ; le motif `hash -> asset courant` existe dans les deux payloads, mais le motif `formule -> hash bytecode` n'est encore prouve que dans `1663210`
+- plan de payloads header-patterns ajoute : `8` candidats, `2` deja decodes, `6` a decoder ; prochain payload prioritaire `assetId 1953817`, `data.007` offset `8270942`
+- payloads supplementaires decodes et compares : `1953817`, `1461593`, `493422`, `1882772`
+- comparaison croisee etendue : `6` rapports, `51` signatures, `0` signature exacte repetee ; familles repetees detectees, dont `hash-to-current-asset` dans `1663210`, `2302974`, `1953817`, `493422`
+- comparaison de layouts normalises ajoutee : `hash-to-current-asset` possede une position `asset-id-raw` stable dans `3/4` cas, mais l'ownership `SF_32` reste `not-proven`
+- deux payloads supplementaires decodes et compares : `2474146` et `1408295`
+- offsets BLTE corriges pendant le decodage : `2474146` utilise `data.043` offset `10278255` au lieu de `10279789`; `1408295` utilise `data.042` offset `19293952` au lieu de `19293246`
+- plan de payloads header-patterns initialement considere ferme : `8` candidats, `8` fichiers decodes trouves, mais ce statut a ete corrige apres verification de contenu
+- comparaison croisee verifiee : `5` rapports utilisables, `51` signatures, `0` signature exacte repetee
+- comparaison verifiee des layouts normalises : `5` rapports utilisables, `5` familles, `51` transitions ; `hash-to-current-asset` reste stable dans `4` rapports avec position `asset-id-raw` recurrente, mais `formula-to-hash-bytecode` reste represente seulement par `1663210`
+- minage local des couples formule/hash ajoute : `5` candidats visibles dans `deadbeef-string-search`, `3` couples formule/hash forts, mais `1` seul valide par headers (`1663210`)
+- nouveau rapport genere : `outputs/diablo4-formula-hash-candidates/formula-hash-candidates.json`
+- correction du plan de payloads : un payload decode n'est plus considere utilisable s'il ne contient pas les chaines attendues du rapport source
+- plan header-patterns rouvert : `8` candidats, `5` decodes utilisables, `3` a redecode/valider (`1461593`, `2474146`, `1408295`)
+- cas `1461593` clarifie : les chaines gameplay sont associees a l'offset source `43688625`, mais le payload compare `43689641` ne contient pas `SF_4 * Table(34, 3) * 100` ni `Affix_Flat_Value_1#Helm_Unique_Necro_100`
+- verification source locale `1461593` : l'offset `43688625` n'est pas un BLTE direct, la cle locale historique est absente du `data.045` actuel, et un scan complet de `data.045` ne retrouve pas les chaines cible ; cette preuve est donc stale pour l'installation courante
+- nouveau payload courant ajoute : `assetId 309070`, `data.006`, offset `194851`, contenant `SF_8 * Table(34,3) * 100` -> `Min(1.5, 1 + (AoE_Size_Bonus_Per_Power#Druid_Maul / 2))`
+- `309070` valide une nouvelle transition `formula-to-hash-bytecode` et deux transitions `hash-to-current-asset`
+- comparaison croisee regeneree : `6` rapports utilisables, `61` signatures, `0` signature exacte repetee ; `formula-to-hash-bytecode` est maintenant represente par `1663210` et `309070`
+- comparaison normalisee regeneree : `6` rapports, `5` familles, `61` transitions ; le layout hash/asset n'est pas assez stable pour promouvoir, mais la prochaine action peut maintenant comparer les deux layouts `formula-to-hash`
+- rapport focus formule/hash ajoute : `outputs/diablo4-formula-hash-layout-focus/formula-hash-layout-focus.json`
+- ancres communes detectees : `formula-to-hash` contient `float, float, one, op:add, op:multiply`; `hash-to-current-asset` contient `ref:0, raw, asset-id-raw`
+- diagnostic blocages enrichi avec `formulaHashLayoutFocusAssessment` ; prochaine action du blocage champ : parser autour du noyau `one/add/multiply` et comparer le suffixe hash adjacent
+- rapport frontieres formule/hash ajoute : `outputs/diablo4-formula-hash-field-boundaries/formula-hash-field-boundaries.json`
+- frontieres separees : noyau opcode formule trouve dans `2/2` transitions `formula-to-hash`, ancre hash/asset trouvee dans `6/6` transitions `hash-to-current-asset`
+- diagnostic blocages enrichi avec `formulaHashFieldBoundaryAssessment` ; assessment `formula-bytecode-and-hash-asset-zones-linked`, confiance `medium-high`, ownership `not-proven`, promotion `false`
+- comparaison prelude/header suffixe ajoutee : `outputs/diablo4-hash-suffix-prelude-header-comparison/hash-suffix-prelude-header-comparison.json`
+- les `3` fenetres de prelude suffixe matchent exactement une transition header `hash-to-current-asset`, mais sans nom de champ ; assessment `hash-suffix-preludes-match-header-transitions-without-field-name`, confiance `medium-high`, ownership `not-proven`, promotion `false`
+- audit `target-blocker-resolution` relance avec cette preuve : `3` blocages actifs, `0` resolu, `promotionReady: false`
+- prochaine action du blocage champ : ajouter des payloads comparables contenant `Bonus_Percent_Per_Power` puis relancer la comparaison prelude/header
+- support des selecteurs high-bit ajoute dans l'audit binaire suffixe : `2147483816` est normalise en `selector:168` tout en conservant `encodedValue`
+- `assetId 2302974` est maintenant integre a `hash-suffix-binary-context-comparison` ; la couverture passe a `6` assets bonus, mais son shape reste divergent/unknown et ne produit aucun lien d'offset promouvable
+- audit cible relance apres cette extension : `3` blocages actifs, `0` resolu, `promotionReady: false`
+- comparaison directe des shapes header suffixe ajoutee : `outputs/diablo4-hash-suffix-header-shape-comparison/hash-suffix-header-shape-comparison.json`
+- les headers donnent `10` transitions, `7` groupes, `1` seul compact `949/12337/10`, `4` selecteurs high-bit et `6` groupes divergents ; assessment `hash-suffix-header-shapes-compact-local-and-divergent`, promotion `false`
+- prochaine action du blocage champ : trouver un second header compact `949/12337/10` ou une table nommee avant toute promotion DPS
+- recherche binaire brute du compact suffixe ajoutee : `outputs/diablo4-hash-suffix-compact-pattern-search/hash-suffix-compact-pattern-search.json`
+- `25` binaires decodes scannes, `1` seul hit exact compact `949/asset/0/0/12337/6/10`, `19` hits partiels `949`/`12337` dans `9` fichiers ; assessment `hash-suffix-compact-pattern-local-only`, promotion `false`
+- `1953817` contient bien `949` et `12337`, mais pas dans le shape compact exact ; cela confirme une divergence et bloque la promotion par analogie
+- prochaine action du blocage champ : chercher une table nommee pour `949/12337` ou decoder davantage de payloads `Bonus_Percent_Per_Power`
+- cartographie post-transition ajoutee : les zones lient string formule -> bytecode -> hash cible et hash -> suffixe asset -> string suivante, avec `formulaZonesLinked: true` et `hashZonesLinked: true`
+- comparaison suffixe hash / definitions ajoutee : `outputs/diablo4-hash-suffix-definition-links/hash-suffix-definition-links.json`
+- assessment suffixe : `hash-suffix-current-asset-context-only`, confiance `medium-low`, ownership `not-proven`, promotion `false`
+- pour `1663210`, le suffixe confirme `asset-id-raw = 1663210`, mais `raw 949`, `small-table-or-string-id 12337` et `float 10` restent des valeurs candidates sans definition externe exacte
+- analyse des motifs de valeurs du suffixe ajoutee : `outputs/diablo4-hash-suffix-value-patterns/hash-suffix-value-patterns.json`
+- assessment motifs suffixe : `hash-suffix-patterns-asset-context-with-local-candidates`, confiance `low`, ownership `not-proven`, promotion `false`
+- apres filtrage des operations/formules generiques, aucune constante candidate ne se repete entre assets ; pour `1663210`, `949`, `12337` et `10` restent locaux et non expliques
+- diagnostic blocages enrichi avec `hashSuffixValuePatternAssessment` ; le site affiche maintenant une ligne `Motifs suffixe`
+- analyse semantique candidate du suffixe ajoutee : `outputs/diablo4-hash-suffix-candidate-semantics/hash-suffix-candidate-semantics.json`
+- assessment semantique suffixe : `hash-suffix-semantic-triplets-local-only`, confiance `low`, ownership `not-proven`, promotion `false`
+- pour `1663210`, le motif est maintenant decrit comme un triplet candidat `selector 949 -> asset 1663210 -> metadata 12337 / 10`, mais aucun dictionnaire de selecteurs ou metadata ids n'est encore prouve
+- diagnostic blocages enrichi avec `hashSuffixCandidateSemanticAssessment` ; le site affiche maintenant une ligne `Semantique suffixe`
+- minage local du dictionnaire suffixe ajoute : `outputs/diablo4-hash-suffix-dictionary-mining/hash-suffix-dictionary-mining.json`
+- assessment minage dictionnaire : `hash-suffix-dictionary-repeated-candidates-found`, confiance `low`, ownership `not-proven`, promotion `false`
+- le minage retrouve maintenant `19` ancres suffixe, dont `9` probables, apres scan large des `.decoded.bin` deja presents dans `outputs`
+- `selector 949` se repete sur deux cibles `Bonus_Percent_Per_Power` : `Spiritborn_Centipede_Ultimate` et `Spiritborn_Feather_Spawn`
+- `metadata 12337 / 10` se repete sur `1663210` et sur `1882772` via `Affix_Value_1#S05_BSK_Generic_001 / 100`
+- `selector 1126 -> assetLike 1882770 -> metadata 12337 / 10` est une nouvelle ancre utile, mais le libelle externe du dictionnaire reste inconnu
+- `selector 991 -> metadata 12343 / 70` reste observe sur `493422`
+- diagnostic blocages enrichi avec `hashSuffixDictionaryMiningAssessment` ; le site affiche maintenant une ligne `Dico suffixe`
+- synthese famille suffixe ajoutee : `outputs/diablo4-hash-suffix-family-evidence/hash-suffix-family-evidence.json`
+- assessment famille suffixe : `selector-family-and-metadata-repeat-found`, confiance `medium-low`, ownership `not-proven`, promotion `false`
+- hypothese forte mais non promue : `selector 949` est candidat pour la famille `Bonus_Percent_Per_Power`, observe sur `1663210` et `1953817`
+- `metadata 12337 / 10` est repetee sur `1663210` et `1882772`, mais aucun libelle externe ne nomme encore ces ids
+- diagnostic blocages enrichi avec `hashSuffixFamilyEvidenceAssessment` ; le site affiche maintenant une ligne `Famille suffixe`
+- audit de source nommee ajoute : `outputs/diablo4-hash-suffix-source-name-audit/hash-suffix-source-name-audit.json`
+- assessment source suffixe : `generated-source-name-like-contexts-only`, confiance `medium`, ownership `not-proven`, promotion `false`
+- l'audit trouve `115` fichiers JSON avec `949`, `12337` ou `Bonus_Percent_Per_Power`, dont `33` avec numerique + famille, mais seulement `1` contexte nomme et il vient d'un artefact genere
+- diagnostic blocages enrichi avec `hashSuffixSourceNameAssessment` ; le site affiche maintenant une ligne `Source suffixe`
+- prochaine action prioritaire : chercher ou decoder une table/dictionnaire source des selecteurs de suffixe ; conserver `949/12337` comme preuve locale non promotable
+- audit binaire des sources suffixe ajoute : `outputs/diablo4-hash-suffix-binary-source-audit/hash-suffix-binary-source-audit.json`
+- assessment binaire suffixe : `binary-family-contexts-without-dictionary-name`, confiance `medium`, ownership `not-proven`, promotion `false`
+- scan binaire : `22` fichiers `.decoded.bin`, `6` fichiers avec hits, `14` hits numeriques, `5` hits proches de la famille, `0` hit dictionnaire nomme
+- le site affiche maintenant une ligne `Binaire suffixe`
+- prochaine action binaire : comparer les contextes autour de `949/12337` avec davantage de cibles `Bonus_Percent_Per_Power` avant toute promotion DPS
+- comparaison binaire des contextes suffixe ajoutee : `outputs/diablo4-hash-suffix-binary-context-comparison/hash-suffix-binary-context-comparison.json`
+- assessment comparaison suffixe : `binary-context-selector-repeats-but-layout-diverges`, confiance `medium`, ownership `not-proven`, promotion `false`
+- comparaison : `2` assets `Bonus_Percent_Per_Power`, `2` signatures selecteur, `3` signatures metadata, `1` triplet compact seulement
+- `1663210` : layout compact `949 -> 1663210 -> 12337 / opcode 6 / float 10`
+- `1953817` : `949 -> asset-like 1975049`, mais `12337 / 10` est a `-240` octets du selecteur, pas dans le meme suffixe compact
+- le site affiche maintenant une ligne `Comparaison suffixe`
+- prochaine action : decoder ou identifier d'autres cibles `Bonus_Percent_Per_Power` afin de confirmer si le suffixe `949` porte toujours un asset-like, puis parser le champ avant promotion DPS
+- couverture echantillon `Bonus_Percent_Per_Power` ajoutee : `outputs/diablo4-bonus-percent-sample-coverage/bonus-percent-sample-coverage.json`
+- assessment couverture : `local-bonus-percent-sample-covered-but-layout-diverges`, confiance `medium`, ownership `not-proven`, promotion `false`
+- le graphe local contient `4` refs `Percent_Per_Power`/assimilees, dont `2` cibles exactes `Bonus_Percent_Per_Power`
+- les `2` cibles exactes `Bonus_Percent_Per_Power` connues localement sont deja comparees : `1663210` et `1953817`
+- aucun asset `Bonus_Percent_Per_Power` restant a decoder dans le plan local ; il faut elargir le scan externe pour trouver d'autres cibles
+- scan externe elargi `Bonus_Percent_Per_Power` lance sur `205` fichiers data : `outputs/diablo4-bonus-percent-external-scan-all/external-target-search.json`
+- nouveaux assets trouves et decodes : `2058843`, `1489641`, `202484`
+- nouveaux contextes : `Bonus_Percent_Per_Power#Paragon_Spiritborn_Legendary_007`, `Bonus_Percent_Per_Power#Spiritborn_Eagle_Focus`, `Bonus_Percent_Per_Power#Barbarian_Upheaval`
+- minage suffixe enrichi : `26` ancres, `12` selecteurs, `16` ancres probables
+- nouveaux selecteurs repetes :
+  - `selector 994` sur `Bonus_Percent_Per_Power#Spiritborn_Eagle_Focus` et `Bonus_Percent_Per_Power#Barbarian_Upheaval`
+  - `selector 1037` sur les expressions `AoE_Size_Bonus_Per_Power`
+  - `selector 168` sur `Chance_For_Double_Damage_Per_Power`
+- `selector 997` observe sur `Bonus_Percent_Per_Power#Paragon_Spiritborn_Legendary_007` avec `metadata 12337 / 10`
+- comparaison binaire enrichie : `5` assets, `4` signatures selecteur, `3` signatures metadata, toujours `promotionReady false`
+- conclusion revisee : `949` n'est pas le selecteur universel de toute la famille ; plusieurs sous-layouts existent
+- classification des sous-layouts suffixe ajoutee : `outputs/diablo4-hash-suffix-sublayout-classification/hash-suffix-sublayout-classification.json`
+- assessment classification : `hash-suffix-sublayouts-classified-divergent`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat classification : `12` selecteurs, `2` metadata ids, `6` groupes
+- groupes utiles : `mixed-compact-metadata-and-noncompact-selector` (`949`), `bonus-percent-selector-no-metadata-scale` (`994`), `mined-metadata-scale-without-binary-selector-hit` (`997`), `formula-wrapper-or-hash-reference-selector` (`1037`), `chance-per-power-selector` (`168`)
+- decision revisee : parser chaque sous-layout separement avant toute attribution de champ DPS ; `949` reste candidat pour `1663210`, mais son layout mixte interdit la promotion fiable
+- parser candidat des champs suffixe ajoute : `outputs/diablo4-hash-suffix-sublayout-fields/hash-suffix-sublayout-fields.json`
+- assessment champs suffixe : `hash-suffix-sublayout-fields-built-blocked`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat champs suffixe : `12` champs selecteurs, `2` champs metadata, `14` champs bloques, `0` promouvable
+- `selector:949` porte un candidat bloque `asset 1663210 -> metadata 12337 -> opcode 6 -> float 10`, mais seulement dans le layout compact de `1663210`
+- diagnostic blocages regenere avec les champs suffixe ; prochaine action du blocage champ : coder les decodeurs binaires par `fieldShape`, puis tester chaque classe contre ses assets avant promotion
+- decodeurs de shapes suffixe ajoutes : `outputs/diablo4-hash-suffix-field-shape-decoders/hash-suffix-field-shape-decoders.json`
+- assessment decodeurs suffixe : `hash-suffix-field-shape-decoders-built-blocked`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat decodeurs : `12` champs decodes, `2` metadata decodees, `5` decodeurs de shape, `14` sorties bloquees, `0` promouvable
+- decodeurs crees : `compact-selector-asset-metadata-scale-decoder`, `bonus-selector-without-local-scale-decoder`, `mined-metadata-linked-selector-decoder`, `formula-wrapper-reference-decoder`, `unknown-suffix-shape-decoder`
+- `selector:949` decode `scale 10` comme `blocked-compact-scale-10-candidate`; blocages conserves : `layout-variant-split-required`, `noncompact-context-present`, `uptime-not-proven`
+- diagnostic blocages regenere avec les decodeurs suffixe ; prochaine action du blocage champ : comparer les sorties decodees aux offsets binaires originaux et rattacher chaque decoder a un champ record prouve
+- liens offsets des sorties decodees ajoutes : `outputs/diablo4-hash-suffix-decoded-offset-links/hash-suffix-decoded-offset-links.json`
+- assessment liens offsets : `hash-suffix-decoded-offsets-linked-blocked`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat liens offsets : `12` champs lies, `2` metadata liees, `11` liens offsets, `1` lien compact, `0` promouvable
+- lien compact confirme pour `selector:949` sur `1663210` : `selectorOffset 19012`, `metadataOffset 19028`, distance `16`, scale candidate `10`
+- liens `selector:994` confirmes sur `202484` offset `10948` et `1489641` offset `11576`, mais sans scale locale
+- diagnostic blocages regenere avec les liens offsets ; prochaine action du blocage champ : construire une inspection de record autour des offsets rattaches pour prouver bornes et ownership
+- inspection des records autour des offsets ajoutee : `outputs/diablo4-hash-suffix-offset-record-inspection/hash-suffix-offset-record-inspection.json`
+- assessment inspection records : `hash-suffix-offset-records-inspected-blocked`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat inspection records : `11` liens record, `1` lien dans un suffixe record, `0` lien avec ownership prouve
+- pour `selector:949`, `selectorOffset 19012` et `metadataOffset 19028` sont tous deux dans le suffixe du record `Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate` (`recordOffset 18948`, `recordEndOffset 19000`)
+- conclusion record : placement local prouve, mais ownership champ DPS non prouve ; statut `suffix-local-not-owner-proven`
+- diagnostic blocages regenere avec inspection records ; prochaine action du blocage champ : comparer les bornes du suffixe record avec d'autres assets et identifier un header/longueur de champ stable avant promotion
+- inspections field-records ajoutees pour `1953817`, `202484`, `1489641`, `2058843`
+- comparaison multi-assets des bornes suffixe ajoutee : `outputs/diablo4-hash-suffix-record-boundary-comparison/hash-suffix-record-boundary-comparison.json`
+- assessment bornes suffixe : `hash-suffix-record-boundaries-repeat-but-not-owned`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat bornes suffixe : `7` lignes selecteur, `4` lignes metadata, `9` groupes de bornes, `5` lignes suffixe, `2` groupes repetes, `0` ownership prouve
+- motif repete utile : `selector:994` sur `202484` et `1489641`, placement `suffix-of-current-record`, delta `+11`, signature suffixe `ref:0|raw:small|raw:asset-like`, mais scale locale absente
+- motif compact `selector:949` reste local a `1663210` : delta selecteur `+12`, metadata `+28`, distance `16`, signature `ref:0|raw:small|raw:asset-like|raw:metadata-like|f:10`
+- diagnostic blocages regenere avec comparaison des bornes ; prochaine action du blocage champ : inspecter les octets precedant les suffixes localises pour chercher un header/length stable
+- inspection des preludes de bornes suffixe ajoutee : `outputs/diablo4-hash-suffix-boundary-preludes/hash-suffix-boundary-preludes.json`
+- assessment preludes suffixe : `hash-suffix-boundary-preludes-repeat-without-ownership`, confiance `medium`, ownership `not-proven`, promotion `false`
+- resultat preludes : `3` fenetres, `3` lisibles, `2` groupes, `1` groupe repete
+- prelude repete `selector:994` : delta `+11`, entre fin de record et selecteur `small:5|zero`, observe sur `202484` et `1489641`
+- prelude compact `selector:949` : delta `+12`, meme `small:5|zero` entre record et selecteur, mais suffixe compact plus long avec `metadata 12337` et `scale 10`
+- diagnostic blocages regenere avec preludes suffixe ; prochaine action du blocage champ : comparer les mots de prelude avec les transitions header-patterns pour nommer le champ ou elargir l'echantillon
+- rapport preludes header ajoute : `outputs/diablo4-formula-hash-header-preludes/formula-hash-header-preludes.json`
+- fenetre prelude elargie a `128` octets et lue sur `8/8` transitions ; petits marqueurs locaux visibles, mais aucun marqueur stable de compteur/taille de champ detecte
+- comparaison des sequences locales de marqueurs ajoutee au rapport prelude ; assessment `header-prelude-motif-windows-classified`, confiance `low`, ownership `not-proven`, promotion `false`
+- motif `formula-to-hash` repete entre `1663210` et `309070` : `small-counter-or-length, small-counter-or-length, asset-like-id`, classe `before-from-string` dans les deux payloads
+- comparaison prologue/string ajoutee ; assessment `header-prelude-prologue-before-string-classified`, confiance `medium-low`, ownership `not-proven`, promotion `false`
+- pour les deux transitions `formula-to-hash`, la zone `fromOffset -> transition` est le texte ASCII de la formule (`printableRatio 1`) et la zone apres string avant transition vaut `0` octet
+- diagnostic de blocages enrichi avec les preuves `field-records`, `record-segments`, `record-headers`, `record-header-patterns`, `cross-header-patterns` et `normalized-header-layouts`
+- audit table nommee `949/12337` ajoute : `outputs/diablo4-hash-suffix-named-table-audit/hash-suffix-named-table-audit.json`
+- contextes exacts `949/12337` trouves dans les artefacts JSON : `1247`
+- candidats independants de table/source nommee : `0`
+- contextes generes par nos rapports : `914`
+- bruit numerique classe : `253`
+- assessment : `hash-suffix-named-table-not-found-generated-only`, confiance `medium-high`, ownership `not-proven`, promotion DPS fiable `false`
+- diagnostic de blocages regenere avec `hashSuffixNamedTableAssessment` ; les blocages restent `3/3` actifs, `0` resolu, `promotionReady: false`
+- le site affiche maintenant une ligne `Table suffixe`
+- redecodage de la file header-patterns tente sur `1461593`, `2474146`, `1408295` avec les offsets recommandes du plan ; les trois offsets retournent `Not a BLTE payload`
+- trace de fermeture de piste : `outputs/diablo4-record-header-redecode-attempts/record-header-redecode-attempts.json`
+- assessment redecodage : `record-header-redecode-offsets-not-blte` ; prochaine action : rechercher des BLTE voisins via catalogue/index plutot que reutiliser ces offsets
+- catalogues BLTE cibles ajoutes pour `data.042`, `data.043`, `data.045` : `outputs/diablo4-blte-catalog-target-files/`
+- scan des `20` voisins BLTE les plus proches pour `1461593`, `2474146`, `1408295` ajoute : `outputs/diablo4-record-header-neighbor-scan/record-header-neighbor-scan.json`
+- resultat scan voisins : `60` payloads voisins decodes, `0` chaine attendue retrouvee, `0` hit exploitable
+- conclusion : les payloads attendus ne sont pas dans les voisins BLTE immediats ; il faut revenir a la liaison index/source ou a de nouveaux assets `Bonus_Percent_Per_Power`
+- scan source frais sur `data.042`, `data.043`, `data.045` avec les termes mismatches : `0` matching entry, `0` target group
+- plan header reconstruit depuis le scan frais : `0` candidat, `0` besoin decode
+- audit fraicheur source ajoute : `outputs/diablo4-record-header-source-freshness-audit/record-header-source-freshness-audit.json`
+- assessment : `record-header-source-links-stale`, `3` offsets anciens non reconfirmes, `0` hit voisin, promotion `false`
+- `audit-target-blockers` accepte maintenant `--record-header-source-freshness-audit` et remonte cette preuve dans `evidenceSummary.recordHeaderSourceFreshnessAssessment`
+- la prochaine action du blocage champ devient : `Rebuild external target search with current BLTE/catalog conventions before reusing these mismatch offsets.`
+- le site affiche maintenant une ligne `Source header` avec `stale`, `fresh` et `voisins`
+- `search-external-targets` accepte maintenant `--decoded-types`, ce qui permet de scanner `deadbeef-binary` et `unknown-binary` sans changer le comportement par defaut
+- scan elargi `Bonus_Percent_Per_Power` relance en `7` tranches sur `205` fichiers avec `--decoded-types deadbeef-binary,unknown-binary`
+- scan elargi fusionne : `outputs/diablo4-bonus-percent-external-scan-expanded/external-target-search-merged/external-target-search-merged.json`
+- couverture elargie : `7` matches `Bonus_Percent_Per_Power`, soit `+1` asset par rapport au scan precedent
+- nouvel asset trouve et decode : `199516`, `data.168`, offset `16167790`, cible `Bonus_Percent_Per_Power#Barbarian_Kick`
+- inspections `199516` ajoutees : payload, field-records et header-patterns ; `26` transitions pertinentes, `2` groupes `hash-to-current-asset`, promotion `false`
+- plan payload elargi : `outputs/diablo4-bonus-percent-expanded-payload-plan/record-header-payload-plan.json`, `7` candidats, `7` deja decodes, `0` a decoder
+- comparaison header suffixe regeneree avec `7` rapports : `10` transitions, `5` groupes, compact `949/12337/10` toujours unique a `1663210`, `4` groupes divergents
+- `199516` renforce les familles divergentes `selector:168` et `selector:994`, mais ne replique pas le compact `selector:949`
+- recherche compact regeneree : `86` binaires scannes, `1` hit exact compact, `25` hits partiels, assessment `hash-suffix-compact-pattern-local-only`
+- audit table nommee regenere : `1521` contextes `949/12337`, `0` candidat independant, assessment `hash-suffix-named-table-not-found-generated-only`
+- priorite de prochaine action corrigee : la preuve stale reste visible dans `proofState`, mais l'action champ redevient la recherche de payloads/table source pour le suffixe
+- chaine suffixe profonde regeneree apres ajout de `199516`
+- minage dictionnaire suffixe : `30` ancres, `13` selecteurs, `2` metadata ids ; `selector:994` passe a `3` occurrences sur la famille `Bonus_Percent_Per_Power`
+- `selector:168` passe a `4` occurrences sur la famille `Chance_For_Double_Damage_Per_Power`, dont `199516`
+- evidence famille : `selector:949` reste a `2` occurrences et `metadata 12337` reste a `3` occurrences ; aucun libelle externe
+- audit binaire suffixe : `7` assets, `7` groupes de patterns selecteur, `3` groupes metadata, `1` seul triplet compact
+- classification sublayout : `13` selecteurs, `6` groupes, toujours divergent
+- champs/decodeurs suffixe : `13` champs decodes, `15` sorties bloquees, `0` promouvable
+- liens offsets : `12` offset links, `1` compact offset link, `0` promouvable
+- bornes/preludes : `6` suffix rows, `4` windows prelude/header matchees, ownership champ toujours `not-proven`
+- conclusion : `199516` renforce la divergence `selector:994` et `selector:168`, mais ne rapproche pas le compact `949/12337/10` de `1663210`
+- matrice selecteurs `Bonus_Percent_Per_Power` ajoutee : `outputs/diablo4-bonus-percent-selector-matrix/bonus-percent-selector-matrix.json`
+- matrice : `7` assets, `5` avec ancres suffixe, `2` groupes de selecteurs, `4` cibles directes, `1` cible enveloppee
+- `selector:949` : assets `1663210`, `1953817`
+- `selector:994` : assets `199516`, `202484`, `1489641`
+- assessment matrice : `bonus-percent-selector-matrix-divergent`, confiance `medium`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--bonus-percent-selector-matrix` et expose `bonusPercentSelectorMatrixAssessment`
+- le site affiche maintenant une ligne `Matrice bonus`
+- prochaine action champ precisee : chercher une table source nommant les selecteurs ou un second asset direct `Bonus_Percent_Per_Power` avec `selector:949` et `metadata 12337/10`
+- audit pair-a-pair `selector:949` ajoute : `outputs/diablo4-selector-949-peer-audit/selector-949-peer-audit.json`
+- comparaison `1663210` / `1953817` : `2` peers, `1` compact candidat, compact uniquement sur `1663210`
+- `1663210` porte le motif local `949 / 1663210 / 0 / 0 / 12337 / 6 / float 10`
+- `1953817` diverge : apres `949`, on lit `1975049 / 0 / 11 / 0 / 0 / -1`, avec `12337` a `-240`, `float 10` a `-232` et asset id `1953817` a `-104`
+- assessment pair-a-pair : `selector-949-peer-compact-not-repeated`, confiance `high`, ownership champ `not-proven`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--selector-949-peer-audit` et expose `selector949PeerAssessment`
+- le site affiche maintenant une ligne `Peers 949`
+- prochaine action champ precisee : trouver un second asset `selector:949` avec `metadata 12337/10` dans la meme fenetre locale, ou une table source qui explique la divergence
+- scan corpus compact `selector:949` ajoute : `outputs/diablo4-selector-949-compact-corpus/selector-949-compact-corpus-scan.json`
+- corpus scanne : `86` payloads decodes, `2` fichiers avec `selector:949`, `2` occurrences `selector:949`, `1` compact exact
+- compact exact detecte uniquement sur candidat asset `1663210`
+- assessment corpus : `selector-949-compact-local-only-in-decoded-corpus`, confiance `medium-high`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--selector-949-compact-corpus` et expose `selector949CompactCorpusAssessment`
+- le site affiche maintenant une ligne `Corpus 949`
+- prochaine action champ actuelle : chercher une table source nommee pour `selector 949` / `metadata 12337` / `scale 10`, ou decoder davantage de payloads candidats
+- scan chaines dictionnaire/table ajoute : `outputs/diablo4-decoded-dictionary-string-scan/decoded-dictionary-string-scan.json`
+- corpus decode : `86` payloads scannes, `12` fichiers avec hits, `34` hits, dont `24` chaines dictionnaire/table et `7` hits `Bonus_Percent_Per_Power`
+- aucune chaine dictionnaire/table n'est proche des valeurs surveillees `949`, `12337` ou `float 10` : `dictionaryHitsNearWatchedNumbers = 0`
+- assessment chaines : `decoded-dictionary-strings-not-near-watched-values`, confiance `medium`, ownership `not-proven`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--decoded-dictionary-string-scan` et expose `decodedDictionaryStringAssessment`
+- le site affiche maintenant une ligne `Strings dict`
+- prochaine action champ actuelle : decoder davantage de payloads candidats ou chercher une source de table hors du corpus decode actuel
+- audit des cibles `Bonus_Percent_Per_Power` sans ancre ajoute : `outputs/diablo4-unanchored-bonus-percent-audit/unanchored-bonus-percent-audit.json`
+- lignes inspectees : `2058843` et `2302974`, `2` payloads lisibles, `2` chaines cibles retrouvees
+- `2058843` : cible `Bonus_Percent_Per_Power#Paragon_Spiritborn_Legendary_007`, `12337` a `+84` et `float 10` a `+92`, mais aucun selecteur proche utile
+- `2302974` : cible `1+CC_Duration_Bonus_Percent_Per_Power#Paladin_Trinity_Cast_3`, selecteur divergent `highbit-168` a `-16`, pas de `949` ni `994`
+- assessment sans ancre : `unanchored-bonus-percent-no-extra-anchor-candidates`, confiance `medium`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--unanchored-bonus-percent-audit` et expose `unanchoredBonusPercentAssessment`
+- le site affiche maintenant une ligne `Sans ancre`
+- audit contexte `metadata 12337 / scale 10` ajoute : `outputs/diablo4-metadata-12337-context-audit/metadata-12337-context-audit.json`
+- occurrences verifiees : `3 / 3`, selecteurs `949`, `997`, `1126`, familles `direct-bonus-percent` et `affix-value-normalized`
+- `1663210` : `selector 949`, `Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate`, `12337/10`
+- `2058843` : `selector 997`, `Bonus_Percent_Per_Power#Paragon_Spiritborn_Legendary_007`, `12337/10`
+- `1882772` : `selector 1126`, `Affix_Value_1#S05_BSK_Generic_001 / 100`, `12337/10`
+- assessment metadata : `metadata-12337-scale-10-cross-selector`, confiance `medium-high`, promotion `false`
+- conclusion : `12337/10` est transversal a plusieurs selecteurs et ne prouve pas a lui seul le role du selecteur `949`
+- `audit-target-blockers` accepte maintenant `--metadata-12337-context-audit` et expose `metadata12337ContextAssessment`
+- le site affiche maintenant une ligne `Metadata 12337`
+- prochaine action champ actuelle : identifier la signification de `metadata 12337 / scale 10` separement du selecteur, puis chercher le champ proprietaire du `selector 949`
+- scan corpus `metadata 12337 / opcode 6 / float 10` ajoute : `outputs/diablo4-metadata-12337-scale-corpus/metadata-12337-scale-corpus-scan.json`
+- corpus scanne : `86` payloads decodes, `14` fichiers avec hits, `23` hits `12337/6/10`
+- formes : `20` hits sans selecteur proche, `1` compact `selector 949`, `1` compact `selector 997`, `1` extended `selector 1126`
+- selecteurs proches observes : `949`, `997`, `1126`, et `20` hits sans selecteur proche
+- assessment corpus metadata : `metadata-12337-scale-cross-selector-corpus-confirmed`, confiance `medium-high`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--metadata-12337-scale-corpus` et expose `metadata12337ScaleCorpusAssessment`
+- le site affiche maintenant une ligne `Corpus 12337`
+- prochaine action champ actuelle : interpreter `metadata 12337 / scale 10` comme une metadata transversale, puis isoler le champ proprietaire du `selector 949`
+- scan corpus `selector -> asset-like` ajoute : `outputs/diablo4-selector-asset-pair-corpus/selector-asset-pair-corpus-scan.json`
+- corpus scanne : `86` payloads decodes, `7` couples trouves, `5` groupes
+- `selector 994` : `3` couples stables `selector-asset-no-local-metadata` sur `1489641`, `199516`, `202484`
+- `selector 949` : `2` groupes, `1` compact metadata/scale sur `1663210`, `1` wrapper/variant non compact sur `1953817` via asset-like `1975049`
+- `selector 997` : `1` compact metadata/scale sur `2058843`
+- `selector 1126` : `1` tail divergent affix sur `1882772`
+- assessment pairs : `selector-949-owner-pair-mixed-layout`, confiance `medium-high`, promotion `false`
+- `audit-target-blockers` accepte maintenant `--selector-asset-pair-corpus` et expose `selectorAssetPairAssessment`
+- le site affiche maintenant une ligne `Pairs selector`
+- prochaine action champ actuelle : separer les layouts `selector->asset` compact et non compact, puis parser le champ proprietaire avant toute promotion DPS
+
+## Cas de reference
+
+Asset principal :
+
+- `assetId 1663210`
+- entite cible : `skill:1663210`
+- classe : `spiritborn`
+- DPS strict : `163200`
+- DPS what-if bloque : `212160`
+- delta : `48960`
+- statut : `blocked-for-real-dps`
+
+Blocages connus :
+
+- `field-level-parser-required`
+- `sf33-trigger-build-state-unmapped`
+- `uptime-not-proven`
+
+Build de reference :
+
+- `1461593` + `1663210`
+- total strict : `1276410`
+- total what-if : `1325370`
+- delta candidat : `48960`
+- qualite modele : `partiel`
+- score qualite : `60 / 100`
+- moteur buckets preview : `diablo4-bucket-engine-preview-v1`
+- statut moteur buckets : `strict-only-blocked-candidates`
+- parite buckets stricte : `0`
+- delta candidat fiable : `0`
+- promotion buckets : `false`
+- contraintes build : `target-build-constraints-v1`
+- validite optimiseur : `false`
+- blocage contrainte : `mixed-hero-classes` (`necromancer` + `spiritborn`)
+- slots a normaliser : `1461593`
+- audit slots aspects : `aspect-slot-readiness-v1`
+- verdict slots `1461593` : `aspect-slots-not-found`
+- audit source slots : `aspect-slot-source-evidence-v1`
+- tokens slot source locaux : `0 / 42 fichiers`
+- audit pont externe slots : `aspect-slot-external-bridge-v1`
+- slot externe infere : `helm`
+- preuves `allowedSlots` utilisables : `0`
+- audit table/source slots : `aspect-slot-table-source-audit-v1`
+- JSON audites pour table slots : `327`
+- preuves table/source `allowedSlots` : `0`
+- plan recherche source slots : `aspect-slot-source-search-plan-v1`
+- fichiers jeu planifies : `205`
+- shards planifies : `7`
+- termes slot/aspect planifies : `45`
+- recherche source slots executee : `205` fichiers, `110` hits, `14` groupes
+- audit resultats recherche slots : `itemtype-candidates-need-payload-inspection`
+- audit candidat `ItemType` : `itemtype-technique-condition-not-aspect-slot-source`
+- audit blocages `1663210` regenere avec preuves champ completes : `field-level-parser-required` reste bloque
+- verdict champ `SF_32` : preuves structurelles fortes, ownership non prouve, pistes locales epuisees
+- prochaine priorite `1663210` : recherche hors artefacts locaux/table source ou avancer `SF_33`/uptime sans promotion DPS
+
+## Decisions importantes
+
+- Ne pas promouvoir les candidats conditionnels dans le DPS fiable tant que le champ exact, le trigger et l'uptime ne sont pas prouves.
+- Garder une separation claire entre strict, what-if, candidat bloque et valeur inconnue.
+- Faire passer progressivement l'interface du dataset prototype vers le dataset cible normalise.
+- Utiliser les preuves `evidence` comme condition d'entree dans le moteur fiable.
+- Garder le calcul de build actuel comme prototype : il ne remplace pas encore les vrais buckets Diablo IV.
+
+## Prochaines etapes
+
+1. Extraire des modifiers plus fins que `estimatedDps`.
+2. Mapper les operations vers des familles de calcul : additif, multiplicatif, uptime, cap, ressource.
+3. Resoudre le candidat `1663210` :
+   - parser les headers binaires autour des offsets `18844-19020`
+   - mapper explicitement formule, bytecode, hash bonus et asset id comme champs
+   - comparer avec d'autres clusters `PowerTag -> formule -> bonus -> asset` pour identifier le layout exact du champ bonus et isoler `SF_32`
+   - ajouter d'autres payloads decodes contenant des couples formule/hash pour obtenir un motif repete
+   - decoder en priorite `assetId 1953817` (`data.007`, offset `8270942`)
+   - comparer les layouts normalises par famille, pas seulement les signatures exactes
+   - trouver ou decoder d'autres transitions `formule -> hash`, encore representees seulement par `1663210`
+   - exclure les preuves stale de `1461593` tant que le mapping source n'est pas retrouve dans l'installation courante
+   - comparer les deux transitions `formula-to-hash-bytecode` validees (`1663210`, `309070`) pour isoler les positions communes du bytecode et du suffixe hash
+   - lire les octets de header immediatement avant chaque transition pour identifier les compteurs/tailles de champs et tester une attribution `SF_32` sans promotion DPS
+   - chercher une definition externe exacte ou decoder la semantique des valeurs candidates du suffixe hash avant toute promotion DPS
+   - construire ou retrouver le dictionnaire des selecteurs de suffixe et des metadata ids (`949`, `12337`, `10`) avant toute promotion DPS
+   - scanner davantage de payloads contenant des suffixes hash pour obtenir des repetitions de selecteurs/metadata ou des strings nommees
+   - trouver une source nommee pour `selector 949` ou verifier davantage de cibles `Bonus_Percent_Per_Power` avant toute promotion DPS
+   - chercher ou decoder une table/dictionnaire source des selecteurs de suffixe, car les contextes nommes actuels sont seulement generes
+   - comparer les contextes binaires de famille autour de `949/12337` avec davantage de cibles `Bonus_Percent_Per_Power`
+   - confirmer la divergence de layout observee entre `1663210` et `1953817` avant d'attribuer `12337/10` au suffixe `949`
+   - elargir le scan externe pour trouver d'autres cibles `Bonus_Percent_Per_Power`, puis relancer audit binaire et comparaison suffixe
+   - comparer les mots de prelude suffixe avec les transitions header-patterns pour nommer le champ ou elargir l'echantillon
+   - traiter `selector:168` high-bit comme contexte divergent non promouvable, utile pour couverture mais pas pour le DPS fiable
+   - trouver un second header compact `949/12337/10` ou une table nommee pour `selector 949` / `metadata 12337`
+   - chercher une table nommee pour `949/12337`, car le compact exact est local a `1663210` dans les binaires decodes actuels
+   - decoder davantage de payloads `Bonus_Percent_Per_Power` ou chercher une table source externe aux rapports generes, car l'audit `949/12337` ne trouve aucun candidat independant
+   - utiliser le scan elargi `Bonus_Percent_Per_Power` comme nouvelle base de couverture ; `199516` confirme une divergence mais pas le compact `949/12337/10`
+   - relier `949`, `12337` et `10` a des tables, ids de strings ou champs de records, ou elargir l'echantillon de transitions hash comparables
+   - trouver un second asset `selector:949` avec `metadata 12337/10` dans la meme fenetre locale, ou une table source expliquant pourquoi `1953817` diverge
+   - chercher une table source nommee pour `selector 949` / `metadata 12337` / `scale 10`, car le corpus decode local ne contient qu'un compact exact sur `1663210`
+   - decoder davantage de payloads candidats ou trouver une source de table hors du corpus decode actuel, car les chaines dictionnaire/table locales ne sont pas proches de `949/12337/10`
+   - ne pas utiliser `2058843` ou `2302974` comme preuve de promotion : ils n'ajoutent aucun selecteur `949/994` utile dans le corpus decode actuel
+   - separer l'interpretation de `metadata 12337 / scale 10` de celle du `selector 949`, car `12337/10` apparait aussi avec `selector 997` et `selector 1126`
+   - traiter `12337/6/10` comme une metadata transversale confirmee par corpus (`23` hits), puis chercher le champ proprietaire du `selector 949` sans s'appuyer sur cette metadata seule
+   - separer les layouts `selector->asset` compact et non compact pour `selector 949` avant toute attribution du champ bonus
+   - parser les champs proprietaires par layout apres separation : `selector 949` reste mixte (`compact-metadata-scale-layout` + `wrapper-or-variant-layout`), donc aucune promotion DPS
+   - chercher une table source nommee ou une seconde preuve compacte `selector 949` avant d'attribuer `metadata 12337 / scale 10` au bonus
+   - la couverture explicite `Bonus_Percent_Per_Power` est epuisee : `6/6` assets decodes, `0` second compact `selector 949`; il faut elargir au-dela des hits explicites ou trouver une table hors artefacts locaux
+   - les alternatives locales de table/source sont epuisees : `0` table independante, `0` dictionnaire proche, `0` second compact ; basculer vers recherche hors artefacts locaux ou traiter `SF_33` / uptime sans promotion DPS
+   - audit `SF_33` ajoute : `Mod.SoilRuler_B` est relie structurellement a la branche conditionnelle `SF_33`, mais reste sans entree build-state ni source d'activation hors asset courant
+   - garder `Mod.SoilRuler_B` comme flag build-state bloque : `sf33-trigger-candidate-flag-unmapped`, promotion `false`
+   - template build-state bloque genere : `outputs/diablo4-sf33-build-state-trigger-audit/blocked-build-state-template.json`, avec `Mod.SoilRuler_B` en `defaultValue: null`, `status: blocked-unmapped`, `promotionReady: false`
+- audit activation `SF_33` ajoute : `39` fichiers mentionnent `Mod.SoilRuler_B`, mais `0` asset externe exact ; les definitions exactes restent limitees a `1663210`
+- prochaine action `SF_33` : elargir hors artefacts locaux ou explorer les donnees d'upgrade/aspect/passif liees a `Spiritborn_Talent_Ultimate_2`
+- plan recherche source `SF_33` ajoute : `outputs/diablo4-sf33-activation-source-search-plan/sf33-activation-source-search-plan.json`
+- recherche source `SF_33` executee sur `205` fichiers jeu : `20414` payloads `deadbeef` decodes, `9` entrees, `12` groupes
+- audit recherche source `SF_33` ajoute : `sf33-trigger-not-found-upgrade-analogies-only`
+- verdict recherche `SF_33` : `Mod.SoilRuler_B` et les proprietaires `Spiritborn` restent limites a `assetId 1663210`, `0` trigger externe, `0` owner externe, `8` assets analogues `UpgradeB/C`
+- diagnostic cible regenere : le blocage `sf33-trigger-build-state-unmapped` recommande maintenant d'utiliser les patrons `UpgradeB/C` pour chercher un champ equivalent a `SoilRuler_B` par voisinage binaire, sans promotion DPS
+- patrons `UpgradeB/C` decodes : `8` assets inspectes, `2` assets avec flags `Mod.Upgrade*` autonomes comparables
+- audit voisinage build-state `SF_33` ajoute : `build-state-flag-offset-triplet-pattern-found`
+- verdict voisinage `SF_33` : `Mod.SoilRuler_B` partage un motif de table d'offsets avec `3` references autonomes `Mod.Upgrade*` (`offset precedent`, `offset flag`, `offset suivant`, type/taille cible `24`)
+- `SF_33` reste bloque : ce motif prouve une similarite structurelle de flag, pas la source gameplay ni l'uptime ; prochaine action : parser les entrees de table d'offsets pour nommer le champ build-state et verifier si `SoilRuler_B` est declaratif ou seulement local
+- audit table d'offsets `SF_33` ajoute : `offset-table-confirms-mod-flag-entry-shape`
+- verdict table d'offsets : `4` ancres propres, `Mod.SoilRuler_B` est une entree `Mod.*` propre de type/taille `24`, les ancres `Mod.Upgrade*` autonomes ont la meme forme
+- `SF_33` reste bloque : la forme de flag est confirmee, mais il faut encore trouver la table ou le record parent qui consomme `Mod.SoilRuler_B` pour le relier a une option de build-state
+- audit run parent `SF_33` ajoute : `offset-table-parent-run-confirms-local-mod-flag-record`
+- verdict run parent : `Mod.SoilRuler_B` est dans un run local contigu `binary-block -> mod-flag-block -> power-tag-block`, suivi par `PowerTag.SystemsTuningGlobals`
+- `SF_33` reste bloque : le run local confirme le record autour du flag, mais il faut identifier si ce run declare, lit ou active le flag `SoilRuler_B`
+- audit semantique run parent `SF_33` ajoute : `parent-run-semantics-confirm-mod-flag-read-context`
+- verdict semantique : le trailer du bloc `Mod.SoilRuler_B` est `5:90`, identique aux `3` trailers `Mod.Upgrade*` compares ; le voisin `SystemsTuningGlobals` est un contexte global, pas une preuve d'activation gameplay
+- `SF_33` reste bloque : chercher une occurrence ou un record parent qui relie `Mod.SoilRuler_B` a une option de build-state nommee, sans assimiler `SystemsTuningGlobals` a une activation
+- scan nomme `Soil/Ruler` execute sur `205` fichiers jeu : `1` entree, uniquement `assetId 1663210`, `0` source externe
+- audit source nommee `SF_33` ajoute : `sf33-named-build-state-source-not-found`
+- verdict source nommee : aucune source nommee externe `Soil/Ruler`; les seules mentions hors asset courant sont des artefacts generes (`optimizer-dataset`, schema exemple)
+- `SF_33` reste bloque : clore la piste nommee locale, puis passer soit a une recherche binaire de record parent hors texte, soit au blocage uptime, sans activer `SF_33`
+- audit parent binaire `SF_33` ajoute : `outputs/diablo4-sf33-binary-parent-source/sf33-binary-parent-source.json`
+- verdict parent binaire : `sf33-binary-parent-source-not-proven-local-context-only`, confiance `high`
+- preuve parent binaire : trailer `5:90` matche les `3` runs `Mod.Upgrade*` compares, mais `0` consommateur voisin exact (`previousSignatureMatches 0`, `upgradeNextPrefixExactMatches 0`), `0` trigger externe et `0` source nommee externe
+- decision `SF_33` : le motif local confirme un contexte de lecture/declaration de flag `Mod.*`, pas une activation gameplay de `Mod.SoilRuler_B`; garder la branche inactive en DPS fiable
+- diagnostic cible regenere : `sf33-trigger-build-state-unmapped` affiche maintenant `trailer match oui, consommateur exact non, source externe 0`, promotion `false`
+- audit uptime ajoute : `2` formules voisines de probabilite (`SF_28`, `SF_29`), mais `0` liee a `SF_32/SF_33`, aucune uptime explicite ou numerique
+   - garder l'uptime bloquee : `uptime-neighbor-formulas-unlinked`, promotion `false`
+   - audit role `SF_28/SF_29` ajoute : `2` formules de probabilite compilees, role actuel `utility-or-scaling`, `0` role uptime prouve
+   - prochaine action uptime : chercher la source gameplay de `SF_28/SF_29` ou une condition utilisateur explicite avant de les utiliser comme uptime fiable
+   - audit dependance uptime ajoute : `outputs/diablo4-uptime-neighbor-dependency/uptime-neighbor-dependency.json`
+   - verdict dependance : `uptime-probability-neighbors-not-linked-to-boost-branch`, confiance `high`
+   - preuve : les `2` formules locales `SF_28/SF_29` suivent le hash bonus cible, mais `0` reference `SF_32/SF_33`; distances depuis le bonus `96` et `228`, distances depuis la branche boostee `720` et `852`
+   - decision : ne pas utiliser `SF_28/SF_29` comme uptime fiable ; garder l'hypothese utilisateur separee du DPS strict tant qu'aucune source gameplay ou uptime numerique n'est prouvee
+   - diagnostic cible regenere : `uptime-not-proven` affiche maintenant `proba locales 2, liees branche 0`, promotion `false`
+   - reconstruire `external-target-search` avec les conventions BLTE/catalogue actuelles avant de reutiliser les offsets mismatches `1461593`, `2474146`, `1408295`
+   - parser le champ exact du bonus
+   - audit cible regenere avec chemins locaux corrects : field-records, record-segments, record-headers, formula/hash, selector/layout, coverage et table-source
+   - verdict actuel : `adjacent-record-cluster-not-field-owned` + `selector-949-owner-fields-blocked-by-mixed-layout` + `local-table-source-alternatives-exhausted`
+   - `SF_32` reste non promouvable : le compact `949/1663210/12337/10` est structurellement trace, mais aucun champ proprietaire ni table source nommee ne prouve l'ownership
+   - audit decision `SF_32` ajoute : `outputs/diablo4-sf32-field-promotion-decision/sf32-field-promotion-decision.json`
+   - verdict decision `SF_32` : `sf32-field-promotion-blocked-by-selector-949-evidence`, confiance `high`, promotion `false`
+   - preuve consolidee : `5` bloqueurs (`selector-949-mixed-layout`, `second-compact-selector-949-missing`, `metadata-12337-scale-10-cross-selector`, `local-table-source-missing`, `record-header-source-links-stale`)
+   - diagnostic cible regenere : `field-level-parser-required` affiche maintenant `blockers 5, layouts949 2, second compact 0, table locale 0`
+   - mapper `SF_33` vers une condition ou un toggle de build
+   - prouver ou configurer l'uptime
+4. Etendre le moteur buckets Diablo IV :
+   - socle preview ajoute : `bucketEngine.version = diablo4-bucket-engine-preview-v1`
+   - strict conserve : `1276410`
+   - parite formule buckets : `0`
+   - candidat what-if conserve hors DPS fiable : `reliableCandidateDelta = 0`, `blockedCandidateDelta = 48960`
+   - readiness buckets ajoutee : `bucketEngine.readiness.version = target-bucket-readiness-v1`
+   - etat readiness : `strictOnlyReady true`, `fineBucketsReady false`, `reliableOptimizerReady false`, `blockedCandidateCount 1`
+   - familles : `strict-base ready`, `additive empty`, `multiplicative empty`, `uptime blocked`, `caps empty`, `blocked-candidates blocked`
+   - site mis a jour pour afficher la readiness buckets et les prochains jalons
+   - verification : composition regeneree, strict `1276410`, what-if `1325370`, delta candidat `48960`, qualite `partiel 60/100`
+   - prochaines extensions : alimenter additif/multiplicatif/uptime/caps avec des modifiers fins, puis ajouter les conflits et slots
+5. Ajouter les contraintes de build : classe, slots, conflits, uniques, aspects, parangon.
+   - socle contraintes ajoute : `target-build-constraints-v1`
+   - le build de reference est maintenant signale invalide pour optimisation automatique car il melange `necromancer` et `spiritborn`
+   - `1461593` signale aussi `slot-data-not-normalized`, donc les slots d'aspects restent a extraire avant les conflits d'equipement
+   - audit slot ajoute : `outputs/diablo4-aspect-slot-readiness/aspect-slot-readiness.json`
+   - `1461593` n'a aucun slot explicite dans les tags, labels ou formules normalises ; ne pas deviner de slot avant parser/table source
+   - audit source ajoute : `outputs/diablo4-aspect-slot-source-evidence/aspect-slot-source-evidence.json`
+   - `42` fichiers directs/voisins scannes, `0` token de slot ; prochaine etape : decoder une table/champ source des slots d'aspects
+   - audit pont externe ajoute : `outputs/diablo4-aspect-slot-external-bridge/aspect-slot-external-bridge.json`
+   - `Helm_Unique_Necro_100` donne un indice `helm`, mais seulement via une cible de valeur d'affixe/hash ; `0` preuve `allowedSlots`, donc aucune promotion slot
+   - audit table/source ajoute : `outputs/diablo4-aspect-slot-table-source/aspect-slot-table-source.json`
+   - `327` JSON scannes, `0` preuve directe `allowedSlots/equipmentSlot/aspect-equipment`; prochaine etape : elargir le decode vers des assets/tables d'equipement ou parser les records source
+   - plan de recherche source ajoute : `outputs/diablo4-aspect-slot-source-search-plan/aspect-slot-source-search-plan.json`
+   - script genere : `outputs/diablo4-aspect-slot-source-search-plan/run-aspect-slot-source-search.ps1`
+   - plan : `205` fichiers jeu, `7` shards, `45` termes (`allowedSlots`, `equipmentSlot`, `ItemType`, `LegendaryPower`, prefixes slots, pistes `Helm_Unique_Necro_100`)
+   - recherche executee et fusionnee : `outputs/diablo4-aspect-slot-source-search-plan/slot-source-search-merged/external-target-search-merged.json`
+   - audit resultats ajoute : `outputs/diablo4-aspect-slot-source-search-audit/aspect-slot-source-search-audit.json`
+   - `110` hits, `14` groupes, `2` candidats directs `ItemType`, mais `0` preuve directe `allowedSlots/equipmentSlot`
+   - payload `1092943` decode et audite : `ItemType` correspond a `TechniqueSlotIsItemType(SNO.ItemType.Mace)` / `GetItemTypeCountForPower`, donc pas une source de slot d'aspect
+   - audit prefixes slots ajoute : `outputs/diablo4-aspect-slot-prefix-candidates/aspect-slot-prefix-candidates.json`
+   - verdict prefixes : `32` candidats, `7` familles de slots, `2` candidats `helm`, mais `0` preuve utilisable `allowedSlots`
+   - conclusion slots `1461593` : les prefixes `Helm_`, `Boots_`, `Ring_`, etc. sont des noms d'affixes/uniques ou d'etat d'arme, pas des champs de slot d'aspect ; aucune promotion
+   - readiness slot regeneree : finding consolidee `nom externe + prefixes seulement nominatifs`, `slot-data-not-normalized` reste actif
+   - conclusion blocage slots ajoutee : `outputs/diablo4-aspect-slot-blocker-conclusion/aspect-slot-blocker-conclusion.json`
+   - verdict conclusion : `6` sondes, `0` sondes pretes, `0` signal de preuve utilisable, `existingEvidenceExhausted true`
+   - decision : les artefacts existants ne peuvent pas prouver `allowedSlots` pour `1461593`; prochaine etape obligatoire = parseur binaire/champ source aspect-equipement ou source externe fiable
+6. Ajouter un optimiseur automatique qui propose les meilleurs choix sous contraintes.
+   - socle plan optimiseur ajoute : `target-optimizer-plan-v1`
+   - script ajoute : `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+   - sortie ajoutee : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+   - le plan utilise uniquement `strictDps` comme `reliableDps`; les deltas bloques restent visibles mais exclus du score fiable
+   - recommandations strictes actuelles :
+     - `necromancer` : assets `1461593,493422`, strict `1119210`, delta bloque `0`
+     - `spiritborn` : asset `1663210`, strict `163200`, delta bloque `48960`
+   - etat : `strictOnlyReady true`, `fineBucketsReady false`, `reliableOptimizerReady false`, `currentBuildValid false`, `promotionReady false`
+   - site mis a jour avec un panneau `Plan optimiseur cible` qui affiche les recommandations par classe et permet de charger une recommandation dans le build courant
+   - verification : script et `site/app.js` valides, JSON lisibles, serveur local HTTP OK sur `http://127.0.0.1:4173/site/`
+   - reserve : verification navigateur integre non concluante dans cette session (`ERR_CONNECTION_REFUSED` cote onglet malgre serveur joignable par HTTP workspace)
+   - contraintes minimales ajoutees au plan : classe connue, classe unique, slots d'aspect prouves
+   - bilan contraint : `constrainedPlans 2`, `validStrictBuilds 1`, `reliableStrictBuilds 0`
+   - meilleur plan strict valide : `spiritborn` avec asset `1663210`, strict `163200`, what-if separe `212160`, delta bloque `48960`
+   - plan `necromancer` bloque par contraintes : `slot-data-not-normalized` sur `1461593`; l'indice externe `helm` reste non promu car `allowedSlots` n'est pas prouve
+   - preuve plan `necromancer` enrichie : `prefixCandidatesAssessment slot-prefix-candidates-name-only`, `prefixCandidatesUsableProofs 0`, `prefixCandidatesHelmCandidates 2`
+   - preuve plan `necromancer` enrichie : `blockerConclusionAssessment aspect-slot-existing-evidence-exhausted`, `existingEvidenceExhausted true`, `blockerConclusionUsableProofSignals 0`
+   - interface mise a jour : cartes de plan avec statut, nombre de plans valides/fiables, et blocages de contraintes
+   - graine de parseur binaire slots ajoutee : `outputs/diablo4-aspect-slot-binary-parser-seed/aspect-slot-binary-parser-seed.json`
+   - layout binaire slots ajoute : `outputs/diablo4-aspect-slot-binary-layout/aspect-slot-binary-layout.json`
+   - payloads candidats inspectes : `11/33`, decodes manquants : `22`
+   - chaines matchees : `32`, references `Affix_Value` : `29`, champs directs slot : `0`
+   - conclusion layout : `binary-layout-affix-value-records-only`, confiance `medium-high`, promotion `false`
+   - conclusion blocage slots regeneree : `7` sondes, `0` signaux de preuve utilisables, `existingEvidenceExhausted true`
+   - decision : ne pas utiliser les records `Affix_Value`, les prefixes `Helm_/Boots_/Ring_`, ni les noms `Helm_Unique_Necro_100` comme preuve `allowedSlots`; ils restent des indices nominaux non promouvables
+   - decision `SF_32` enrichie avec `5` portes de promotion explicites : layout unique `selector 949`, second compact externe, specificite `metadata 12337 / scale 10`, table source nommee, liens record frais
+   - portes `SF_32` passees : `0/5`; portes echouees : `5/5`
+   - politique optimiseur `SF_32` : `reliableDps = strict-only`, `candidateDelta = blocked-what-if`, `canUseForRanking = false`, `canExposeAsScenario = true`
+   - diagnostic cible regenere : `3` blocages actifs, `0` resolu, `promotionReady false`
+   - plan optimiseur regenere : `validStrictBuilds 1`, `reliableStrictBuilds 0`, recommendation `strict-only-class-constrained-plan`
+   - interface diagnostic enrichie : le panneau `Diagnostic blocages` affiche maintenant la decision `SF_32`, les `5` portes de promotion et la politique `strict-only / scenario visible`
+   - `target-blocker-resolution.json` expose maintenant `promotionGates` et `optimizerPolicy` dans `sf32FieldPromotionDecisionAssessment`
+   - plan optimiseur enrichi avec des portes de fiabilite par classe : classe connue, classe unique, slots prouves, delta bloque resolu, buckets fins prets, blocages globaux resolus
+   - echecs globaux actuels : `blocked-delta-cleared`, `fine-buckets-ready`, `global-blockers-cleared`, `slot-constraints-proven`
+   - plan `necromancer` : `3/6` portes passees, prochaine porte `slot-constraints-proven`, statut `blocked-by-constraints`
+   - plan `spiritborn` : `3/6` portes passees, prochaine porte `blocked-delta-cleared`, statut `strict-valid-with-blocked-delta`
+   - interface plan enrichie : chaque carte de recommandation affiche maintenant ses portes de fiabilite et la prochaine porte a resoudre
+   - file d'actions optimiseur ajoutee dans `target-optimizer-plan.json` : `4` actions priorisees
+   - action #1 : `Debloquer le delta conditionnel spiritborn`, focus `asset:1663210`, priorite `high`
+   - action #2 : `Prouver les slots d'aspect necromancer`, focus `asset:1461593`, priorite `high`
+   - action #3 : `Alimenter les buckets fins`, focus `bucket-engine`, priorite `medium`
+   - action #4 : `Fermer les blocages globaux`, focus `target-blocker-resolution`, priorite `medium`
+   - interface plan enrichie : le panneau `Plan optimiseur cible` affiche maintenant la file d'actions priorisee
+   - plan de deblocage delta ajoute : `outputs/diablo4-delta-unblock-plan/delta-unblock-plan.json`
+   - delta `1663210` : strict `163200`, candidat `212160`, delta `48960`, scenario `sf33-active-sf32-30pct`
+   - sous-preuves delta : `3`, pretes `0`, bloquees `3`
+   - prochaine sous-action : `Prouver le champ SF_32`
+   - sous-preuves bloquees : `SF_32` (`sf32-field-promotion-blocked-by-selector-949-evidence`), `SF_33` (`sf33-binary-parent-source-not-proven-local-context-only`), uptime (`uptime-probability-neighbors-not-linked-to-boost-branch`)
+   - plan optimiseur relie maintenant l'action #1 a ce sous-plan (`blockedSteps 3`, `readySteps 0`)
+   - audit analogie compact `SF_32` ajoute : `outputs/diablo4-sf32-compact-selector-analogy/sf32-compact-selector-analogy.json`
+   - resultat analogie : layout compact metadata/scale observe sur selecteurs `949` et `997`, assets `1663210` et `2058843`
+   - verdict analogie : `compact-layout-analogy-cross-selector-not-owner-proof`, confiance `high`, promotion `false`
+   - decision : l'analogie `997` confirme une forme de record compact, mais ne prouve pas l'ownership `SF_32/selector 949`; elle ajoute le bloqueur `compact-layout-cross-selector-not-owner-proof`
+   - decision `SF_32` regeneree : `6` bloqueurs, `0/5` portes passees, prochaine action toujours `seconde preuve compacte selector 949 ou table source nommee`
+   - audit contextes numeriques table ajoute : `outputs/diablo4-sf32-table-numeric-contexts/sf32-table-numeric-contexts.json`
+   - `3` rapports table scannes ; `4` hits entiers exacts sur `949`, `0` hit exact sur `12337`, `0` contexte utile, `0` contexte source potentiel
+   - les `4` hits `949` exacts sont du bruit de metrique (`score` ou `compressedBytes`), pas un selecteur/table de champ
+   - verdict : `sf32-table-numeric-contexts-no-source-proof`, confiance `high`, promotion `false`
+   - decision `SF_32` regeneree : `7` bloqueurs, `0/5` portes passees ; nouveau bloqueur `table-numeric-contexts-not-source-proof`
+   - plan delta regenere : `3` sous-preuves bloquees, prochaine sous-action `Prouver le champ SF_32`
+   - plan optimiseur regenere : `validStrictBuilds 1`, `reliableStrictBuilds 0`, action #1 reste `Debloquer le delta conditionnel spiritborn`
+   - audit hash PowerTag `SF_33` ajoute : `outputs/diablo4-sf33-power-tag-hash-corpus/sf33-power-tag-hash-corpus.json`
+   - `100` payloads decodes scannes ; `7` contextes `SystemsTuningGlobals`, `2` prefixes valides, hash cible `2084621218`
+   - le hash PowerTag cible apparait `1` fois comme contexte PowerTag et `2` fois en brut, mais `0` occurrence externe hors asset `1663210`
+   - verdict : `sf33-power-tag-hash-local-only`, confiance `high`, promotion `false`
+   - decision `SF_33` regeneree : le trailer `5:90` reste une preuve de forme `Mod.*`, mais `SystemsTuningGlobals` ne prouve pas une activation ou un consommateur externe
+   - plan delta regenere : `SF_33` reste bloque par `sf33-binary-parent-source-not-proven-local-context-only`
+   - audit chaine probabilite uptime ajoute : `outputs/diablo4-uptime-probability-chain/uptime-probability-chain.json`
+   - `2` chaines de probabilite detectees : `(1-POW(1-SF_28/100,1/2))*100` et `(1-POW(1-SF_29/100,1/(SF_9*2)))*100`
+   - `1` chaine possede une source cadence locale `Attacks_Per_Second_Total -> SF_28`, mais `0` chaine reference `SF_32/SF_33` et `0` chaine porte un indice duree/uptime
+   - verdict : `uptime-probability-chain-proc-local-not-boost-uptime`, confiance `high`, promotion `false`
+   - decision uptime regeneree : `SF_28/SF_29` restent des probabilites/procs locaux, pas une uptime fiable du scenario booste
+   - diagnostic cible regenere : `3` blocages actifs, `0` resolu, `promotionReady false`; evidence uptime expose maintenant `probabilityChainAssessment`
+   - plan delta et plan optimiseur regenres : `blockedSteps 3`, `validStrictBuilds 1`, `reliableStrictBuilds 0`, action #1 inchangee
+   - moteur buckets cible v1 ajoute : `outputs/diablo4-target-bucket-engine/target-bucket-engine.json`
+   - script ajoute : `work/diablo4-data-exporter/scripts/build-target-bucket-engine.js`
+   - le moteur reproduit le strict agrege : `strictBaseDps 1276410`, `calculatedStrictDps 1276410`, `parityDelta 0`
+   - delta bloque conserve hors fiable : `blockedCandidateDelta 48960`, `reliableDps 1276410`, `whatIfDps 1325370`
+   - portes moteur : `strict-base-ready` passe ; `fine-buckets-mapped`, `blocked-candidates-cleared`, `build-constraints-valid`, `global-blockers-cleared` echouent
+   - verdict : `bucket-engine-strict-only-ready-fine-buckets-blocked`, confiance `high`, promotion `false`
+   - plan optimiseur relie maintenant `targetBucketEngine` avec summary, buckets et gates
+   - interface plan enrichie : carte `Moteur buckets` avec strict calcule, parite, delta bloque, buckets et portes
+   - serveur local relance et verifie : `http://127.0.0.1:4173/site/`, `target-bucket-engine.json` et `target-optimizer-plan.json` repondent `200`
+   - correction moteur buckets : les `classPlans` utilisent maintenant `strictBaseDps` / `blockedCandidateDelta` au lieu des anciens noms de champs
+   - classPlans corriges : `necromancer strict 1113210`, `spiritborn strict 163200`, delta bloque spiritborn `48960`
+   - plan extraction buckets fins ajoute : `outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json`
+   - script ajoute : `work/diablo4-data-exporter/scripts/build-fine-bucket-extraction-plan.js`
+   - familles planifiees : `additive`, `multiplicative`, `uptime`, `caps`, `constraints`, `blocked-candidates`
+   - etat extraction : `6` etapes, `0` prete, `6` bloquees ; prochaine etape `Extraire les bonus additifs fins`
+   - verdict : `fine-bucket-extraction-blocked-by-source-proofs`, confiance `high`, promotion `false`
+   - action optimiseur #3 `Alimenter les buckets fins` reliee au sous-plan (`blockedSteps 6`, `readySteps 0`)
+   - serveur local relance et verifie : `fine-bucket-extraction-plan.json` et `target-optimizer-plan.json` repondent `200`
+   - audit source additive ajoute : `outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json`
+   - sources agregees : matrice `Bonus_Percent_Per_Power`, couverture decodee, scan externe large et audit non ancre
+   - `6` assets explicites, `7` assets en matrice, `7` candidats additifs, `7` candidats bloques, `0` pret
+   - familles selecteurs : `selector 949` (`1663210`, `1953817`) et `selector 994` (`199516`, `202484`, `1489641`) ; `2` groupes divergents
+   - verdict : `additive-bucket-source-candidates-blocked-by-proof`, confiance `high`, promotion `false`
+   - raison : aucun candidat n'a de table/champ source nomme ni ownership prouve ; les hits `Bonus_Percent_Per_Power` ne sont pas automatiquement additifs fiables
+   - plan extraction buckets fins regenere : l'etape additive expose `additiveCandidates 7`, `blockedAdditiveCandidates 7`, `readyAdditiveRows 0`, `selectorGroups 2`
+   - prochaine action : chercher une table source nommee pour les selecteurs `Bonus_Percent_Per_Power` ou decoder un champ distinguant additif/multiplicatif
+   - serveur local relance et verifie : `additive-bucket-source-audit.json` et `fine-bucket-extraction-plan.json` repondent `200`
+   - audit preuve source selecteurs bonus ajoute : `outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json`
+   - script ajoute : `work/diablo4-data-exporter/scripts/audit-bonus-selector-source-proof.js`
+   - selecteurs observes : `2` (`994`, `949`), source nommee : `false`, familles classifiees : `0`, familles bloquees : `2`
+   - `selector 994` : assets `199516`, `202484`, `1489641`, repetition observee mais aucune famille bucket nommee
+   - `selector 949` : assets `1663210`, `1953817`, layout compact/local ou divergent, metadata `12337` observee seulement comme indice non proprietaire
+   - signaux source : `0` table nommee independante, `0` dictionnaire proche des valeurs surveillees, `0` contexte table utile, `0` contexte source potentiel
+   - verdict : `bonus-selector-source-proof-not-found`, confiance `high`, promotion `false`
+   - audit source additive regenere : `selectorSourceNamed false`, `selectorFamiliesClassified 0`, `sourceProofReady false`
+   - plan extraction buckets fins regenere : l'etape additive expose `selectorSourceProofAssessment bonus-selector-source-proof-not-found`
+   - decision : les selecteurs `949/994` restent des candidats non classifies ; aucun ne doit alimenter le bucket additif ni `reliableDps`
+   - interface plan optimiseur enrichie : le panneau `Plan optimiseur cible` charge maintenant `bonus-selector-source-proof.json`
+   - carte UI ajoutee : `Preuve selecteurs Bonus %` avec selecteurs observes, source nommee, familles classees, familles bloquees, details `949/994` et signaux source
+   - validation interface : `site/app.js` passe `node --check`, JSON OK, serveur relance ; `/site/`, `/site/app.js`, `/site/styles.css` et le rapport `bonus-selector-source-proof.json` repondent `200`
+   - action #2 slots aspect relancee : decodage de `12` candidats supplementaires depuis le plan binaire slots (`1906285`, `2118484`, `1973189`, `208263`, puis `1973192`, `2416487`, `2553189`, `2587268`, `2587930`, `421661`, `1822368`, `2506746`)
+   - seed parseur slots regenere : `outputs/diablo4-aspect-slot-binary-parser-seed/aspect-slot-binary-parser-seed.json`
+   - couverture binaire slots : `33` candidats, `23` decodes, `10` manquants, `0` champ direct slot
+   - layout slots regenere : `23` candidats inspectes, `51` chaines pertinentes, `40` references `Affix_Value`, `9` references de noms de slots, `0` `allowedSlots/equipmentSlot`
+   - verdict layout slots : `binary-layout-affix-value-records-only`, confiance `medium-high`, promotion `false`
+   - conclusion blocage slots regeneree : `7` probes, `0` prete, `0` signal utilisable, `existingEvidenceExhausted true`
+   - readiness slots regeneree : aspect `1461593` toujours bloque par `slot-data-not-normalized`, `promotionReady false`
+   - plan optimiseur regenere : action #2 reste `Prouver les slots d'aspect necromancer`, porte `slot-constraints-proven` toujours echouee pour le plan necromancer
+   - decision : les payloads supplementaires renforcent le blocage local ; les noms de slots/affixes restent non promouvables sans table ou champ aspect-equipement direct
+   - recherche champ aspect-equipement bas niveau ajoutee : `outputs/diablo4-aspect-equipment-field-search/external-target-search.json`
+   - termes cherches : `27` variantes (`AllowedItemType`, `ItemSlot`, `EquipLocation`, `AspectSlot`, `CodexOfPower`, `LegendaryPower`, etc.) sur `205` fichiers / `24304` entrees decodees
+   - seul hit : `CodexOfPower`, asset `1197664`, `data.070@3591523`
+   - payload `1197664` decode et inspecte : `161` chaines, nombreuses chaines UI/localisation (`Tab_Defensive`, `CanBeImbued`, `Gegenstandstypen`, `AspectPowerName`, categories Codex)
+   - audit ajoute : `outputs/diablo4-aspect-equipment-field-search-audit/aspect-equipment-field-search-audit.json`
+   - verdict : `aspect-equipment-field-search-codex-ui-only`, confiance `high`, `directSlotFieldStrings 0`, `sourceProofReady false`, promotion `false`
+   - conclusion slots regeneree : `8` probes, `0` prete, `0` signal utilisable ; la piste `CodexOfPower` est non promouvable car UI/localisation
+   - decision : ne pas utiliser `CodexOfPower`, `CanBeImbued`, les onglets Codex ou les categories UI comme source `allowedSlots`
+   - couverture locale slots terminee : les `10` derniers candidats du plan binaire ont ete decodes (`1004852`, `1182549`, `1316177`, `1459593`, `1825639`, `2272475`, `2501717`, `2565857`, `554174`, `86386`)
+   - seed parseur slots regenere : `33/33` candidats decodes, `0` manquant, `0` champ direct slot, `allCandidatesDecoded true`
+   - verdict seed : `binary-parser-seed-local-candidates-exhausted-no-direct-slot`
+   - layout slots regenere : `33` candidats inspectes, `86` chaines pertinentes, `65` references `Affix_Value`, `19` references de noms de slots, `44` groupes de preludes, `0` champ direct `allowedSlots`
+- plan optimiseur regenere : `slot-constraints-proven` reste echoue ; action #2 doit quitter les candidats de noms locaux et viser une table aspect-equipement distincte
+- decision : arreter la piste locale basee sur noms de slots/affixes pour `allowedSlots`; elle est epuisee sans preuve promouvable
+- sous-plan action #2 ajoute : `outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json`
+- script ajoute : `work/diablo4-data-exporter/scripts/build-aspect-slot-next-source-plan.js`
+- resume sous-plan slots : `4` etapes, `4` bloquees, `0` prete ; prochaine piste `Chercher une table aspect-equipement non localisation`
+- le plan optimiseur relie maintenant l'action #2 `Prouver les slots d'aspect necromancer` a ce sous-plan (`blockedSteps 4`, `readySteps 0`, assessment `aspect-slot-next-source-plan-blocked-local-exhausted`)
+- signaux consolides : `33/33` candidats locaux decodes, `0` manquant, `0` champ direct slot, `0` signal utilisable, `existingEvidenceExhausted true`
+- decision : ne toujours pas remplir `allowedSlots` pour `1461593`; prochaine preuve requise = table aspect-equipement non localisation, champ binaire direct, ou source externe fiable

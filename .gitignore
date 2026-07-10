@@ -1,0 +1,10 @@
+node_modules/
+*.log
+
+# Generated exports and analysis reports.
+outputs/*
+!outputs/rapport-outil-exportateur-diablo4.md
+
+# Local OS/editor noise.
+.DS_Store
+Thumbs.db
