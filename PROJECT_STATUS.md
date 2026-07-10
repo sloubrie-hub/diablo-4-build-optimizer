@@ -646,3 +646,10 @@ Build de reference :
 - le plan optimiseur relie maintenant l'action #2 `Prouver les slots d'aspect necromancer` a ce sous-plan (`blockedSteps 4`, `readySteps 0`, assessment `aspect-slot-next-source-plan-blocked-local-exhausted`)
 - signaux consolides : `33/33` candidats locaux decodes, `0` manquant, `0` champ direct slot, `0` signal utilisable, `existingEvidenceExhausted true`
 - decision : ne toujours pas remplir `allowedSlots` pour `1461593`; prochaine preuve requise = table aspect-equipement non localisation, champ binaire direct, ou source externe fiable
+- scan source aspect-equipement explicite ajoute : `outputs/diablo4-aspect-equipment-source-candidate-search/external-target-search.json`
+- audit ajoute : `work/diablo4-data-exporter/scripts/audit-aspect-equipment-source-candidates.js` -> `outputs/diablo4-aspect-equipment-source-candidate-audit/aspect-equipment-source-candidate-audit.json`
+- termes cherches : `34` variantes autour de `AllowedItemType`, `AllowedEquipmentSlot`, `SlotMask`, `AspectPowerData`, `LegendaryPowerRecord`, `CanImprint`, `CanExtract`, `ImprintPower`, `ExtractedPower`
+- couverture : `205` fichiers, `20419` entrees `deadbeef` decodees, `0` hit, `0` groupe, `0` candidat source, `0` candidat slot direct
+- conclusion slots regeneree : `9` probes, `0` prete, `0` signal utilisable ; assessment `aspect-slot-existing-evidence-exhausted`
+- sous-plan slots regenere : `sourceCandidateMatches 0`; prochaine strategie = chercher une famille binaire par structure ou une source externe fiable
+- decision : ne pas inventer de champ `Allowed/Imprint/Extract`; ces noms explicites sont absents du corpus local scanne

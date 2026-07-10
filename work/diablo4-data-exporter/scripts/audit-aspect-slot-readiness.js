@@ -4,13 +4,14 @@ const path = require("path");
 const targetDatasetFile = process.argv[2] ?? "outputs/diablo4-target-dataset/target-dataset.json";
 const optimizerDatasetFile = process.argv[3] ?? "outputs/diablo4-optimizer-dataset/optimizer-dataset.json";
 const outDir = process.argv[4] ?? "outputs/diablo4-aspect-slot-readiness";
-const sourceEvidenceFile = process.argv[5] ?? null;
-const externalBridgeFile = process.argv[6] ?? null;
-const tableSourceFile = process.argv[7] ?? null;
-const prefixCandidatesFile = process.argv[8] ?? null;
-const blockerConclusionFile = process.argv[9] ?? null;
+const sourceEvidenceFile = process.argv[5] ?? "outputs/diablo4-aspect-slot-source-evidence/aspect-slot-source-evidence.json";
+const externalBridgeFile = process.argv[6] ?? "outputs/diablo4-aspect-slot-external-bridge/aspect-slot-external-bridge.json";
+const tableSourceFile = process.argv[7] ?? "outputs/diablo4-aspect-slot-table-source/aspect-slot-table-source.json";
+const prefixCandidatesFile = process.argv[8] ?? "outputs/diablo4-aspect-slot-prefix-candidates/aspect-slot-prefix-candidates.json";
+const blockerConclusionFile = process.argv[9] ?? "outputs/diablo4-aspect-slot-blocker-conclusion/aspect-slot-blocker-conclusion.json";
 
 function readJsonIfExists(filePath) {
+  if (!filePath) return null;
   return fs.existsSync(filePath) ? JSON.parse(fs.readFileSync(filePath, "utf8")) : null;
 }
 
@@ -98,7 +99,7 @@ function aspectAssessment(aspect, optimizerAsset, sourceEvidence, externalBridge
         : hasTokenSlots
           ? "Des tokens de slot existent dans les textes disponibles, mais ils doivent etre confirmes par un parser de champ avant contrainte fiable."
           : blockerConclusionAssessment?.kind === "aspect-slot-existing-evidence-exhausted"
-            ? "Les preuves existantes sont epuisees pour 1461593: source locale, pont externe, tables JSON, ItemType et prefixes ne prouvent pas allowedSlots."
+            ? "Les preuves existantes sont epuisees pour 1461593: source locale, pont externe, tables JSON, ItemType, prefixes, Codex UI et noms de champs source ne prouvent pas allowedSlots."
           : externalAssessment?.kind === "external-slot-name-only-not-proof" && prefixAssessment?.kind === "slot-prefix-candidates-name-only"
             ? "Un nom externe suggere un slot, mais les prefixes de slots audites sont seulement des noms d'affixes/uniques; aucune preuve allowedSlots n'est disponible."
           : externalAssessment?.kind === "external-slot-name-only-not-proof"
@@ -112,7 +113,9 @@ function aspectAssessment(aspect, optimizerAsset, sourceEvidence, externalBridge
             : "Aucun slot equipement explicite n'est disponible dans les tags, labels ou formules normalises.",
       nextAction: hasProvenSlots
         ? "Utiliser ces slots dans le solveur de conflits d'equipement."
-        : "Chercher les champs de slot dans les records source ou une table d'aspects avant de contraindre l'equipement.",
+        : blockerConclusionAssessment?.kind === "aspect-slot-existing-evidence-exhausted"
+          ? "Chercher une autre famille de records binaires ou une source externe fiable de slots avant de contraindre l'equipement."
+          : "Chercher les champs de slot dans les records source ou une table d'aspects avant de contraindre l'equipement.",
     },
   };
 }
@@ -164,7 +167,7 @@ const report = {
       "slot-data-not-normalized": blocked.length,
     },
     nextActions: blocked.length
-      ? ["chercher les champs de slot dans les records source ou une table d'aspects"]
+      ? ["chercher une autre famille de records binaires ou une source externe fiable de slots"]
       : ["brancher les slots normalises au solveur de conflits d'equipement"],
   },
   aspects: rows,

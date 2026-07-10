@@ -7,9 +7,14 @@ const blockerConclusionFile = process.argv[4] ?? "outputs/diablo4-aspect-slot-bl
 const equipmentFieldSearchFile = process.argv[5] ?? "outputs/diablo4-aspect-equipment-field-search-audit/aspect-equipment-field-search-audit.json";
 const readinessFile = process.argv[6] ?? "outputs/diablo4-aspect-slot-readiness/aspect-slot-readiness.json";
 const outDir = process.argv[7] ?? "outputs/diablo4-aspect-slot-next-source-plan";
+const equipmentSourceCandidateFile = process.argv[8] ?? "outputs/diablo4-aspect-equipment-source-candidate-audit/aspect-equipment-source-candidate-audit.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readOptionalJson(filePath) {
+  return fs.existsSync(filePath) ? readJson(filePath) : null;
 }
 
 const parserSeed = readJson(parserSeedFile);
@@ -17,12 +22,14 @@ const binaryLayout = readJson(binaryLayoutFile);
 const blockerConclusion = readJson(blockerConclusionFile);
 const equipmentFieldSearch = readJson(equipmentFieldSearchFile);
 const readiness = readJson(readinessFile);
+const equipmentSourceCandidate = readOptionalJson(equipmentSourceCandidateFile);
 
 const targetAspect = readiness.aspects?.find((aspect) => Number(aspect.assetId) === 1461593) ?? readiness.aspects?.[0] ?? {};
 const parserSummary = parserSeed.summary ?? {};
 const layoutSummary = binaryLayout.summary ?? {};
 const blockerSummary = blockerConclusion.summary ?? {};
 const equipmentSummary = equipmentFieldSearch.summary ?? {};
+const sourceCandidateSummary = equipmentSourceCandidate?.summary ?? {};
 
 const steps = [
   {
@@ -37,8 +44,15 @@ const steps = [
       codexTopMatch: equipmentSummary.topMatchTarget ?? null,
       directSlotFieldStrings: equipmentSummary.directSlotFieldStrings ?? 0,
       uiLikeScore: equipmentSummary.uiLikeScore ?? null,
+      sourceCandidateAssessment: sourceCandidateSummary.assessment?.kind ?? null,
+      sourceCandidateTerms: sourceCandidateSummary.targetTerms ?? null,
+      sourceCandidateMatches: sourceCandidateSummary.matchingEntries ?? null,
+      sourceCandidates: sourceCandidateSummary.sourceCandidates ?? null,
+      directSlotCandidates: sourceCandidateSummary.directSlotCandidates ?? null,
     },
-    nextAction: "Chercher un asset/table non UI qui relie aspect power, categories d'equipement et slots autorises.",
+    nextAction: sourceCandidateSummary.matchingEntries === 0
+      ? "Changer de strategie: les noms de champs source explicites sont absents; chercher une famille binaire par structure ou source externe fiable."
+      : "Decoder les meilleurs candidats source avant de remplir allowedSlots.",
   },
   {
     id: "slot-next-step-02-binary-field-parser",
@@ -99,6 +113,7 @@ const report = {
     binaryLayoutFile,
     blockerConclusionFile,
     equipmentFieldSearchFile,
+    equipmentSourceCandidateFile: equipmentSourceCandidate ? equipmentSourceCandidateFile : null,
     readinessFile,
   },
   target: {
@@ -116,6 +131,7 @@ const report = {
     localCandidatesMissing: parserSummary.missingDecode ?? 0,
     directSlotFieldStrings: layoutSummary.directSlotFieldStrings ?? 0,
     usableProofSignals: blockerSummary.usableProofSignals ?? 0,
+    sourceCandidateMatches: sourceCandidateSummary.matchingEntries ?? null,
     existingEvidenceExhausted: blockerSummary.existingEvidenceExhausted === true,
     promotionReady: false,
     assessment: {
@@ -123,14 +139,15 @@ const report = {
       confidence: "high",
       slotConstraintReady: false,
       blocker: "slot-data-not-normalized",
-      finding: "Les sources locales, noms, prefixes, ItemType, Affix_Value et Codex UI sont epuisees ou non promouvables pour 1461593.",
-      nextAction: "Chercher une table aspect-equipement non localisation ou un champ binaire direct avant de remplir allowedSlots.",
+      finding: "Les sources locales, noms, prefixes, ItemType, Affix_Value, Codex UI et noms de champs source explicites sont epuisees ou non promouvables pour 1461593.",
+      nextAction: "Chercher une famille binaire par structure ou obtenir une source externe fiable avant de remplir allowedSlots.",
     },
   },
   steps,
   safeguards: [
     "Ne pas promouvoir les prefixes Helm_/Ring_/2H comme slots autorises.",
     "Ne pas promouvoir CodexOfPower, CanBeImbued ou Gegenstandstypen: ce sont des signaux UI/localisation.",
+    "Ne pas inventer de champ Allowed/Imprint/Extract: le scan cible ne trouve aucun hit.",
     "Ne pas promouvoir Affix_Value ou Static Value comme preuve d'equipement.",
     "Garder allowedSlots vide tant qu'aucun champ direct ou source externe fiable n'est prouve.",
   ],

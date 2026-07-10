@@ -8663,3 +8663,53 @@ L'action #2 `Prouver les slots d'aspect necromancer` du plan optimiseur contient
 Decision :
 
 Ne pas remplir `allowedSlots` pour `1461593` tant qu'aucun champ direct, table source non UI, ou source externe fiable ne prouve les slots autorises. Les prefixes, `Affix_Value`, `ItemType`, `CodexOfPower`, `CanBeImbued` et les libelles UI restent non promouvables.
+
+## Scan source aspect-equipement explicite
+
+La piste suivante du sous-plan slots etait de chercher une table ou un champ source non-localisation. Un scan cible a ete lance avec des noms explicites autour des slots, masques, imprint/extract et records de powers.
+
+Fichiers generes ou modifies :
+
+- `outputs/diablo4-aspect-equipment-source-candidate-search/external-target-search.json`
+- `outputs/diablo4-aspect-equipment-source-candidate-search/external-target-search-summary.json`
+- `work/diablo4-data-exporter/scripts/audit-aspect-equipment-source-candidates.js`
+- `outputs/diablo4-aspect-equipment-source-candidate-audit/aspect-equipment-source-candidate-audit.json`
+- `work/diablo4-data-exporter/scripts/audit-aspect-slot-blocker-conclusion.js`
+- `outputs/diablo4-aspect-slot-blocker-conclusion/aspect-slot-blocker-conclusion.json`
+- `work/diablo4-data-exporter/scripts/audit-aspect-slot-readiness.js`
+- `outputs/diablo4-aspect-slot-readiness/aspect-slot-readiness.json`
+- `work/diablo4-data-exporter/scripts/build-aspect-slot-next-source-plan.js`
+- `outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Termes cherches :
+
+- `AllowedItemType`, `AllowedItemTypes`, `AllowedEquipmentSlot`, `AllowedEquipmentSlots`
+- `SlotMask`, `EquipmentSlotMask`, `ItemTypeMask`, `PowerTypeMask`
+- `AspectPowerData`, `AspectPowerRecord`, `LegendaryPowerData`, `LegendaryPowerRecord`
+- `CodexPowerData`, `CodexPowerRecord`, `PowerDefinition`, `PowerRecord`
+- `CanImprint`, `CanBeImprinted`, `CanExtract`, `CanBeExtracted`
+- `ImprintPower`, `ExtractPower`, `ImprintedPower`, `ExtractedPower`
+- `PowerItemType`, `PowerItemTypes`, `AspectItemType`, `AspectItemTypes`
+
+Resultats :
+
+- fichiers scannes : `205`
+- entrees `deadbeef` decodees : `20419`
+- termes cibles : `34`
+- entrees trouvees : `0`
+- groupes trouves : `0`
+- candidats source : `0`
+- candidats slot direct : `0`
+- assessment : `aspect-equipment-source-candidates-not-found`
+- confiance : `high`
+- promotion : `false`
+
+Impact :
+
+La conclusion de blocage slots contient maintenant `9` probes. Toutes restent bloquees : `0` probe prete, `0` signal utilisable. Le sous-plan slots expose `sourceCandidateMatches 0` et change la prochaine strategie vers une famille binaire par structure ou une source externe fiable.
+
+Decision :
+
+Ne pas inventer de champ `Allowed/Imprint/Extract` pour `1461593`. Les noms de champs source explicites sont absents du corpus local scanne; `allowedSlots` reste vide et non promouvable.

@@ -11,6 +11,7 @@ const inputs = {
   prefixCandidates: process.argv[8] ?? "outputs/diablo4-aspect-slot-prefix-candidates/aspect-slot-prefix-candidates.json",
   binaryLayout: process.argv[9] ?? "outputs/diablo4-aspect-slot-binary-layout/aspect-slot-binary-layout.json",
   aspectEquipmentFieldSearch: process.argv[10] ?? "outputs/diablo4-aspect-equipment-field-search-audit/aspect-equipment-field-search-audit.json",
+  aspectEquipmentSourceCandidates: process.argv[11] ?? "outputs/diablo4-aspect-equipment-source-candidate-audit/aspect-equipment-source-candidate-audit.json",
 };
 
 function readJson(filePath) {
@@ -46,6 +47,7 @@ const reports = {
   prefixCandidates: readJson(inputs.prefixCandidates),
   binaryLayout: readJson(inputs.binaryLayout),
   aspectEquipmentFieldSearch: readOptionalJson(inputs.aspectEquipmentFieldSearch),
+  aspectEquipmentSourceCandidates: readOptionalJson(inputs.aspectEquipmentSourceCandidates),
 };
 
 const probes = [
@@ -91,6 +93,13 @@ const probes = [
     directSlotFieldStrings: reports.aspectEquipmentFieldSearch.summary?.directSlotFieldStrings ?? 0,
     uiLikeScore: reports.aspectEquipmentFieldSearch.summary?.uiLikeScore ?? 0,
   }) : null,
+  reports.aspectEquipmentSourceCandidates ? row("aspect-equipment-source-candidates", reports.aspectEquipmentSourceCandidates, {
+    searchedFiles: reports.aspectEquipmentSourceCandidates.summary?.searchedFiles ?? 0,
+    targetTerms: reports.aspectEquipmentSourceCandidates.summary?.targetTerms ?? 0,
+    matchingEntries: reports.aspectEquipmentSourceCandidates.summary?.matchingEntries ?? 0,
+    sourceCandidates: reports.aspectEquipmentSourceCandidates.summary?.sourceCandidates ?? 0,
+    directSlotCandidates: reports.aspectEquipmentSourceCandidates.summary?.directSlotCandidates ?? 0,
+  }) : null,
 ].filter(Boolean);
 
 const readyProbes = probes.filter((probe) => probe.slotConstraintReady || probe.promotionReady);
@@ -103,6 +112,7 @@ const usableProofSignals = [
   reports.prefixCandidates.summary?.usableAllowedSlotProofs > 0,
   reports.binaryLayout.summary?.directSlotFieldStrings > 0,
   reports.aspectEquipmentFieldSearch?.summary?.sourceProofReady === true,
+  reports.aspectEquipmentSourceCandidates?.summary?.sourceProofReady === true,
 ].filter(Boolean).length;
 
 const report = {
@@ -121,8 +131,8 @@ const report = {
     assessment: {
       kind: "aspect-slot-existing-evidence-exhausted",
       confidence: "high",
-      finding: "Les artefacts existants ne contiennent aucune preuve allowedSlots pour 1461593; les pistes locale, externe, table JSON, ItemType, prefixes, layouts binaires seed et Codex UI sont non promouvables.",
-      nextAction: "Passer a un parseur binaire/champ source aspect-equipement, ou obtenir une source externe fiable de slots avant toute promotion.",
+      finding: "Les artefacts existants ne contiennent aucune preuve allowedSlots pour 1461593; les pistes locale, externe, table JSON, ItemType, prefixes, layouts binaires seed, Codex UI et noms de champs source aspect-equipement sont non promouvables.",
+      nextAction: "Chercher une autre famille de records binaires ou obtenir une source externe fiable de slots avant toute promotion.",
     },
   },
   probes,
@@ -132,6 +142,7 @@ const report = {
     "Ne pas utiliser les prefixes Helm_/Boots_/Ring_ comme preuve: ils sont nominatifs.",
     "Ne pas utiliser les records Affix_Value comme preuve de slot: le layout binaire seed ne montre aucun champ direct allowedSlots.",
     "Ne pas utiliser CodexOfPower comme preuve: l'asset trouve est une surface UI/localisation, pas une source aspect-equipement.",
+    "Ne pas supposer des noms de champs source absents: le scan cible Allowed/Imprint/Extract/PowerRecord ne trouve aucun candidat.",
     "Garder necromancer bloque tant que le champ source allowedSlots n'est pas prouve.",
   ],
 };
