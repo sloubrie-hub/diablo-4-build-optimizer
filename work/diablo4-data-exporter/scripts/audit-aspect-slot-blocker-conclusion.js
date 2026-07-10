@@ -12,6 +12,7 @@ const inputs = {
   binaryLayout: process.argv[9] ?? "outputs/diablo4-aspect-slot-binary-layout/aspect-slot-binary-layout.json",
   aspectEquipmentFieldSearch: process.argv[10] ?? "outputs/diablo4-aspect-equipment-field-search-audit/aspect-equipment-field-search-audit.json",
   aspectEquipmentSourceCandidates: process.argv[11] ?? "outputs/diablo4-aspect-equipment-source-candidate-audit/aspect-equipment-source-candidate-audit.json",
+  structuralFamily: process.argv[12] ?? "outputs/diablo4-aspect-slot-structural-family/aspect-slot-structural-family.json",
 };
 
 function readJson(filePath) {
@@ -48,6 +49,7 @@ const reports = {
   binaryLayout: readJson(inputs.binaryLayout),
   aspectEquipmentFieldSearch: readOptionalJson(inputs.aspectEquipmentFieldSearch),
   aspectEquipmentSourceCandidates: readOptionalJson(inputs.aspectEquipmentSourceCandidates),
+  structuralFamily: readOptionalJson(inputs.structuralFamily),
 };
 
 const probes = [
@@ -100,6 +102,13 @@ const probes = [
     sourceCandidates: reports.aspectEquipmentSourceCandidates.summary?.sourceCandidates ?? 0,
     directSlotCandidates: reports.aspectEquipmentSourceCandidates.summary?.directSlotCandidates ?? 0,
   }) : null,
+  reports.structuralFamily ? row("slot-structural-family", reports.structuralFamily, {
+    samples: reports.structuralFamily.summary?.samples ?? 0,
+    groups: reports.structuralFamily.summary?.groups ?? 0,
+    multiSampleGroups: reports.structuralFamily.summary?.multiSampleGroups ?? 0,
+    structuralCandidates: reports.structuralFamily.summary?.structuralCandidates ?? 0,
+    strongStructuralCandidates: reports.structuralFamily.summary?.strongStructuralCandidates ?? 0,
+  }) : null,
 ].filter(Boolean);
 
 const readyProbes = probes.filter((probe) => probe.slotConstraintReady || probe.promotionReady);
@@ -113,6 +122,7 @@ const usableProofSignals = [
   reports.binaryLayout.summary?.directSlotFieldStrings > 0,
   reports.aspectEquipmentFieldSearch?.summary?.sourceProofReady === true,
   reports.aspectEquipmentSourceCandidates?.summary?.sourceProofReady === true,
+  reports.structuralFamily?.summary?.sourceProofReady === true,
 ].filter(Boolean).length;
 
 const report = {
@@ -131,7 +141,7 @@ const report = {
     assessment: {
       kind: "aspect-slot-existing-evidence-exhausted",
       confidence: "high",
-      finding: "Les artefacts existants ne contiennent aucune preuve allowedSlots pour 1461593; les pistes locale, externe, table JSON, ItemType, prefixes, layouts binaires seed, Codex UI et noms de champs source aspect-equipement sont non promouvables.",
+      finding: "Les artefacts existants ne contiennent aucune preuve allowedSlots pour 1461593; les pistes locale, externe, table JSON, ItemType, prefixes, layouts binaires seed, Codex UI, noms de champs source aspect-equipement et discriminateurs structurels sont non promouvables.",
       nextAction: "Chercher une autre famille de records binaires ou obtenir une source externe fiable de slots avant toute promotion.",
     },
   },
@@ -143,6 +153,7 @@ const report = {
     "Ne pas utiliser les records Affix_Value comme preuve de slot: le layout binaire seed ne montre aucun champ direct allowedSlots.",
     "Ne pas utiliser CodexOfPower comme preuve: l'asset trouve est une surface UI/localisation, pas une source aspect-equipement.",
     "Ne pas supposer des noms de champs source absents: le scan cible Allowed/Imprint/Extract/PowerRecord ne trouve aucun candidat.",
+    "Ne pas convertir un offset structurel en slot: aucun discriminateur stable promouvable n'a ete trouve.",
     "Garder necromancer bloque tant que le champ source allowedSlots n'est pas prouve.",
   ],
 };

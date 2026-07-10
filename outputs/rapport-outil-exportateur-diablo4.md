@@ -8713,3 +8713,48 @@ La conclusion de blocage slots contient maintenant `9` probes. Toutes restent bl
 Decision :
 
 Ne pas inventer de champ `Allowed/Imprint/Extract` pour `1461593`. Les noms de champs source explicites sont absents du corpus local scanne; `allowedSlots` reste vide et non promouvable.
+
+## Audit structurel des familles de slots
+
+Apres l'echec des recherches par noms de champs, la piste suivante etait de verifier si les payloads deja decodes contiennent un discriminateur binaire stable par famille de slot (`2H`, `Boots_`, `Ring_`, `Gloves_`, etc.). Un audit structurel a ete ajoute pour comparer les offsets fixes et les fenetres binaires autour des chaines.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/audit-aspect-slot-structural-family.js`
+- `outputs/diablo4-aspect-slot-structural-family/aspect-slot-structural-family.json`
+- `work/diablo4-data-exporter/scripts/audit-aspect-slot-blocker-conclusion.js`
+- `outputs/diablo4-aspect-slot-blocker-conclusion/aspect-slot-blocker-conclusion.json`
+- `work/diablo4-data-exporter/scripts/build-aspect-slot-next-source-plan.js`
+- `outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Methode :
+
+- lire les `33` payloads deja decodes du seed slots
+- grouper par `groupKey` (`2H`, `Boots_`, `Ring_`, etc.)
+- scanner les offsets fixes `0..512`
+- detecter les valeurs `u32` stables dans les groupes multi-samples
+- comparer les signatures de fenetres autour des chaines d'affixes/slots
+- refuser toute promotion sans semantique explicite de slot/equipement
+
+Resultats :
+
+- samples : `33`
+- groupes : `9`
+- groupes multi-samples : `7`
+- offsets fixes testes : `129`
+- signatures de fenetres de chaines : `67`
+- candidats structurels : `0`
+- candidats structurels forts : `0`
+- assessment : `slot-structural-family-no-stable-discriminator`
+- confiance : `high`
+- promotion : `false`
+
+Impact :
+
+La conclusion de blocage slots contient maintenant `10` probes. Toutes restent bloquees : `0` probe prete, `0` signal utilisable. Le sous-plan slots expose `strongStructuralCandidates 0` sur l'etape binaire.
+
+Decision :
+
+Ne pas convertir un offset numerique ou une signature de layout en `allowedSlots`. Sur le corpus actuel, aucun discriminateur binaire stable ne relie les payloads aux slots autorises. La suite doit chercher une autre famille de records binaires ou une source externe fiable.

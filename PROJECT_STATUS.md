@@ -653,3 +653,10 @@ Build de reference :
 - conclusion slots regeneree : `9` probes, `0` prete, `0` signal utilisable ; assessment `aspect-slot-existing-evidence-exhausted`
 - sous-plan slots regenere : `sourceCandidateMatches 0`; prochaine strategie = chercher une famille binaire par structure ou une source externe fiable
 - decision : ne pas inventer de champ `Allowed/Imprint/Extract`; ces noms explicites sont absents du corpus local scanne
+- audit structurel slots ajoute : `work/diablo4-data-exporter/scripts/audit-aspect-slot-structural-family.js`
+- rapport genere : `outputs/diablo4-aspect-slot-structural-family/aspect-slot-structural-family.json`
+- corpus structurel : `33` samples decodes, `9` groupes, `7` groupes multi-samples, `129` offsets fixes testes, `67` signatures de fenetres de chaines
+- resultat structurel : `0` discriminateur stable, `0` candidat fort, assessment `slot-structural-family-no-stable-discriminator`, confiance `high`, promotion `false`
+- conclusion slots regeneree : `10` probes, `0` prete, `0` signal utilisable ; les discriminateurs structurels rejoignent les pistes non promouvables
+- sous-plan slots regenere : `strongStructuralCandidates 0`; etape binaire #2 conseille d'abandonner les discriminateurs fixes sur ce corpus
+- decision : ne pas convertir un offset numerique stable/absent en slot ; la prochaine piste doit viser une autre famille de records binaires ou une source externe fiable
