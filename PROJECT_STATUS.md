@@ -698,3 +698,9 @@ Build de reference :
 - audit source additive regenere : `sourceConclusionAssessment additive-bucket-local-source-evidence-exhausted`, `localSourceEvidenceExhausted true`
 - plan buckets fins regenere : prochaine action = `Basculer vers une source externe fiable ou une nouvelle famille de records binaires; garder les candidats hors reliableDps.`
 - decision : arreter les variantes locales autour de `949/994`; la prochaine preuve doit etre externe fiable ou issue d'une nouvelle famille de records binaires
+- exposition plan/site de la conclusion additive ajoutee
+  - `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js` lit maintenant `outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json`
+  - `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` expose `additiveBucketSourceConclusion` et rattache la conclusion au sous-plan `fine-buckets-ready`
+  - `site/app.js` charge et affiche un panneau `Conclusion source additive`
+  - metriques affichees : `6` pistes, `0` prete, `6` bloquees, confiance `high`, `localEvidenceExhausted true`, `sourceNamed false`, `additiveBucketReady false`
+  - decision UI : rendre visible que la prochaine etape n'est plus une variante locale autour de `949/994`, mais une source externe fiable ou une nouvelle famille de records binaires

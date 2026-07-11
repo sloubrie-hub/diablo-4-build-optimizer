@@ -4,6 +4,7 @@ const TARGET_VALIDATION_URL = "../outputs/diablo4-target-dataset-validation/targ
 const BLOCKER_AUDIT_URL = "../outputs/diablo4-target-blocker-resolution/target-blocker-resolution.json";
 const TARGET_OPTIMIZER_PLAN_URL = "../outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json";
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
+const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
 
 const state = {
@@ -13,6 +14,7 @@ const state = {
   blockerAudit: null,
   targetOptimizerPlan: null,
   bonusSelectorSourceProof: null,
+  additiveBucketSourceConclusion: null,
   selectedAssetId: null,
   filter: "all",
   includeCandidates: false,
@@ -53,6 +55,7 @@ async function boot() {
     await loadBlockerAudit();
     await loadTargetOptimizerPlan();
     await loadBonusSelectorSourceProof();
+    await loadAdditiveBucketSourceConclusion();
     restoreState();
     state.selectedAssetId = selectRestoredAsset(state.dataset);
     byId("datasetStatus").textContent = "Dataset charge";
@@ -224,6 +227,10 @@ async function loadBonusSelectorSourceProof() {
   state.bonusSelectorSourceProof = await fetchOptionalJson(BONUS_SELECTOR_SOURCE_PROOF_URL);
 }
 
+async function loadAdditiveBucketSourceConclusion() {
+  state.additiveBucketSourceConclusion = await fetchOptionalJson(ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL);
+}
+
 async function fetchOptionalJson(url) {
   try {
     const response = await fetch(url);
@@ -269,6 +276,7 @@ function renderTargetOptimizerPlan() {
     </div>
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
+    ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
     <div class="target-optimizer-recommendations">
       ${recommendations.map(renderTargetOptimizerRecommendation).join("") || `<div class="optimizer-empty">Aucune recommandation stricte exploitable.</div>`}
@@ -309,6 +317,41 @@ function renderBonusSelectorSourceProof(report) {
         <span>Dictionnaire proche ${formatNumber(signals.decodedDictionary?.dictionaryHitsNearWatchedNumbers)} - bonus hits ${formatNumber(signals.decodedDictionary?.bonusPercentHits)}</span>
         <span>Contextes table utiles ${formatNumber(signals.localTableAlternatives?.usefulTableCandidateContexts)} - source potentielle ${formatNumber(signals.tableNumericContexts?.potentialSourceContexts)}</span>
       </div>
+    </div>
+  `;
+}
+
+function renderAdditiveBucketSourceConclusion(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const assessment = summary.assessment ?? {};
+  return `
+    <div class="bonus-selector-proof additive-source-conclusion">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Conclusion source additive</strong>
+          <span>${assessment.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.promotionReady ? "positive" : "blocked"}">
+          ${summary.promotionReady ? "promotion possible" : "promotion bloquee"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Pistes", summary.probes)}
+        ${targetMetric("Pretes", summary.readyProbes)}
+        ${targetMetric("Bloquees", summary.blockedProbes)}
+        ${targetMetric("Confiance", assessment.confidence ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Local epuise ${summary.localEvidenceExhausted ? "oui" : "non"}</span>
+        <span>Source nommee ${summary.sourceNamed ? "oui" : "non"}</span>
+        <span>Bucket additif ${summary.additiveBucketReady ? "pret" : "bloque"}</span>
+      </div>
+      <div class="additive-source-next">
+        ${(summary.nextRequiredEvidence ?? []).map((item) => `<span>${item}</span>`).join("")}
+      </div>
+      <p>${assessment.finding ?? ""}</p>
+      <p>${assessment.nextAction ?? ""}</p>
     </div>
   `;
 }

@@ -9,6 +9,7 @@ const aspectSlotReadinessFile = "outputs/diablo4-aspect-slot-readiness/aspect-sl
 const deltaUnblockPlanFile = "outputs/diablo4-delta-unblock-plan/delta-unblock-plan.json";
 const targetBucketEngineFile = "outputs/diablo4-target-bucket-engine/target-bucket-engine.json";
 const fineBucketExtractionPlanFile = "outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json";
+const additiveBucketSourceConclusionFile = "outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const aspectSlotNextSourcePlanFile = "outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json";
 
 function readJson(filePath) {
@@ -240,6 +241,7 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
 function actionForGate(gateId, plan, context = {}) {
   const deltaPlan = context.deltaUnblockPlan;
   const fineBucketPlan = context.fineBucketExtractionPlan;
+  const additiveBucketConclusion = context.additiveBucketSourceConclusion;
   const aspectSlotPlan = context.aspectSlotNextSourcePlan;
   const gateActions = {
     "blocked-delta-cleared": {
@@ -293,6 +295,15 @@ function actionForGate(gateId, plan, context = {}) {
             nextStepId: fineBucketPlan.summary?.nextStepId ?? null,
             nextStepTitle: fineBucketPlan.summary?.nextStepTitle ?? null,
             assessment: fineBucketPlan.summary?.assessment?.kind ?? null,
+            sourceConclusion: additiveBucketConclusion
+              ? {
+                  file: additiveBucketSourceConclusionFile,
+                  assessment: additiveBucketConclusion.summary?.assessment?.kind ?? null,
+                  confidence: additiveBucketConclusion.summary?.assessment?.confidence ?? null,
+                  localEvidenceExhausted: additiveBucketConclusion.summary?.localEvidenceExhausted === true,
+                  nextAction: additiveBucketConclusion.summary?.assessment?.nextAction ?? null,
+                }
+              : null,
           }
         : null,
     },
@@ -381,6 +392,7 @@ const aspectSlotReadiness = readOptionalJson(aspectSlotReadinessFile);
 const deltaUnblockPlan = readOptionalJson(deltaUnblockPlanFile);
 const targetBucketEngine = readOptionalJson(targetBucketEngineFile);
 const fineBucketExtractionPlan = readOptionalJson(fineBucketExtractionPlanFile);
+const additiveBucketSourceConclusion = readOptionalJson(additiveBucketSourceConclusionFile);
 const aspectSlotNextSourcePlan = readOptionalJson(aspectSlotNextSourcePlanFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
@@ -414,7 +426,12 @@ const recommendedStrictByClass = byClass
 
 const validStrictBuilds = recommendedStrictByClass.filter((row) => row.strictConstraintValid);
 const reliableStrictBuilds = recommendedStrictByClass.filter((row) => row.reliableOptimizerReady);
-const actionQueue = buildActionQueue(recommendedStrictByClass, { deltaUnblockPlan, fineBucketExtractionPlan, aspectSlotNextSourcePlan });
+const actionQueue = buildActionQueue(recommendedStrictByClass, {
+  deltaUnblockPlan,
+  fineBucketExtractionPlan,
+  additiveBucketSourceConclusion,
+  aspectSlotNextSourcePlan,
+});
 
 const report = {
   generatedAt: new Date().toISOString(),
@@ -428,6 +445,7 @@ const report = {
     deltaUnblockPlanFile: deltaUnblockPlan ? deltaUnblockPlanFile : null,
     targetBucketEngineFile: targetBucketEngine ? targetBucketEngineFile : null,
     fineBucketExtractionPlanFile: fineBucketExtractionPlan ? fineBucketExtractionPlanFile : null,
+    additiveBucketSourceConclusionFile: additiveBucketSourceConclusion ? additiveBucketSourceConclusionFile : null,
     aspectSlotNextSourcePlanFile: aspectSlotNextSourcePlan ? aspectSlotNextSourcePlanFile : null,
   },
   summary: {
@@ -467,6 +485,12 @@ const report = {
     ? {
         file: fineBucketExtractionPlanFile,
         summary: fineBucketExtractionPlan.summary,
+      }
+    : null,
+  additiveBucketSourceConclusion: additiveBucketSourceConclusion
+    ? {
+        file: additiveBucketSourceConclusionFile,
+        summary: additiveBucketSourceConclusion.summary,
       }
     : null,
   aspectSlotNextSourcePlan: aspectSlotNextSourcePlan

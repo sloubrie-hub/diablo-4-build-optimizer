@@ -9057,3 +9057,30 @@ Le plan buckets fins expose maintenant comme prochaine action :
 Decision :
 
 Les variantes locales autour de `949/994`, des chaines `Bonus_Percent_Per_Power`, des empreintes structurelles et des tables candidates sont fermees pour la promotion. La prochaine preuve doit venir d'une source externe fiable ou d'une nouvelle famille de records binaires qui classe explicitement les modifiers en additif/multiplicatif. Aucun changement de `reliableDps`.
+
+## Exposition de la conclusion additive dans le plan et le site
+
+La conclusion `additive-bucket-local-source-evidence-exhausted` est maintenant rattachee directement au plan optimiseur cible et visible dans l'interface locale.
+
+Fichiers modifies :
+
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultats :
+
+- le plan optimiseur lit `outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json`
+- le rapport expose `additiveBucketSourceConclusion.summary`
+- l'action `fine-buckets-ready` porte maintenant un `sourceConclusion` avec :
+  - assessment `additive-bucket-local-source-evidence-exhausted`
+  - confiance `high`
+  - `localEvidenceExhausted true`
+  - prochaine action : `Basculer vers une source externe fiable ou une nouvelle famille de records binaires; garder les candidats hors reliableDps.`
+- le site affiche un panneau `Conclusion source additive` avec `6` pistes, `0` prete, `6` bloquees, source nommee absente et bucket additif toujours bloque
+
+Decision :
+
+Cette etape ne debloque pas le calcul fiable. Elle rend visible, dans le plan de travail principal, que la piste locale additive est terminee et que la prochaine avancee utile doit venir d'une source externe fiable ou d'une nouvelle famille de records binaires.
