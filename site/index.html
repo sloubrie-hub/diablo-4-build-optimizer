@@ -76,6 +76,18 @@
           </div>
         </div>
         <div id="buildExportStatus" class="build-export-status" aria-live="polite"></div>
+        <div class="user-scenario-panel" aria-label="Scenario utilisateur what-if">
+          <label class="mode-toggle">
+            <input type="checkbox" id="userScenarioSf33">
+            <span>SF_33 utilisateur</span>
+          </label>
+          <label class="scenario-range">
+            <span>Uptime</span>
+            <input id="userScenarioUptime" type="range" min="0" max="100" step="5" value="100">
+            <strong id="userScenarioUptimeValue">100%</strong>
+          </label>
+          <div class="status-pill" id="userScenarioStatus">What-if utilisateur inactif</div>
+        </div>
         <div id="buildSummary" class="build-summary"></div>
         <div id="buildList" class="build-list"></div>
         <div class="build-import">

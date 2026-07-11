@@ -9262,3 +9262,47 @@ Preuves refusees :
 Decision :
 
 La prochaine phase doit viser une preuve externe fiable, une nouvelle famille binaire, ou une hypothese utilisateur explicitement separee. `reliableDps` reste strict.
+
+## Scenario utilisateur what-if pour 1663210
+
+L'option la plus prometteuse a court terme a ete implementee : exposer le delta `48960` comme une hypothese utilisateur configurable, sans le promouvoir en DPS fiable.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-user-whatif-scenarios.js`
+- `outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/index.html`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Scenario :
+
+- id : `user-scenario-1663210-sf33-uptime`
+- asset : `1663210`
+- strict : `163200`
+- delta brut : `48960`
+- DPS max configure : `212160`
+- controles : `SF_33 utilisateur`, `uptime utilisateur`
+- formule : `configuredWhatIfDps = strictDps + (blockedDeltaDps * uptime)` quand `SF_33 utilisateur` est actif
+
+Impact site :
+
+- nouveau controle dans `Build courant`
+- le toggle `SF_33 utilisateur` active le mode what-if
+- le slider `Uptime` module le delta configure
+- le statut affiche le delta what-if utilisateur applique
+- l'export/import JSON transporte `userScenario`
+
+Garde-fous :
+
+- `canUseForReliableDps false`
+- `canUseForRanking false` pour le ranking fiable
+- `reliableDps` reste strict-only
+- l'hypothese ne ferme pas les preuves `SF_32`, `SF_33` ou uptime
+
+Decision :
+
+Le site peut maintenant simuler un scenario utilisateur propre, mais ce scenario reste separe du DPS fiable et des preuves jeu.

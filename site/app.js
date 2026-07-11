@@ -8,6 +8,7 @@ const ASPECT_SLOT_NEXT_SOURCE_PLAN_URL = "../outputs/diablo4-aspect-slot-next-so
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
+const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
 
 const state = {
@@ -21,6 +22,11 @@ const state = {
   bonusSelectorSourceProof: null,
   additiveBucketSourceConclusion: null,
   nextEvidenceRoadmap: null,
+  userWhatIfScenarios: null,
+  userScenario: {
+    sf33Active: false,
+    uptime: 1,
+  },
   selectedAssetId: null,
   filter: "all",
   includeCandidates: false,
@@ -65,6 +71,7 @@ async function boot() {
     await loadBonusSelectorSourceProof();
     await loadAdditiveBucketSourceConclusion();
     await loadNextEvidenceRoadmap();
+    await loadUserWhatIfScenarios();
     restoreState();
     state.selectedAssetId = selectRestoredAsset(state.dataset);
     byId("datasetStatus").textContent = "Dataset charge";
@@ -109,6 +116,16 @@ async function boot() {
       setBuildExportStatus("");
       render();
     });
+    byId("userScenarioSf33").addEventListener("change", (event) => {
+      state.userScenario.sf33Active = event.target.checked;
+      if (state.userScenario.sf33Active) state.includeCandidates = true;
+      render();
+    });
+    byId("userScenarioUptime").addEventListener("input", (event) => {
+      state.userScenario.uptime = normalizeUptimeValue(Number(event.target.value) / 100);
+      if (state.userScenario.uptime > 0 && state.userScenario.sf33Active) state.includeCandidates = true;
+      render();
+    });
     byId("exportBuild").addEventListener("click", exportBuildJson);
     byId("importBuild").addEventListener("click", importBuildJson);
     document.addEventListener("click", handleGlobalClick);
@@ -143,6 +160,10 @@ function restoreState() {
     state.targetEntitySearch = saved.targetEntitySearch ?? state.targetEntitySearch;
     state.selectedTargetEntityId = saved.selectedTargetEntityId ?? state.selectedTargetEntityId;
     state.buildAssetIds = Array.isArray(saved.buildAssetIds) ? saved.buildAssetIds.map(Number) : [];
+    state.userScenario = {
+      sf33Active: Boolean(saved.userScenario?.sf33Active),
+      uptime: normalizeUptimeValue(saved.userScenario?.uptime ?? 1),
+    };
   } catch {
     state.buildAssetIds = [];
   }
@@ -161,6 +182,7 @@ function persistState() {
     targetEntitySearch: state.targetEntitySearch,
     selectedTargetEntityId: state.selectedTargetEntityId,
     buildAssetIds: state.buildAssetIds,
+    userScenario: state.userScenario,
   };
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
@@ -198,6 +220,9 @@ function syncControls() {
   byId("targetEntityType").value = state.targetEntityType;
   byId("targetEntityClass").value = state.targetEntityClass;
   byId("targetEntitySearch").value = state.targetEntitySearch;
+  byId("userScenarioSf33").checked = state.userScenario.sf33Active;
+  byId("userScenarioUptime").value = String(Math.round(normalizeUptimeValue(state.userScenario.uptime) * 100));
+  byId("userScenarioUptimeValue").textContent = formatPercent(normalizeUptimeValue(state.userScenario.uptime) * 100);
 }
 
 function render() {
@@ -250,6 +275,10 @@ async function loadAdditiveBucketSourceConclusion() {
 
 async function loadNextEvidenceRoadmap() {
   state.nextEvidenceRoadmap = await fetchOptionalJson(NEXT_EVIDENCE_ROADMAP_URL);
+}
+
+async function loadUserWhatIfScenarios() {
+  state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
 
 async function fetchOptionalJson(url) {
@@ -1092,6 +1121,7 @@ function renderBuildSelection() {
   const assets = buildAssets();
   const composition = buildComposition(assets);
   const totals = composition.totals;
+  renderUserScenarioStatus(composition);
   byId("buildSummary").innerHTML = `
     <article class="build-metric">
       <span>Assets retenus</span>
@@ -1164,7 +1194,7 @@ function buildTotals(assets) {
 
 function buildComposition(assets) {
   const rows = assets.map((asset) => {
-    const score = dpsScore(asset);
+    const score = configuredDpsScore(asset);
     const candidateDelta = score.candidateDps == null ? 0 : score.candidateDps - score.strictDps;
     const blockers = buildAssetBlockers(asset, score);
     return {
@@ -1202,11 +1232,15 @@ function buildComposition(assets) {
   const blockers = buildCompositionBlockers(rows);
   const constraints = assessBuildConstraints(rows);
   const bucketEngine = buildBucketEnginePreview(totals, buckets, coverage, blockers, rows, constraints);
+  const userScenario = userScenarioSnapshot();
+  userScenario.deltaDps = rows.reduce((sum, row) => sum + Number(row.userScenario?.configuredDeltaDps || 0), 0);
+  userScenario.rawBlockedDeltaDps = rows.reduce((sum, row) => sum + Number(row.userScenario?.rawBlockedDeltaDps || 0), 0);
 
   return {
     schemaVersion: 1,
     method: "target-modifier-sum-v1",
     mode: state.includeCandidates ? "what-if" : "strict",
+    userScenario,
     note: "Prototype composition: sums normalized estimatedDps modifiers. It does not yet model Diablo IV additive/multiplicative buckets, caps, conflicts, uptime, or equipment slots.",
     totals,
     buckets,
@@ -1217,6 +1251,64 @@ function buildComposition(assets) {
     blockers,
     quality: buildCompositionQuality(totals, coverage, buckets),
     warnings: buildCompositionWarnings(totals, coverage, buckets),
+  };
+}
+
+function renderUserScenarioStatus(composition) {
+  const scenario = userScenarioDefinition();
+  const applied = composition.userScenario?.applied === true;
+  byId("userScenarioSf33").checked = state.userScenario.sf33Active;
+  byId("userScenarioUptime").value = String(Math.round(normalizeUptimeValue(state.userScenario.uptime) * 100));
+  byId("userScenarioUptimeValue").textContent = formatPercent(normalizeUptimeValue(state.userScenario.uptime) * 100);
+  byId("userScenarioStatus").textContent = scenario
+    ? applied
+      ? `What-if utilisateur +${formatNumber(composition.userScenario.deltaDps)} DPS`
+      : "What-if utilisateur inactif"
+    : "Scenario utilisateur absent";
+}
+
+function userScenarioDefinition() {
+  return (state.userWhatIfScenarios?.scenarios ?? [])[0] ?? null;
+}
+
+function userScenarioSnapshot() {
+  const scenario = userScenarioDefinition();
+  const sf33Active = state.userScenario.sf33Active === true;
+  const uptime = normalizeUptimeValue(state.userScenario.uptime);
+  return {
+    scenarioId: scenario?.id ?? "user-scenario-1663210-sf33-uptime",
+    assetId: scenario?.assetId ?? 1663210,
+    sf33Active,
+    uptime,
+    applied: state.includeCandidates && sf33Active,
+    reliableDpsAffected: false,
+    mode: "what-if-user-configured",
+  };
+}
+
+function configuredDpsScore(asset) {
+  const score = dpsScore(asset);
+  const scenario = userScenarioDefinition();
+  const scenarioAssetId = Number(scenario?.assetId ?? 1663210);
+  if (Number(asset.assetId) !== scenarioAssetId) return score;
+  const rawDelta = Number(score.candidateDeltaDps || scenario?.blockedDeltaDps || 0);
+  const uptime = normalizeUptimeValue(state.userScenario.uptime);
+  const applied = state.includeCandidates && state.userScenario.sf33Active === true;
+  const configuredDelta = applied ? Math.round(rawDelta * uptime) : 0;
+  return {
+    ...score,
+    candidateDps: score.strictDps + configuredDelta,
+    candidateDeltaDps: configuredDelta,
+    blockedCandidates: score.blockedCandidates,
+    userScenario: {
+      scenarioId: scenario?.id ?? "user-scenario-1663210-sf33-uptime",
+      rawBlockedDeltaDps: rawDelta,
+      configuredDeltaDps: configuredDelta,
+      uptime,
+      sf33Active: state.userScenario.sf33Active === true,
+      applied,
+      reliableDpsAffected: false,
+    },
   };
 }
 
@@ -1631,7 +1723,7 @@ function renderBuildBlockers(blockers) {
 }
 
 function buildAssetMeta(asset) {
-  const score = dpsScore(asset);
+  const score = configuredDpsScore(asset);
   const active = effectiveDps(asset).displayDps;
   const delta = score.candidateDeltaDps > 0 ? ` - delta +${formatNumber(score.candidateDeltaDps)}` : "";
   return `strict ${formatNumber(score.strictDps)} - actif ${formatNumber(active)} - ${score.source}${delta}`;
@@ -1647,10 +1739,11 @@ function buildExportPayload() {
     mode: state.includeCandidates ? "what-if" : "strict",
     totals,
     composition,
+    userScenario: composition.userScenario,
     assetIds: assets.map((asset) => asset.assetId),
     assets: assets.map((asset) => {
       const candidate = bestCandidate(asset);
-      const score = dpsScore(asset);
+      const score = configuredDpsScore(asset);
       return {
         assetId: asset.assetId,
         label: asset.label,
@@ -1665,6 +1758,7 @@ function buildExportPayload() {
           formula: candidate.candidateFormula,
           estimatedDps: score.candidateDps ?? candidate.scenarioImpact?.estimatedDps ?? 0,
           deltaVsStrictDps: score.candidateDeltaDps ?? candidate.scenarioImpact?.deltaVsStrictDps ?? 0,
+          userScenario: score.userScenario ?? null,
           promotionStatus: candidate.promotionStatus?.kind ?? "unknown",
           blockers: candidate.promotionStatus?.blockers ?? [],
         } : null,
@@ -1703,6 +1797,13 @@ function importBuildJson() {
     state.selectedAssetId = state.buildAssetIds[0] ?? state.selectedAssetId;
     if (payload.mode === "what-if") state.includeCandidates = true;
     if (payload.mode === "strict") state.includeCandidates = false;
+    if (payload.userScenario && typeof payload.userScenario === "object") {
+      state.userScenario = {
+        sf33Active: Boolean(payload.userScenario.sf33Active),
+        uptime: normalizeUptimeValue(payload.userScenario.uptime ?? 1),
+      };
+      if (state.userScenario.sf33Active) state.includeCandidates = true;
+    }
     byId("buildImportText").value = "";
     syncControls();
     setBuildExportStatus(`Import OK (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})`);
@@ -1778,22 +1879,23 @@ function optimizerSearchText(asset) {
 }
 
 function optimizerScore(asset) {
-  if (state.optimizerMode === "strict") return dpsScore(asset).strictDps;
+  if (state.optimizerMode === "strict") return configuredDpsScore(asset).strictDps;
   if (state.optimizerMode === "candidate") return bestCandidateDelta(asset);
   return effectiveDps(asset).displayDps;
 }
 
 function optimizerScoreLabel(asset) {
-  if (state.optimizerMode === "strict") return `DPS strict ${formatNumber(dpsScore(asset).strictDps)}`;
+  if (state.optimizerMode === "strict") return `DPS strict ${formatNumber(configuredDpsScore(asset).strictDps)}`;
   if (state.optimizerMode === "candidate") return `Gain candidat +${formatNumber(bestCandidateDelta(asset))}`;
   return `${state.includeCandidates ? "DPS what-if" : "DPS strict"} ${formatNumber(effectiveDps(asset).displayDps)}`;
 }
 
 function optimizerMeta(asset) {
-  const strict = `strict ${formatNumber(dpsScore(asset).strictDps)}`;
+  const score = configuredDpsScore(asset);
+  const strict = `strict ${formatNumber(score.strictDps)}`;
   const candidate = bestCandidate(asset);
   if (!candidate) return `${strict} - ${asset.tags.join(", ") || "sans tag"}`;
-  return `${strict} - what-if ${formatNumber(dpsScore(asset).candidateDps ?? candidate.scenarioImpact.estimatedDps)} - bloque`;
+  return `${strict} - what-if ${formatNumber(score.candidateDps ?? candidate.scenarioImpact.estimatedDps)} - configure`;
 }
 
 function renderDetail() {
@@ -1957,12 +2059,12 @@ function bestCandidate(asset) {
 }
 
 function bestCandidateDelta(asset) {
-  return dpsScore(asset).candidateDeltaDps ?? bestCandidate(asset)?.scenarioImpact?.deltaVsStrictDps ?? 0;
+  return configuredDpsScore(asset).candidateDeltaDps ?? bestCandidate(asset)?.scenarioImpact?.deltaVsStrictDps ?? 0;
 }
 
 function effectiveDps(asset) {
   const candidate = bestCandidate(asset);
-  const score = dpsScore(asset);
+  const score = configuredDpsScore(asset);
   if (state.includeCandidates && candidate) {
     return {
       label: "DPS what-if",
@@ -1979,7 +2081,7 @@ function effectiveDps(asset) {
 
 function renderComparisonSection(asset) {
   const candidate = bestCandidate(asset);
-  const score = dpsScore(asset);
+  const score = configuredDpsScore(asset);
   const strict = score.strictDps;
   const candidateDps = score.candidateDps ?? candidate?.scenarioImpact?.estimatedDps ?? strict;
   const delta = score.candidateDeltaDps ?? candidate?.scenarioImpact?.deltaVsStrictDps ?? 0;

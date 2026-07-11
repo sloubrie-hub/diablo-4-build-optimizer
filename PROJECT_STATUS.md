@@ -734,3 +734,12 @@ Build de reference :
   - assessment : `next-evidence-roadmap-required`, confiance `high`, promotion `false`
   - actions : source externe fiable, nouvelle famille de records binaires, hypothese utilisateur separee
   - plan optimiseur et site : nouveau panneau `Plan prochaines preuves`
+- scenario utilisateur what-if ajoute pour `1663210`
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-user-whatif-scenarios.js`
+  - rapport genere : `outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json`
+  - scenario : `user-scenario-1663210-sf33-uptime`
+  - controles site : toggle `SF_33 utilisateur`, slider `Uptime`
+  - formule : `strictDps + blockedDeltaDps * uptime` seulement si `SF_33 utilisateur` est actif et le mode what-if est actif
+  - valeurs : strict `163200`, delta brut `48960`, DPS max configure `212160`
+  - export/import build transporte maintenant `userScenario`
+  - decision : simulation what-if configurable, `reliableDps` reste strict et `canUseForReliableDps false`

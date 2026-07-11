@@ -13,6 +13,7 @@ const fineBucketExtractionPlanFile = "outputs/diablo4-fine-bucket-extraction-pla
 const additiveBucketSourceConclusionFile = "outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const aspectSlotNextSourcePlanFile = "outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json";
 const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
+const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -447,6 +448,7 @@ const fineBucketExtractionPlan = readOptionalJson(fineBucketExtractionPlanFile);
 const additiveBucketSourceConclusion = readOptionalJson(additiveBucketSourceConclusionFile);
 const aspectSlotNextSourcePlan = readOptionalJson(aspectSlotNextSourcePlanFile);
 const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
+const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -504,6 +506,7 @@ const report = {
     additiveBucketSourceConclusionFile: additiveBucketSourceConclusion ? additiveBucketSourceConclusionFile : null,
     aspectSlotNextSourcePlanFile: aspectSlotNextSourcePlan ? aspectSlotNextSourcePlanFile : null,
     nextEvidenceRoadmapFile: nextEvidenceRoadmap ? nextEvidenceRoadmapFile : null,
+    userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -567,6 +570,13 @@ const report = {
         file: nextEvidenceRoadmapFile,
         summary: nextEvidenceRoadmap.summary,
         roadmap: nextEvidenceRoadmap.roadmap,
+      }
+    : null,
+  userWhatIfScenarios: userWhatIfScenarios
+    ? {
+        file: userWhatIfScenariosFile,
+        summary: userWhatIfScenarios.summary,
+        scenarios: userWhatIfScenarios.scenarios,
       }
     : null,
   byClass,

@@ -973,6 +973,39 @@ input[type="search"] {
   padding: 14px 14px 0;
 }
 
+.user-scenario-panel {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: #f9fff7;
+  padding: 10px 14px;
+}
+
+.scenario-range {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 1fr) 48px;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.scenario-range input {
+  width: 100%;
+  accent-color: var(--green);
+}
+
+.scenario-range strong {
+  color: var(--ink);
+  font-size: 12px;
+  text-align: right;
+}
+
 .build-metric {
   min-height: 76px;
   border: 1px solid var(--line);
@@ -1694,6 +1727,7 @@ input[type="search"] {
   .target-action-queue,
   .target-optimizer-recommendations,
   .target-reliability-gates,
+  .user-scenario-panel,
   .blocker-audit-grid,
   .blocker-audit-cards,
   .sf32-gate-grid {
@@ -1740,6 +1774,7 @@ input[type="search"] {
   .target-optimizer-recommendations,
   .target-optimizer-card,
   .target-reliability-gates,
+  .user-scenario-panel,
   .build-summary,
   .build-list,
   .build-import {
