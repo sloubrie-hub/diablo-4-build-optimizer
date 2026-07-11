@@ -8890,3 +8890,60 @@ La preuve source des selecteurs expose maintenant :
 Decision :
 
 Ne pas utiliser les nouveaux peers comme preuve `949/994`. Ils valident un layout commun, pas une semantique de bucket. La prochaine piste doit chercher une table source hors empreinte fixe ou decoder un champ proprietaire qui relie explicitement le selecteur a une famille additive/multiplicative.
+
+## Scan des termes source de buckets
+
+Apres le scan structurel, une recherche texte ciblee a ete ajoutee pour verifier si le corpus decode contient des termes explicites comme `additive`, `multiplicative`, `bucket`, `damage bucket`, ou des termes source proches des selecteurs `949/994`, de `12337`, de `10.0`, ou des chaines `Bonus_Percent_Per_Power`.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/scan-bucket-source-term-corpus.js`
+- `outputs/diablo4-bucket-source-term-corpus/bucket-source-term-corpus.json`
+- `work/diablo4-data-exporter/scripts/audit-bonus-selector-source-proof.js`
+- `outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json`
+- `work/diablo4-data-exporter/scripts/audit-additive-bucket-source.js`
+- `outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json`
+- `work/diablo4-data-exporter/scripts/build-fine-bucket-extraction-plan.js`
+- `outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Methode :
+
+- scanner les `123` payloads decodes
+- extraire les chaines ASCII
+- chercher les groupes de termes `bucket-family`, `damage-modifier-source` et `formula-source`
+- calculer les distances avec les valeurs surveillees `949`, `994`, `12337`, `10.0`
+- detecter les chaines proches de `Bonus_Percent_Per_Power`
+- ne considerer comme candidat source que les termes `additive/multiplicative/bucket` relies a une valeur surveillee ou a une chaine cible
+
+Resultats :
+
+- fichiers scannes : `123`
+- hits source/formule : `70`
+- hits bucket/additif/multiplicatif : `0`
+- hits proches de valeurs surveillees : `46`
+- hits lies a `Bonus_Percent_Per_Power` : `14`
+- candidats source : `0`
+- assessment : `bucket-source-terms-not-found`
+- `sourceProofReady false`
+- promotion : `false`
+
+Lecture :
+
+Le corpus contient des chaines de type formule (`SF_*`, `Script Formula`, `Static Value`, `Affix_Value`, `Bonus_Percent_Per_Power`) et quelques termes de modifier/source. Mais aucun terme ne nomme une famille `additive`, `multiplicative` ou `bucket`, et aucun hit texte ne suffit a classer les selecteurs.
+
+Impact :
+
+La preuve source des selecteurs expose maintenant :
+
+- `bucketSourceTermsAssessment bucket-source-terms-not-found`
+- `bucketSourceTermHits 70`
+- `bucketSourceCandidateHits 0`
+- `bucketSourceNearWatchedHits 46`
+- `bucketSourceBonusPercentHits 14`
+- `promotionReady false`
+
+Decision :
+
+La piste texte locale est bloquee. Les selecteurs `949/994` restent non classes, et les candidats `Bonus_Percent_Per_Power` ne doivent pas alimenter le bucket additif ni `reliableDps`. La suite doit viser une table binaire non textuelle ou une source externe fiable.

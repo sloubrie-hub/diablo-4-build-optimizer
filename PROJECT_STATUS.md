@@ -677,3 +677,9 @@ Build de reference :
 - source nommee : `0` match source ; assessment `bonus-selector-structural-corpus-has-layout-only-peers`, promotion `false`
 - preuve source selecteurs regeneree : `structuralCorpusAssessment bonus-selector-structural-corpus-has-layout-only-peers`, `structuralCorpusSourceNamedMatches 0`
 - decision : les nouveaux peers prouvent seulement un layout commun ; ils ne prouvent ni `949/994`, ni additif/multiplicatif, ni `reliableDps`
+- scan termes source buckets ajoute : `work/diablo4-data-exporter/scripts/scan-bucket-source-term-corpus.js`
+- rapport genere : `outputs/diablo4-bucket-source-term-corpus/bucket-source-term-corpus.json`
+- corpus texte : `123` payloads decodes, `70` hits source/formule, `0` hit bucket/additif/multiplicatif, `46` hits proches de valeurs surveillees, `14` hits lies a `Bonus_Percent_Per_Power`
+- candidats source : `0`; assessment `bucket-source-terms-not-found`, `sourceProofReady false`, promotion `false`
+- preuve source selecteurs regeneree : `bucketSourceTermsAssessment bucket-source-terms-not-found`, `bucketSourceCandidateHits 0`
+- decision : la piste texte locale ne nomme aucune famille de bucket ; chercher ensuite une table binaire non textuelle ou une source externe fiable

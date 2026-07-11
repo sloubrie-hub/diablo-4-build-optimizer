@@ -69,6 +69,11 @@ const selectorStructuralCorpusNewExactAssets = selectorSourceProof?.summary?.str
 const selectorStructuralCorpusExactMatchesWithSelectorAnchors = selectorSourceProof?.summary?.structuralCorpusExactMatchesWithSelectorAnchors ?? null;
 const selectorStructuralCorpusNewExactAssetsWithSelectorAnchors = selectorSourceProof?.summary?.structuralCorpusNewExactAssetsWithSelectorAnchors ?? [];
 const selectorStructuralCorpusSourceNamedMatches = selectorSourceProof?.summary?.structuralCorpusSourceNamedMatches ?? null;
+const bucketSourceTermsAssessment = selectorSourceProof?.summary?.bucketSourceTermsAssessment ?? null;
+const bucketSourceTermHits = selectorSourceProof?.summary?.bucketSourceTermHits ?? null;
+const bucketSourceCandidateHits = selectorSourceProof?.summary?.bucketSourceCandidateHits ?? null;
+const bucketSourceNearWatchedHits = selectorSourceProof?.summary?.bucketSourceNearWatchedHits ?? null;
+const bucketSourceBonusPercentHits = selectorSourceProof?.summary?.bucketSourceBonusPercentHits ?? null;
 const sourceProofReady = selectorSourceProof?.summary?.promotionReady === true;
 const fieldOwnershipProven = sf32Decision?.summary?.promotionReady === true;
 const hasBonusPercentCorpus = explicitAssets.length > 0 || matrixAssets.length > 0;
@@ -146,6 +151,11 @@ const report = {
     selectorStructuralCorpusExactMatchesWithSelectorAnchors,
     selectorStructuralCorpusNewExactAssetsWithSelectorAnchors,
     selectorStructuralCorpusSourceNamedMatches,
+    bucketSourceTermsAssessment,
+    bucketSourceTermHits,
+    bucketSourceCandidateHits,
+    bucketSourceNearWatchedHits,
+    bucketSourceBonusPercentHits,
     sourceProofReady,
     fieldOwnershipProven,
     hasUnanchoredUseful,
@@ -168,6 +178,7 @@ const report = {
         selectorSourceProofAssessment: selectorSourceProof?.summary?.assessment?.kind ?? null,
         selectorStructuralAssessment,
         selectorStructuralCorpusAssessment,
+        bucketSourceTermsAssessment,
       },
     },
   },

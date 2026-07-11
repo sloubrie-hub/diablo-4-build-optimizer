@@ -9,7 +9,8 @@ const tableNumericContextsFile = process.argv[6] ?? "outputs/diablo4-sf32-table-
 const additiveBucketSourceFile = process.argv[7] ?? "outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json";
 const structuralFamilyFile = process.argv[8] ?? "outputs/diablo4-bonus-selector-structural-family/bonus-selector-structural-family.json";
 const structuralCorpusFile = process.argv[9] ?? "outputs/diablo4-bonus-selector-structural-corpus/bonus-selector-structural-corpus.json";
-const outDir = process.argv[10] ?? "outputs/diablo4-bonus-selector-source-proof";
+const bucketSourceTermsFile = process.argv[10] ?? "outputs/diablo4-bucket-source-term-corpus/bucket-source-term-corpus.json";
+const outDir = process.argv[11] ?? "outputs/diablo4-bonus-selector-source-proof";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -39,6 +40,7 @@ const tableNumericContexts = readOptionalJson(tableNumericContextsFile);
 const additiveBucketSource = readOptionalJson(additiveBucketSourceFile);
 const structuralFamily = readOptionalJson(structuralFamilyFile);
 const structuralCorpus = readOptionalJson(structuralCorpusFile);
+const bucketSourceTerms = readOptionalJson(bucketSourceTermsFile);
 
 const matrixGroups = selectorMatrix?.groups ?? [];
 const matrixRows = selectorMatrix?.rows ?? [];
@@ -120,6 +122,16 @@ const sourceSignals = {
     sourceProofReady: structuralCorpus?.summary?.sourceProofReady === true,
     promotionReady: structuralCorpus?.summary?.promotionReady === true,
   },
+  bucketSourceTerms: {
+    assessment: assessmentKind(bucketSourceTerms),
+    hits: bucketSourceTerms?.summary?.hits ?? null,
+    bucketTermHits: bucketSourceTerms?.summary?.bucketTermHits ?? null,
+    nearWatchedHits: bucketSourceTerms?.summary?.nearWatchedHits ?? null,
+    bonusPercentHits: bucketSourceTerms?.summary?.bonusPercentHits ?? null,
+    candidateSourceHits: bucketSourceTerms?.summary?.candidateSourceHits ?? null,
+    sourceProofReady: bucketSourceTerms?.summary?.sourceProofReady === true,
+    promotionReady: bucketSourceTerms?.summary?.promotionReady === true,
+  },
 };
 
 const sourceNamed =
@@ -128,7 +140,8 @@ const sourceNamed =
   Number(sourceSignals.localTableAlternatives.usefulTableCandidateContexts || 0) > 0 ||
   Number(sourceSignals.tableNumericContexts.potentialSourceContexts || 0) > 0 ||
   Number(sourceSignals.decodedDictionary.dictionaryHitsNearWatchedNumbers || 0) > 0 ||
-  Number(sourceSignals.structuralCorpus.sourceNamedMatches || 0) > 0;
+  Number(sourceSignals.structuralCorpus.sourceNamedMatches || 0) > 0 ||
+  Number(sourceSignals.bucketSourceTerms.candidateSourceHits || 0) > 0;
 
 const selectorFamiliesClassified = readyFamilies.length;
 const assessment = sourceNamed && readyFamilies.length === selectorFamilies.length
@@ -162,6 +175,7 @@ const report = {
     additiveBucketSourceFile: additiveBucketSource ? additiveBucketSourceFile : null,
     structuralFamilyFile: structuralFamily ? structuralFamilyFile : null,
     structuralCorpusFile: structuralCorpus ? structuralCorpusFile : null,
+    bucketSourceTermsFile: bucketSourceTerms ? bucketSourceTermsFile : null,
   },
   summary: {
     selectorsObserved: selectorFamilies.length,
@@ -180,6 +194,11 @@ const report = {
     structuralCorpusExactMatchesWithSelectorAnchors: sourceSignals.structuralCorpus.exactMatchesWithSelectorAnchors,
     structuralCorpusNewExactAssetsWithSelectorAnchors: sourceSignals.structuralCorpus.newExactAssetsWithSelectorAnchors,
     structuralCorpusSourceNamedMatches: sourceSignals.structuralCorpus.sourceNamedMatches,
+    bucketSourceTermsAssessment: sourceSignals.bucketSourceTerms.assessment,
+    bucketSourceTermHits: sourceSignals.bucketSourceTerms.hits,
+    bucketSourceCandidateHits: sourceSignals.bucketSourceTerms.candidateSourceHits,
+    bucketSourceNearWatchedHits: sourceSignals.bucketSourceTerms.nearWatchedHits,
+    bucketSourceBonusPercentHits: sourceSignals.bucketSourceTerms.bonusPercentHits,
     promotionReady: assessment.promotionReady,
     matrixAssessment: assessmentKind(selectorMatrix),
     additiveSourceAssessment: assessmentKind(additiveBucketSource),
