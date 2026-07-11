@@ -726,3 +726,11 @@ Build de reference :
   - kinds : `field-level-parser-required`, `sf33-trigger-build-state-unmapped`, `uptime-not-proven`
   - le sous-plan prefere la conclusion recente `delta-promotion-local-evidence-exhausted` pour la prochaine action
   - prochaine action affichee : chercher une source externe fiable, un nouveau record parent binaire, ou exposer une hypothese utilisateur separee ; ne pas modifier `reliableDps`
+- roadmap prochaines preuves ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-next-evidence-roadmap.js`
+  - rapport genere : `outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json`
+  - domaines consolides : `delta-1663210`, `slots-1461593`, `additive-buckets`
+  - resultat : `3` domaines bloques, `3` domaines localement epuises, `3` actions, `2` priorite haute
+  - assessment : `next-evidence-roadmap-required`, confiance `high`, promotion `false`
+  - actions : source externe fiable, nouvelle famille de records binaires, hypothese utilisateur separee
+  - plan optimiseur et site : nouveau panneau `Plan prochaines preuves`

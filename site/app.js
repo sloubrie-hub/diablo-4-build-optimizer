@@ -7,6 +7,7 @@ const DELTA_PROMOTION_CONCLUSION_URL = "../outputs/diablo4-delta-promotion-concl
 const ASPECT_SLOT_NEXT_SOURCE_PLAN_URL = "../outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json";
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
+const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
 
 const state = {
@@ -19,6 +20,7 @@ const state = {
   aspectSlotNextSourcePlan: null,
   bonusSelectorSourceProof: null,
   additiveBucketSourceConclusion: null,
+  nextEvidenceRoadmap: null,
   selectedAssetId: null,
   filter: "all",
   includeCandidates: false,
@@ -62,6 +64,7 @@ async function boot() {
     await loadAspectSlotNextSourcePlan();
     await loadBonusSelectorSourceProof();
     await loadAdditiveBucketSourceConclusion();
+    await loadNextEvidenceRoadmap();
     restoreState();
     state.selectedAssetId = selectRestoredAsset(state.dataset);
     byId("datasetStatus").textContent = "Dataset charge";
@@ -245,6 +248,10 @@ async function loadAdditiveBucketSourceConclusion() {
   state.additiveBucketSourceConclusion = await fetchOptionalJson(ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL);
 }
 
+async function loadNextEvidenceRoadmap() {
+  state.nextEvidenceRoadmap = await fetchOptionalJson(NEXT_EVIDENCE_ROADMAP_URL);
+}
+
 async function fetchOptionalJson(url) {
   try {
     const response = await fetch(url);
@@ -293,12 +300,50 @@ function renderTargetOptimizerPlan() {
     ${renderAspectSlotNextSourcePlan(state.aspectSlotNextSourcePlan ?? plan.aspectSlotNextSourcePlan)}
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
+    ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
     <div class="target-optimizer-recommendations">
       ${recommendations.map(renderTargetOptimizerRecommendation).join("") || `<div class="optimizer-empty">Aucune recommandation stricte exploitable.</div>`}
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderNextEvidenceRoadmap(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const assessment = summary.assessment ?? {};
+  const roadmap = report.roadmap ?? [];
+  return `
+    <div class="bonus-selector-proof next-evidence-roadmap">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Plan prochaines preuves</strong>
+          <span>${assessment.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.promotionReady ? "positive" : "blocked"}">
+          ${summary.promotionReady ? "pret" : "preuves requises"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Domaines", summary.domains)}
+        ${targetMetric("Bloques", summary.blockedDomains)}
+        ${targetMetric("Epuises", summary.exhaustedDomains)}
+        ${targetMetric("Actions", summary.actions)}
+      </div>
+      <div class="next-evidence-actions">
+        ${roadmap.map((item) => `
+          <article>
+            <span>${item.priority}</span>
+            <strong>${item.title}</strong>
+            <p>${item.unlocks}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${assessment.finding ?? ""}</p>
+      <p>${assessment.nextAction ?? ""}</p>
     </div>
   `;
 }

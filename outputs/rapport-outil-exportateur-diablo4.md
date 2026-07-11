@@ -9209,3 +9209,56 @@ La file d'actions affiche maintenant un sous-plan pour l'action globale, et le r
 Decision :
 
 L'action globale reste bloquee, mais elle pointe maintenant vers la bonne strategie : chercher une source externe fiable, un nouveau record parent binaire, ou exposer une hypothese utilisateur separee sans modifier `reliableDps`.
+
+## Roadmap des prochaines preuves
+
+Une roadmap transversale a ete ajoutee pour consolider les prochaines preuves acceptables apres epuisement des pistes locales principales.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-next-evidence-roadmap.js`
+- `outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultats :
+
+- domaines : `3`
+- domaines bloques : `3`
+- domaines localement epuises : `3`
+- domaines consolides :
+  - `delta-1663210`
+  - `slots-1461593`
+  - `additive-buckets`
+- actions : `3`
+- actions priorite haute : `2`
+- assessment : `next-evidence-roadmap-required`
+- confiance : `high`
+- promotion : `false`
+
+Actions :
+
+- obtenir une source externe fiable
+- chercher une nouvelle famille de records binaires
+- ajouter une hypothese utilisateur separee pour le scenario what-if
+
+Preuves acceptees :
+
+- source qui nomme explicitement les slots autorises d'un aspect
+- source qui classe `Bonus_Percent_Per_Power` en bucket additif/multiplicatif
+- source qui relie `Mod.SoilRuler_B` a une condition de build ou gameplay
+- record parent/consommateur exact ou decodeur reliant selecteur, champ, metadata et famille de calcul
+
+Preuves refusees :
+
+- noms d'affixes contenant `Helm`, `Ring` ou `2H` sans champ `allowedSlots`
+- Codex/UI/localisation
+- pairs de layout sans semantique source
+- valeurs `949/994/12337/10` sans table ou dictionnaire nomme
+
+Decision :
+
+La prochaine phase doit viser une preuve externe fiable, une nouvelle famille binaire, ou une hypothese utilisateur explicitement separee. `reliableDps` reste strict.
