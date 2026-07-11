@@ -683,3 +683,11 @@ Build de reference :
 - candidats source : `0`; assessment `bucket-source-terms-not-found`, `sourceProofReady false`, promotion `false`
 - preuve source selecteurs regeneree : `bucketSourceTermsAssessment bucket-source-terms-not-found`, `bucketSourceCandidateHits 0`
 - decision : la piste texte locale ne nomme aucune famille de bucket ; chercher ensuite une table binaire non textuelle ou une source externe fiable
+- audit tables binaires candidates ajoute : `work/diablo4-data-exporter/scripts/audit-bucket-binary-table-source.js`
+- rapport genere : `outputs/diablo4-bucket-binary-table-source/bucket-binary-table-source.json`
+- sources inspectees : `table-candidates.json`, `table-candidates-strict/table-candidates.json`, `table-candidates-strong.json`
+- valeurs surveillees trouvees : `17` hits exacts (`949`, `994`, `1663210`, `1953817`, `2302974`, `10.0 bits`), mais `0` hit utile et `0` candidat source
+- classification : `8` references asset, `8` bruits metrique/offset, `1` nombre non qualifie
+- assessment : `bucket-binary-table-source-not-found`, `sourceProofReady false`, promotion `false`
+- preuve source selecteurs regeneree : `binaryTableSourceAssessment bucket-binary-table-source-not-found`, `binaryTableSourceCandidates 0`
+- decision : les tables candidates locales ne prouvent aucune famille additif/multiplicatif ; ne pas alimenter les buckets fins ni `reliableDps`

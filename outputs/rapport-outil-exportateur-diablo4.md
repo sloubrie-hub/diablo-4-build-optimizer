@@ -8947,3 +8947,60 @@ La preuve source des selecteurs expose maintenant :
 Decision :
 
 La piste texte locale est bloquee. Les selecteurs `949/994` restent non classes, et les candidats `Bonus_Percent_Per_Power` ne doivent pas alimenter le bucket additif ni `reliableDps`. La suite doit viser une table binaire non textuelle ou une source externe fiable.
+
+## Audit des tables binaires candidates
+
+La piste suivante etait d'inspecter les artefacts de tables binaires deja extraits, non plus par chaines texte mais par valeurs surveillees. L'audit cherche si les candidats de tables contiennent `949`, `994`, `12337`, `10.0`, ou les assets `Bonus_Percent_Per_Power` dans un contexte exploitable.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/audit-bucket-binary-table-source.js`
+- `outputs/diablo4-bucket-binary-table-source/bucket-binary-table-source.json`
+- `work/diablo4-data-exporter/scripts/audit-bonus-selector-source-proof.js`
+- `outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json`
+- `work/diablo4-data-exporter/scripts/audit-additive-bucket-source.js`
+- `outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json`
+- `work/diablo4-data-exporter/scripts/build-fine-bucket-extraction-plan.js`
+- `outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Methode :
+
+- lire `outputs/diablo4-table-candidates/table-candidates.json`
+- lire `outputs/diablo4-table-candidates-strict/table-candidates.json`
+- lire `outputs/diablo4-table-candidates-strict/table-candidates-strong.json`
+- chercher les valeurs exactes `949`, `994`, `12337`, `1092616192` et les assets de la matrice `Bonus_Percent_Per_Power`
+- classer chaque hit comme reference asset, bruit metrique/offset, table-id, contexte selecteur/metadata, ou candidat source potentiel
+- refuser toute promotion si le contexte ne nomme pas une famille additive/multiplicative
+
+Resultats :
+
+- fichiers scannes : `3`
+- hits exacts : `17`
+- hits utiles : `0`
+- candidats source : `0`
+- valeurs trouvees : `949:4`, `994:4`, `1663210:4`, `1953817:1`, `2302974:3`, `1092616192:1`
+- classifications : `8` references asset, `8` bruits metrique/offset, `1` nombre non qualifie
+- assessment : `bucket-binary-table-source-not-found`
+- `sourceProofReady false`
+- promotion : `false`
+
+Lecture :
+
+Les tables candidates locales contiennent bien quelques valeurs surveillees, mais elles apparaissent comme references d'asset, scores, offsets, samples ou nombres non qualifies. Aucun contexte ne relie `949/994` a une famille de bucket, et aucun champ ne nomme `additive` ou `multiplicative`.
+
+Impact :
+
+La preuve source des selecteurs expose maintenant :
+
+- `binaryTableSourceAssessment bucket-binary-table-source-not-found`
+- `binaryTableSourceFilesScanned 3`
+- `binaryTableExactHits 17`
+- `binaryTableUsefulHits 0`
+- `binaryTableSourceCandidates 0`
+- `promotionReady false`
+
+Decision :
+
+Les tables candidates locales ne sont pas promouvables pour les buckets fins. Les selecteurs `949/994` restent non classes, et `Bonus_Percent_Per_Power` reste hors `reliableDps` tant qu'une autre famille de records ou une source externe fiable ne prouve pas la semantique additive/multiplicative.

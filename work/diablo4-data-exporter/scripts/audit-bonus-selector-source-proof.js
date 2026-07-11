@@ -10,7 +10,8 @@ const additiveBucketSourceFile = process.argv[7] ?? "outputs/diablo4-additive-bu
 const structuralFamilyFile = process.argv[8] ?? "outputs/diablo4-bonus-selector-structural-family/bonus-selector-structural-family.json";
 const structuralCorpusFile = process.argv[9] ?? "outputs/diablo4-bonus-selector-structural-corpus/bonus-selector-structural-corpus.json";
 const bucketSourceTermsFile = process.argv[10] ?? "outputs/diablo4-bucket-source-term-corpus/bucket-source-term-corpus.json";
-const outDir = process.argv[11] ?? "outputs/diablo4-bonus-selector-source-proof";
+const binaryTableSourceFile = process.argv[11] ?? "outputs/diablo4-bucket-binary-table-source/bucket-binary-table-source.json";
+const outDir = process.argv[12] ?? "outputs/diablo4-bonus-selector-source-proof";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -41,6 +42,7 @@ const additiveBucketSource = readOptionalJson(additiveBucketSourceFile);
 const structuralFamily = readOptionalJson(structuralFamilyFile);
 const structuralCorpus = readOptionalJson(structuralCorpusFile);
 const bucketSourceTerms = readOptionalJson(bucketSourceTermsFile);
+const binaryTableSource = readOptionalJson(binaryTableSourceFile);
 
 const matrixGroups = selectorMatrix?.groups ?? [];
 const matrixRows = selectorMatrix?.rows ?? [];
@@ -132,6 +134,15 @@ const sourceSignals = {
     sourceProofReady: bucketSourceTerms?.summary?.sourceProofReady === true,
     promotionReady: bucketSourceTerms?.summary?.promotionReady === true,
   },
+  binaryTableSource: {
+    assessment: assessmentKind(binaryTableSource),
+    filesScanned: binaryTableSource?.summary?.filesScanned ?? null,
+    exactHits: binaryTableSource?.summary?.exactHits ?? null,
+    usefulHits: binaryTableSource?.summary?.usefulHits ?? null,
+    sourceCandidates: binaryTableSource?.summary?.sourceCandidates ?? null,
+    sourceProofReady: binaryTableSource?.summary?.sourceProofReady === true,
+    promotionReady: binaryTableSource?.summary?.promotionReady === true,
+  },
 };
 
 const sourceNamed =
@@ -141,7 +152,8 @@ const sourceNamed =
   Number(sourceSignals.tableNumericContexts.potentialSourceContexts || 0) > 0 ||
   Number(sourceSignals.decodedDictionary.dictionaryHitsNearWatchedNumbers || 0) > 0 ||
   Number(sourceSignals.structuralCorpus.sourceNamedMatches || 0) > 0 ||
-  Number(sourceSignals.bucketSourceTerms.candidateSourceHits || 0) > 0;
+  Number(sourceSignals.bucketSourceTerms.candidateSourceHits || 0) > 0 ||
+  Number(sourceSignals.binaryTableSource.sourceCandidates || 0) > 0;
 
 const selectorFamiliesClassified = readyFamilies.length;
 const assessment = sourceNamed && readyFamilies.length === selectorFamilies.length
@@ -176,6 +188,7 @@ const report = {
     structuralFamilyFile: structuralFamily ? structuralFamilyFile : null,
     structuralCorpusFile: structuralCorpus ? structuralCorpusFile : null,
     bucketSourceTermsFile: bucketSourceTerms ? bucketSourceTermsFile : null,
+    binaryTableSourceFile: binaryTableSource ? binaryTableSourceFile : null,
   },
   summary: {
     selectorsObserved: selectorFamilies.length,
@@ -199,6 +212,11 @@ const report = {
     bucketSourceCandidateHits: sourceSignals.bucketSourceTerms.candidateSourceHits,
     bucketSourceNearWatchedHits: sourceSignals.bucketSourceTerms.nearWatchedHits,
     bucketSourceBonusPercentHits: sourceSignals.bucketSourceTerms.bonusPercentHits,
+    binaryTableSourceAssessment: sourceSignals.binaryTableSource.assessment,
+    binaryTableSourceFilesScanned: sourceSignals.binaryTableSource.filesScanned,
+    binaryTableExactHits: sourceSignals.binaryTableSource.exactHits,
+    binaryTableUsefulHits: sourceSignals.binaryTableSource.usefulHits,
+    binaryTableSourceCandidates: sourceSignals.binaryTableSource.sourceCandidates,
     promotionReady: assessment.promotionReady,
     matrixAssessment: assessmentKind(selectorMatrix),
     additiveSourceAssessment: assessmentKind(additiveBucketSource),

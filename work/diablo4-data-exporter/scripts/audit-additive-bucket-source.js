@@ -74,6 +74,11 @@ const bucketSourceTermHits = selectorSourceProof?.summary?.bucketSourceTermHits 
 const bucketSourceCandidateHits = selectorSourceProof?.summary?.bucketSourceCandidateHits ?? null;
 const bucketSourceNearWatchedHits = selectorSourceProof?.summary?.bucketSourceNearWatchedHits ?? null;
 const bucketSourceBonusPercentHits = selectorSourceProof?.summary?.bucketSourceBonusPercentHits ?? null;
+const binaryTableSourceAssessment = selectorSourceProof?.summary?.binaryTableSourceAssessment ?? null;
+const binaryTableSourceFilesScanned = selectorSourceProof?.summary?.binaryTableSourceFilesScanned ?? null;
+const binaryTableExactHits = selectorSourceProof?.summary?.binaryTableExactHits ?? null;
+const binaryTableUsefulHits = selectorSourceProof?.summary?.binaryTableUsefulHits ?? null;
+const binaryTableSourceCandidates = selectorSourceProof?.summary?.binaryTableSourceCandidates ?? null;
 const sourceProofReady = selectorSourceProof?.summary?.promotionReady === true;
 const fieldOwnershipProven = sf32Decision?.summary?.promotionReady === true;
 const hasBonusPercentCorpus = explicitAssets.length > 0 || matrixAssets.length > 0;
@@ -156,6 +161,11 @@ const report = {
     bucketSourceCandidateHits,
     bucketSourceNearWatchedHits,
     bucketSourceBonusPercentHits,
+    binaryTableSourceAssessment,
+    binaryTableSourceFilesScanned,
+    binaryTableExactHits,
+    binaryTableUsefulHits,
+    binaryTableSourceCandidates,
     sourceProofReady,
     fieldOwnershipProven,
     hasUnanchoredUseful,
@@ -179,6 +189,7 @@ const report = {
         selectorStructuralAssessment,
         selectorStructuralCorpusAssessment,
         bucketSourceTermsAssessment,
+        binaryTableSourceAssessment,
       },
     },
   },
