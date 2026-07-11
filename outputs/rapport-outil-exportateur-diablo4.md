@@ -9004,3 +9004,56 @@ La preuve source des selecteurs expose maintenant :
 Decision :
 
 Les tables candidates locales ne sont pas promouvables pour les buckets fins. Les selecteurs `949/994` restent non classes, et `Bonus_Percent_Per_Power` reste hors `reliableDps` tant qu'une autre famille de records ou une source externe fiable ne prouve pas la semantique additive/multiplicative.
+
+## Conclusion des preuves locales pour le bucket additif
+
+Une conclusion consolidee a ete ajoutee pour eviter de continuer a relancer les memes pistes locales autour de `949/994`. Elle agrege les preuves selecteurs, structure, corpus, termes texte, tables binaires et lignes candidates additives.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-additive-bucket-source-conclusion.js`
+- `outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json`
+- `work/diablo4-data-exporter/scripts/audit-additive-bucket-source.js`
+- `outputs/diablo4-additive-bucket-source-audit/additive-bucket-source-audit.json`
+- `work/diablo4-data-exporter/scripts/build-fine-bucket-extraction-plan.js`
+- `outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+
+Probes consolidees :
+
+- `selector-source-proof`
+- `structural-family`
+- `structural-corpus`
+- `bucket-source-terms`
+- `binary-table-source`
+- `additive-candidate-rows`
+
+Resultats :
+
+- probes : `6`
+- probes pretes : `0`
+- probes bloquees : `6`
+- `localEvidenceExhausted true`
+- `sourceNamed false`
+- `additiveBucketReady false`
+- assessment : `additive-bucket-local-source-evidence-exhausted`
+- confiance : `high`
+- promotion : `false`
+
+Impact :
+
+L'audit source additive expose maintenant :
+
+- `sourceConclusionAssessment additive-bucket-local-source-evidence-exhausted`
+- `localSourceEvidenceExhausted true`
+- `sourceConclusionBlockedProbes 6`
+- `nextStep Basculer vers une source externe fiable ou une nouvelle famille de records binaires avant toute promotion.`
+
+Le plan buckets fins expose maintenant comme prochaine action :
+
+`Basculer vers une source externe fiable ou une nouvelle famille de records binaires; garder les candidats hors reliableDps.`
+
+Decision :
+
+Les variantes locales autour de `949/994`, des chaines `Bonus_Percent_Per_Power`, des empreintes structurelles et des tables candidates sont fermees pour la promotion. La prochaine preuve doit venir d'une source externe fiable ou d'une nouvelle famille de records binaires qui classe explicitement les modifiers en additif/multiplicatif. Aucun changement de `reliableDps`.

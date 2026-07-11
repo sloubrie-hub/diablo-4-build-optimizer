@@ -691,3 +691,10 @@ Build de reference :
 - assessment : `bucket-binary-table-source-not-found`, `sourceProofReady false`, promotion `false`
 - preuve source selecteurs regeneree : `binaryTableSourceAssessment bucket-binary-table-source-not-found`, `binaryTableSourceCandidates 0`
 - decision : les tables candidates locales ne prouvent aucune famille additif/multiplicatif ; ne pas alimenter les buckets fins ni `reliableDps`
+- conclusion source additive ajoutee : `work/diablo4-data-exporter/scripts/build-additive-bucket-source-conclusion.js`
+- rapport genere : `outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json`
+- probes consolidees : `6`, pretes `0`, bloquees `6`; `localEvidenceExhausted true`, `sourceNamed false`, `additiveBucketReady false`
+- assessment : `additive-bucket-local-source-evidence-exhausted`, confiance `high`, promotion `false`
+- audit source additive regenere : `sourceConclusionAssessment additive-bucket-local-source-evidence-exhausted`, `localSourceEvidenceExhausted true`
+- plan buckets fins regenere : prochaine action = `Basculer vers une source externe fiable ou une nouvelle famille de records binaires; garder les candidats hors reliableDps.`
+- decision : arreter les variantes locales autour de `949/994`; la prochaine preuve doit etre externe fiable ou issue d'une nouvelle famille de records binaires

@@ -7,7 +7,8 @@ const externalScanFile = process.argv[4] ?? "outputs/diablo4-bonus-percent-exter
 const unanchoredFile = process.argv[5] ?? "outputs/diablo4-unanchored-bonus-percent-audit/unanchored-bonus-percent-audit.json";
 const sf32DecisionFile = process.argv[6] ?? "outputs/diablo4-sf32-field-promotion-decision/sf32-field-promotion-decision.json";
 const selectorSourceProofFile = process.argv[7] ?? "outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
-const outDir = process.argv[8] ?? "outputs/diablo4-additive-bucket-source-audit";
+const sourceConclusionFile = process.argv[8] ?? "outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
+const outDir = process.argv[9] ?? "outputs/diablo4-additive-bucket-source-audit";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -50,6 +51,7 @@ const externalScan = readOptionalJson(externalScanFile);
 const unanchored = readOptionalJson(unanchoredFile);
 const sf32Decision = readOptionalJson(sf32DecisionFile);
 const selectorSourceProof = readOptionalJson(selectorSourceProofFile);
+const sourceConclusion = readOptionalJson(sourceConclusionFile);
 
 const matrixRows = summarizeMatrixRows(selectorMatrix ?? {});
 const matrixAssets = uniqueSorted(matrixRows.map((row) => row.assetId));
@@ -79,6 +81,9 @@ const binaryTableSourceFilesScanned = selectorSourceProof?.summary?.binaryTableS
 const binaryTableExactHits = selectorSourceProof?.summary?.binaryTableExactHits ?? null;
 const binaryTableUsefulHits = selectorSourceProof?.summary?.binaryTableUsefulHits ?? null;
 const binaryTableSourceCandidates = selectorSourceProof?.summary?.binaryTableSourceCandidates ?? null;
+const sourceConclusionAssessment = sourceConclusion?.summary?.assessment?.kind ?? null;
+const localSourceEvidenceExhausted = sourceConclusion?.summary?.localEvidenceExhausted === true;
+const sourceConclusionBlockedProbes = sourceConclusion?.summary?.blockedProbes ?? null;
 const sourceProofReady = selectorSourceProof?.summary?.promotionReady === true;
 const fieldOwnershipProven = sf32Decision?.summary?.promotionReady === true;
 const hasBonusPercentCorpus = explicitAssets.length > 0 || matrixAssets.length > 0;
@@ -132,6 +137,7 @@ const report = {
     unanchoredFile: unanchored ? unanchoredFile : null,
     sf32DecisionFile: sf32Decision ? sf32DecisionFile : null,
     selectorSourceProofFile: selectorSourceProof ? selectorSourceProofFile : null,
+    sourceConclusionFile: sourceConclusion ? sourceConclusionFile : null,
   },
   summary: {
     explicitAssets: explicitAssets.length,
@@ -166,11 +172,16 @@ const report = {
     binaryTableExactHits,
     binaryTableUsefulHits,
     binaryTableSourceCandidates,
+    sourceConclusionAssessment,
+    localSourceEvidenceExhausted,
+    sourceConclusionBlockedProbes,
     sourceProofReady,
     fieldOwnershipProven,
     hasUnanchoredUseful,
     nextAssetId: targetRow?.assetId ?? blockedCandidates[0]?.assetId ?? null,
-    nextStep: "Prouver une table/champ source qui nomme la famille additive avant d'alimenter reliableDps.",
+    nextStep: localSourceEvidenceExhausted
+      ? "Basculer vers une source externe fiable ou une nouvelle famille de records binaires avant toute promotion."
+      : "Prouver une table/champ source qui nomme la famille additive avant d'alimenter reliableDps.",
     assessment: {
       kind: assessmentKind,
       confidence: readyRows.length ? "medium" : "high",
@@ -178,8 +189,12 @@ const report = {
       blocker: readyRows.length ? null : "additive-bucket-source-missing",
       finding: readyRows.length
         ? "Au moins une source additive est prete pour validation bucket."
-        : "Les hits Bonus_Percent_Per_Power donnent des candidats additifs, mais aucun n'a de table/champ source et d'ownership prouves.",
-      nextAction: "Chercher une table source nommee pour les selecteurs Bonus_Percent_Per_Power ou decoder un champ qui distingue additif/multiplicatif.",
+        : localSourceEvidenceExhausted
+          ? "Les hits Bonus_Percent_Per_Power donnent des candidats additifs, mais toutes les pistes locales actuelles sont bloquees ou non promouvables."
+          : "Les hits Bonus_Percent_Per_Power donnent des candidats additifs, mais aucun n'a de table/champ source et d'ownership prouves.",
+      nextAction: localSourceEvidenceExhausted
+        ? "Basculer vers une source externe fiable ou une nouvelle famille de records binaires; garder les candidats hors reliableDps."
+        : "Chercher une table source nommee pour les selecteurs Bonus_Percent_Per_Power ou decoder un champ qui distingue additif/multiplicatif.",
       evidence: {
         selectorMatrixAssessment: selectorMatrix?.summary?.assessment?.kind ?? null,
         coverageAssessment: coverage?.summary?.assessment?.kind ?? null,
@@ -190,6 +205,7 @@ const report = {
         selectorStructuralCorpusAssessment,
         bucketSourceTermsAssessment,
         binaryTableSourceAssessment,
+        sourceConclusionAssessment,
       },
     },
   },
