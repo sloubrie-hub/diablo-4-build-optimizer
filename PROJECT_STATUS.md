@@ -713,3 +713,10 @@ Build de reference :
   - plan optimiseur regenere : l'action #1 `Debloquer le delta conditionnel spiritborn` porte maintenant `promotionConclusion`
   - site : nouveau panneau `Conclusion delta 48960`
   - decision : le delta `48960` reste visible en what-if bloque, jamais ajoute a `reliableDps` sans source externe fiable, nouveau record parent binaire, ou hypothese utilisateur explicitement separee
+- exposition plan/site de la conclusion slots `1461593`
+  - le plan optimiseur enrichit l'action #2 `Prouver les slots d'aspect necromancer` avec `slotConclusion`
+  - source : `outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json`
+  - resultat : `4` etapes, `0` prete, `4` bloquees ; `existingEvidenceExhausted true`, `slotConstraintReady false`, `usableProofSignals 0`
+  - assessment : `aspect-slot-next-source-plan-blocked-local-exhausted`, confiance `high`
+  - site : nouveau panneau `Conclusion slots 1461593`
+  - decision : ne pas remplir `allowedSlots` avec `helm`, prefixes, Codex UI, ItemType ou Affix_Value ; chercher une source externe fiable ou une nouvelle famille de records binaires

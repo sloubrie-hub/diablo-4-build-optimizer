@@ -290,6 +290,16 @@ function actionForGate(gateId, plan, context = {}) {
             nextStepId: aspectSlotPlan.summary?.nextStepId ?? null,
             nextStepTitle: aspectSlotPlan.summary?.nextStepTitle ?? null,
             assessment: aspectSlotPlan.summary?.assessment?.kind ?? null,
+            slotConclusion: {
+              file: aspectSlotNextSourcePlanFile,
+              confidence: aspectSlotPlan.summary?.assessment?.confidence ?? null,
+              localEvidenceExhausted: aspectSlotPlan.summary?.existingEvidenceExhausted === true,
+              slotConstraintReady: aspectSlotPlan.summary?.assessment?.slotConstraintReady === true,
+              usableProofSignals: aspectSlotPlan.summary?.usableProofSignals ?? null,
+              sourceCandidateMatches: aspectSlotPlan.summary?.sourceCandidateMatches ?? null,
+              strongStructuralCandidates: aspectSlotPlan.summary?.strongStructuralCandidates ?? null,
+              nextAction: aspectSlotPlan.summary?.assessment?.nextAction ?? null,
+            },
           }
         : null,
     },

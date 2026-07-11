@@ -4,6 +4,7 @@ const TARGET_VALIDATION_URL = "../outputs/diablo4-target-dataset-validation/targ
 const BLOCKER_AUDIT_URL = "../outputs/diablo4-target-blocker-resolution/target-blocker-resolution.json";
 const TARGET_OPTIMIZER_PLAN_URL = "../outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json";
 const DELTA_PROMOTION_CONCLUSION_URL = "../outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json";
+const ASPECT_SLOT_NEXT_SOURCE_PLAN_URL = "../outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json";
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -15,6 +16,7 @@ const state = {
   blockerAudit: null,
   targetOptimizerPlan: null,
   deltaPromotionConclusion: null,
+  aspectSlotNextSourcePlan: null,
   bonusSelectorSourceProof: null,
   additiveBucketSourceConclusion: null,
   selectedAssetId: null,
@@ -57,6 +59,7 @@ async function boot() {
     await loadBlockerAudit();
     await loadTargetOptimizerPlan();
     await loadDeltaPromotionConclusion();
+    await loadAspectSlotNextSourcePlan();
     await loadBonusSelectorSourceProof();
     await loadAdditiveBucketSourceConclusion();
     restoreState();
@@ -230,6 +233,10 @@ async function loadDeltaPromotionConclusion() {
   state.deltaPromotionConclusion = await fetchOptionalJson(DELTA_PROMOTION_CONCLUSION_URL);
 }
 
+async function loadAspectSlotNextSourcePlan() {
+  state.aspectSlotNextSourcePlan = await fetchOptionalJson(ASPECT_SLOT_NEXT_SOURCE_PLAN_URL);
+}
+
 async function loadBonusSelectorSourceProof() {
   state.bonusSelectorSourceProof = await fetchOptionalJson(BONUS_SELECTOR_SOURCE_PROOF_URL);
 }
@@ -283,6 +290,7 @@ function renderTargetOptimizerPlan() {
     </div>
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
     ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
+    ${renderAspectSlotNextSourcePlan(state.aspectSlotNextSourcePlan ?? plan.aspectSlotNextSourcePlan)}
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -291,6 +299,44 @@ function renderTargetOptimizerPlan() {
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderAspectSlotNextSourcePlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const assessment = summary.assessment ?? {};
+  const target = report.target ?? {};
+  return `
+    <div class="bonus-selector-proof aspect-slot-conclusion">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Conclusion slots ${target.assetId ?? "n/a"}</strong>
+          <span>${assessment.kind ?? "n/a"}</span>
+        </div>
+        <div class="${assessment.slotConstraintReady ? "positive" : "blocked"}">
+          ${assessment.slotConstraintReady ? "slots prouves" : "slots bloques"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Etapes", summary.steps)}
+        ${targetMetric("Pretes", summary.readySteps)}
+        ${targetMetric("Bloquees", summary.blockedSteps)}
+        ${targetMetric("Preuves", summary.usableProofSignals)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Local epuise ${summary.existingEvidenceExhausted ? "oui" : "non"}</span>
+        <span>Champs slot directs ${formatNumber(summary.directSlotFieldStrings)}</span>
+        <span>Structure forte ${formatNumber(summary.strongStructuralCandidates)}</span>
+      </div>
+      <div class="slot-step-list">
+        ${(report.steps ?? []).map((step) => `
+          <span class="${step.status === "ready" ? "ready" : "blocked"}">${step.title}: ${step.status}</span>
+        `).join("")}
+      </div>
+      <p>${assessment.finding ?? ""}</p>
+      <p>${assessment.nextAction ?? ""}</p>
     </div>
   `;
 }

@@ -9131,3 +9131,49 @@ Le site affiche maintenant un panneau `Conclusion delta 48960` avec les trois pr
 Decision :
 
 Le delta `48960` reste un scenario what-if bloque. Il n'est pas ajoute a `reliableDps`, car `SF_32`, `SF_33` et l'uptime sont tous encore non promouvables.
+
+## Exposition de la conclusion slots 1461593
+
+La conclusion du sous-plan slots pour l'aspect `1461593` est maintenant visible dans le plan optimiseur cible et dans l'interface locale.
+
+Fichiers modifies :
+
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultats :
+
+- source : `outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json`
+- target : `aspect:1461593`
+- classe : `necromancer`
+- etapes : `4`
+- etapes pretes : `0`
+- etapes bloquees : `4`
+- `existingEvidenceExhausted true`
+- `slotConstraintReady false`
+- `usableProofSignals 0`
+- `directSlotFieldStrings 0`
+- `sourceCandidateMatches 0`
+- `strongStructuralCandidates 0`
+- assessment : `aspect-slot-next-source-plan-blocked-local-exhausted`
+- confiance : `high`
+
+Impact :
+
+L'action #2 `Prouver les slots d'aspect necromancer` porte maintenant un `slotConclusion` avec :
+
+- `localEvidenceExhausted true`
+- `slotConstraintReady false`
+- `usableProofSignals 0`
+- `sourceCandidateMatches 0`
+- `strongStructuralCandidates 0`
+- prochaine action : chercher une famille binaire par structure ou obtenir une source externe fiable avant de remplir `allowedSlots`
+
+Le site affiche maintenant un panneau `Conclusion slots 1461593` avec les quatre etapes bloquees.
+
+Decision :
+
+`allowedSlots` reste vide pour `1461593`. Les signaux `helm`, prefixes, Codex UI, ItemType et Affix_Value restent non promouvables.

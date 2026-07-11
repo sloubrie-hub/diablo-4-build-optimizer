@@ -547,6 +547,11 @@ input[type="search"] {
   background: #fff8ff;
 }
 
+.aspect-slot-conclusion {
+  border-color: #c3d4e8;
+  background: #f8fbff;
+}
+
 .additive-source-conclusion p {
   margin: 0;
   color: var(--muted);
@@ -555,6 +560,13 @@ input[type="search"] {
 }
 
 .delta-promotion-conclusion p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.aspect-slot-conclusion p {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
@@ -584,7 +596,14 @@ input[type="search"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.delta-proof-list span {
+.slot-step-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.delta-proof-list span,
+.slot-step-list span {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -595,13 +614,15 @@ input[type="search"] {
   overflow-wrap: anywhere;
 }
 
-.delta-proof-list span.blocked {
+.delta-proof-list span.blocked,
+.slot-step-list span.blocked {
   border-color: #f0b4a8;
   color: #8a3f32;
   background: #fff7f5;
 }
 
-.delta-proof-list span.ready {
+.delta-proof-list span.ready,
+.slot-step-list span.ready {
   border-color: #b8dfc5;
   color: #287a45;
   background: #f4fff7;
@@ -1622,6 +1643,7 @@ input[type="search"] {
   .bonus-selector-signals,
   .additive-source-next,
   .delta-proof-list,
+  .slot-step-list,
   .target-action-queue,
   .target-optimizer-recommendations,
   .target-reliability-gates,
@@ -1664,6 +1686,7 @@ input[type="search"] {
   .bonus-selector-signals,
   .additive-source-next,
   .delta-proof-list,
+  .slot-step-list,
   .bonus-selector-family,
   .target-action-queue,
   .target-optimizer-recommendations,
