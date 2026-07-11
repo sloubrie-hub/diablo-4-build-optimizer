@@ -518,10 +518,12 @@ function renderTargetOptimizerActionQueue(actions) {
 
 function renderActionSubPlan(subPlan) {
   if (!subPlan) return "";
+  const blockerKinds = subPlan.blockerConclusion?.blockerKinds ?? [];
   return `
     <div class="target-action-subplan">
       <span>${subPlan.blockedSteps ?? 0} bloquees / ${subPlan.readySteps ?? 0} pretes</span>
       <strong>${subPlan.nextStepTitle ?? "Sous-plan"}</strong>
+      ${blockerKinds.length ? `<em>${blockerKinds.join(" - ")}</em>` : ""}
     </div>
   `;
 }

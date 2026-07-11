@@ -9177,3 +9177,35 @@ Le site affiche maintenant un panneau `Conclusion slots 1461593` avec les quatre
 Decision :
 
 `allowedSlots` reste vide pour `1461593`. Les signaux `helm`, prefixes, Codex UI, ItemType et Affix_Value restent non promouvables.
+
+## Raccord de l'action globale des blocages
+
+L'action #4 `Fermer les blocages globaux` du plan optimiseur cible est maintenant reliee au diagnostic `target-blocker-resolution`.
+
+Fichiers modifies :
+
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `PROJECT_STATUS.md`
+
+Resultats :
+
+- source : `outputs/diablo4-target-blocker-resolution/target-blocker-resolution.json`
+- action : `global-blockers-cleared`
+- asset concerne : `1663210`
+- blocages globaux : `3`
+- resolus : `0`
+- assessment : `target-blockers-active`
+- blockers :
+  - `field-level-parser-required`
+  - `sf33-trigger-build-state-unmapped`
+  - `uptime-not-proven`
+
+Impact :
+
+La file d'actions affiche maintenant un sous-plan pour l'action globale, et le rendu de sous-plan peut afficher les kinds de blocages. La prochaine action globale prefere la conclusion recente `delta-promotion-local-evidence-exhausted` plutot que l'ancien libelle local `parser champ par champ`.
+
+Decision :
+
+L'action globale reste bloquee, mais elle pointe maintenant vers la bonne strategie : chercher une source externe fiable, un nouveau record parent binaire, ou exposer une hypothese utilisateur separee sans modifier `reliableDps`.

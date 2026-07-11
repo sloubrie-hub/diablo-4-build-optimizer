@@ -242,6 +242,7 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
 function actionForGate(gateId, plan, context = {}) {
   const deltaPlan = context.deltaUnblockPlan;
   const deltaConclusion = context.deltaPromotionConclusion;
+  const blockerResolution = context.blockerResolution;
   const fineBucketPlan = context.fineBucketExtractionPlan;
   const additiveBucketConclusion = context.additiveBucketSourceConclusion;
   const aspectSlotPlan = context.aspectSlotNextSourcePlan;
@@ -336,6 +337,32 @@ function actionForGate(gateId, plan, context = {}) {
       title: "Fermer les blocages globaux",
       action: "Resoudre ou expliciter les blocages encore actifs avant de declarer un plan fiable.",
       expectedImpact: "Faire passer reliableStrictBuilds au-dessus de zero lorsque les autres portes sont pretes.",
+      subPlan: blockerResolution
+        ? {
+            mode: blockerResolution.mode,
+            file: blockerResolutionFile,
+            blockedSteps: blockerResolution.summary?.blocked ?? null,
+            readySteps: blockerResolution.summary?.resolved ?? null,
+            nextStepId: blockerResolution.assets?.[0]?.blockers?.[0]?.kind ?? null,
+            nextStepTitle: deltaConclusion?.summary?.assessment?.nextAction
+              ?? blockerResolution.summary?.nextActions?.[0]
+              ?? "Fermer les blocages globaux actifs",
+            assessment: blockerResolution.summary?.promotionReady === true
+              ? "target-blockers-cleared"
+              : "target-blockers-active",
+            blockerConclusion: {
+              assets: blockerResolution.summary?.assets ?? null,
+              blockers: blockerResolution.summary?.blockers ?? null,
+              promotionReady: blockerResolution.summary?.promotionReady === true,
+              deltaConclusionAssessment: deltaConclusion?.summary?.assessment?.kind ?? null,
+              deltaLocalEvidenceExhausted: deltaConclusion?.summary?.localEvidenceExhausted === true,
+              blockerKinds: Array.from(new Set((blockerResolution.assets ?? [])
+                .flatMap((asset) => asset.blockers ?? [])
+                .map((blocker) => blocker.kind))).sort(),
+              nextActions: blockerResolution.summary?.nextActions ?? [],
+            },
+          }
+        : null,
     },
     "hero-class-known": {
       priority: "medium",
@@ -451,6 +478,7 @@ const recommendedStrictByClass = byClass
 const validStrictBuilds = recommendedStrictByClass.filter((row) => row.strictConstraintValid);
 const reliableStrictBuilds = recommendedStrictByClass.filter((row) => row.reliableOptimizerReady);
 const actionQueue = buildActionQueue(recommendedStrictByClass, {
+  blockerResolution,
   deltaUnblockPlan,
   deltaPromotionConclusion,
   fineBucketExtractionPlan,

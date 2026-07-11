@@ -720,3 +720,9 @@ Build de reference :
   - assessment : `aspect-slot-next-source-plan-blocked-local-exhausted`, confiance `high`
   - site : nouveau panneau `Conclusion slots 1461593`
   - decision : ne pas remplir `allowedSlots` avec `helm`, prefixes, Codex UI, ItemType ou Affix_Value ; chercher une source externe fiable ou une nouvelle famille de records binaires
+- raccord de l'action #4 `Fermer les blocages globaux`
+  - l'action `global-blockers-cleared` porte maintenant un sous-plan issu de `outputs/diablo4-target-blocker-resolution/target-blocker-resolution.json`
+  - blocages globaux : `3`, resolus `0`, asset `1663210`
+  - kinds : `field-level-parser-required`, `sf33-trigger-build-state-unmapped`, `uptime-not-proven`
+  - le sous-plan prefere la conclusion recente `delta-promotion-local-evidence-exhausted` pour la prochaine action
+  - prochaine action affichee : chercher une source externe fiable, un nouveau record parent binaire, ou exposer une hypothese utilisateur separee ; ne pas modifier `reliableDps`
