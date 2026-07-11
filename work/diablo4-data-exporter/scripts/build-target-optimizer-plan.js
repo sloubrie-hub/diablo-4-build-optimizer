@@ -14,6 +14,7 @@ const additiveBucketSourceConclusionFile = "outputs/diablo4-additive-bucket-sour
 const aspectSlotNextSourcePlanFile = "outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json";
 const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
+const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -449,6 +450,7 @@ const additiveBucketSourceConclusion = readOptionalJson(additiveBucketSourceConc
 const aspectSlotNextSourcePlan = readOptionalJson(aspectSlotNextSourcePlanFile);
 const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
+const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -507,6 +509,7 @@ const report = {
     aspectSlotNextSourcePlanFile: aspectSlotNextSourcePlan ? aspectSlotNextSourcePlanFile : null,
     nextEvidenceRoadmapFile: nextEvidenceRoadmap ? nextEvidenceRoadmapFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
+    reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -577,6 +580,14 @@ const report = {
         file: userWhatIfScenariosFile,
         summary: userWhatIfScenarios.summary,
         scenarios: userWhatIfScenarios.scenarios,
+      }
+    : null,
+  reliableDpsGates: reliableDpsGates
+    ? {
+        file: reliableDpsGatesFile,
+        summary: reliableDpsGates.summary,
+        gates: reliableDpsGates.gates,
+        policy: reliableDpsGates.policy,
       }
     : null,
   byClass,

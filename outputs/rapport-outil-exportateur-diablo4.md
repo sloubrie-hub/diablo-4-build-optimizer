@@ -9306,3 +9306,44 @@ Garde-fous :
 Decision :
 
 Le site peut maintenant simuler un scenario utilisateur propre, mais ce scenario reste separe du DPS fiable et des preuves jeu.
+
+## Portes DPS fiable pour 1663210
+
+Apres l'ajout du scenario utilisateur, l'etape suivante a ete de rendre la decision exploitable par l'optimiseur : chaque preuve obligatoire du delta `48960` est maintenant convertie en porte de fiabilite.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-reliable-dps-gates.js`
+- `outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultat :
+
+- asset : `1663210`
+- strict fiable : `163200`
+- delta bloque : `48960`
+- DPS what-if max : `212160`
+- portes : `4`
+- portes passees : `1`
+- portes bloquees : `3`
+- portes bloquees : `sf32-field`, `sf33-trigger`, `uptime`
+- porte passee : `user-what-if-separated`
+- assessment : `reliable-dps-gates-blocked`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `canUseForUserWhatIf true`
+
+Impact site :
+
+- nouveau panneau `Portes DPS fiable 1663210`
+- affichage du strict, du delta bloque, des portes passees/bloquees
+- rappel que le ranking fiable reste strict-only
+- rappel que le what-if utilisateur reste autorise mais separe
+
+Decision :
+
+Le delta `48960` de `1663210` reste exclu du DPS fiable. Le site peut le simuler comme hypothese utilisateur, mais le moteur fiable doit continuer a utiliser `strictDps = 163200` tant que `SF_32`, `SF_33` et l'uptime ne sont pas prouves.

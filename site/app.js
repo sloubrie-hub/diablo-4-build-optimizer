@@ -9,6 +9,7 @@ const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-sourc
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
+const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
 
 const state = {
@@ -23,6 +24,7 @@ const state = {
   additiveBucketSourceConclusion: null,
   nextEvidenceRoadmap: null,
   userWhatIfScenarios: null,
+  reliableDpsGates: null,
   userScenario: {
     sf33Active: false,
     uptime: 1,
@@ -72,6 +74,7 @@ async function boot() {
     await loadAdditiveBucketSourceConclusion();
     await loadNextEvidenceRoadmap();
     await loadUserWhatIfScenarios();
+    await loadReliableDpsGates();
     restoreState();
     state.selectedAssetId = selectRestoredAsset(state.dataset);
     byId("datasetStatus").textContent = "Dataset charge";
@@ -281,6 +284,10 @@ async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
 
+async function loadReliableDpsGates() {
+  state.reliableDpsGates = await fetchOptionalJson(RELIABLE_DPS_GATES_URL);
+}
+
 async function fetchOptionalJson(url) {
   try {
     const response = await fetch(url);
@@ -326,6 +333,7 @@ function renderTargetOptimizerPlan() {
     </div>
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
     ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
+    ${renderReliableDpsGates(state.reliableDpsGates ?? plan.reliableDpsGates)}
     ${renderAspectSlotNextSourcePlan(state.aspectSlotNextSourcePlan ?? plan.aspectSlotNextSourcePlan)}
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
@@ -336,6 +344,47 @@ function renderTargetOptimizerPlan() {
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderReliableDpsGates(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const assessment = summary.assessment ?? {};
+  const gates = report.gates ?? [];
+  return `
+    <div class="bonus-selector-proof reliable-dps-gates">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Portes DPS fiable ${summary.assetId ?? "n/a"}</strong>
+          <span>${assessment.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.canUseForReliableDps ? "positive" : "blocked"}">
+          ${summary.canUseForReliableDps ? "promouvable" : "strict-only"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Strict", formatNumber(summary.strictDps))}
+        ${targetMetric("Delta bloque", `+${formatNumber(summary.blockedDeltaDps)}`)}
+        ${targetMetric("Passees", summary.passedGates)}
+        ${targetMetric("Bloquees", summary.failedGates)}
+      </div>
+      <div class="reliable-gate-list">
+        ${gates.map((gate) => `
+          <span class="${gate.status === "passed" ? "ready" : "blocked"}">
+            <strong>${gate.title}</strong>
+            <em>${gate.status}</em>
+          </span>
+        `).join("")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ranking ${summary.canUseForRanking ? "what-if autorise" : "strict uniquement"}</span>
+        <span>What-if utilisateur ${summary.canUseForUserWhatIf ? "oui" : "non"}</span>
+        <span>Local epuise ${summary.localEvidenceExhausted ? "oui" : "non"}</span>
+      </div>
+      <p>${assessment.finding ?? ""}</p>
+      <p>${assessment.nextAction ?? ""}</p>
     </div>
   `;
 }

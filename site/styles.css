@@ -557,6 +557,11 @@ input[type="search"] {
   background: #f9fff7;
 }
 
+.reliable-dps-gates {
+  border-color: #d4c3e8;
+  background: #fbf8ff;
+}
+
 .additive-source-conclusion p {
   margin: 0;
   color: var(--muted);
@@ -583,6 +588,52 @@ input[type="search"] {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.reliable-dps-gates p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.reliable-gate-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.reliable-gate-list span {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 8px;
+  overflow-wrap: anywhere;
+}
+
+.reliable-gate-list span.blocked {
+  border-color: #f0b4a8;
+  background: #fff7f5;
+}
+
+.reliable-gate-list span.ready {
+  border-color: #b8dfc5;
+  background: #f4fff7;
+}
+
+.reliable-gate-list strong {
+  color: var(--ink);
+  font-size: 12px;
+}
+
+.reliable-gate-list em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .next-evidence-actions {
@@ -1717,6 +1768,7 @@ input[type="search"] {
   .target-bucket-engine-metrics,
   .target-bucket-breakdown,
   .target-bucket-gates,
+  .reliable-gate-list,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
   .bonus-selector-signals,
@@ -1762,6 +1814,7 @@ input[type="search"] {
   .target-bucket-engine-metrics,
   .target-bucket-breakdown,
   .target-bucket-gates,
+  .reliable-gate-list,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
   .bonus-selector-signals,

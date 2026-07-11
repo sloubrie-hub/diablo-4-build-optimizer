@@ -743,3 +743,12 @@ Build de reference :
   - valeurs : strict `163200`, delta brut `48960`, DPS max configure `212160`
   - export/import build transporte maintenant `userScenario`
   - decision : simulation what-if configurable, `reliableDps` reste strict et `canUseForReliableDps false`
+- portes DPS fiables ajoutees pour `1663210`
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-reliable-dps-gates.js`
+  - rapport genere : `outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json`
+  - resultat : `4` portes, `1` passee, `3` bloquees
+  - portes bloquees : `sf32-field`, `sf33-trigger`, `uptime`
+  - porte passee : separation du scenario utilisateur what-if hors DPS fiable
+  - valeurs confirmees : `reliableDps 163200`, `whatIfOnlyDps 212160`, `blockedDeltaDps 48960`
+  - plan optimiseur et site : nouveau panneau `Portes DPS fiable 1663210`
+  - decision : le ranking fiable reste `strictDps`; le scenario utilisateur reste disponible mais exclu de `reliableDps`
