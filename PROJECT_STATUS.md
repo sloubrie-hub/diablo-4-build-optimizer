@@ -752,3 +752,12 @@ Build de reference :
   - valeurs confirmees : `reliableDps 163200`, `whatIfOnlyDps 212160`, `blockedDeltaDps 48960`
   - plan optimiseur et site : nouveau panneau `Portes DPS fiable 1663210`
   - decision : le ranking fiable reste `strictDps`; le scenario utilisateur reste disponible mais exclu de `reliableDps`
+- plans buckets par classe ajoutes
+  - script enrichi : `work/diablo4-data-exporter/scripts/build-target-bucket-engine.js`
+  - rapport regenere : `outputs/diablo4-target-bucket-engine/target-bucket-engine.json`
+  - resultat : `2` plans de classe, `1` chargeable, `0` fiable
+  - meilleur plan strict chargeable : `spiritborn`, asset `1663210`, `163200` DPS strict, delta bloque `48960`
+  - plan `necromancer` reste bloque par `slot-constraints-proven` pour `1461593`
+  - plan optimiseur : le moteur buckets expose maintenant `classPlans`, `bestStrictClassPlan`, `bestReliableClassPlan`
+  - site : le panneau `Moteur buckets` affiche les plans par classe et les portes associees
+  - decision : ne plus utiliser le total mixte `1461593 + 1663210` comme base optimisable ; charger seulement un plan strict mono-classe

@@ -595,6 +595,8 @@ function renderTargetBucketEnginePlan(bucketEngine) {
   const summary = bucketEngine.summary ?? {};
   const buckets = bucketEngine.buckets ?? {};
   const gates = bucketEngine.gates ?? [];
+  const classPlans = bucketEngine.classPlans ?? [];
+  const bestStrictClassPlan = bucketEngine.bestStrictClassPlan ?? null;
   return `
     <div class="target-bucket-engine-plan">
       <div>
@@ -607,6 +609,12 @@ function renderTargetBucketEnginePlan(bucketEngine) {
         ${targetMetric("Delta bloque", `+${formatNumber(summary.blockedCandidateDelta)}`)}
         ${targetMetric("What-if", summary.whatIfDps)}
       </div>
+      <div class="target-bucket-class-summary">
+        <span>Plans classe ${formatNumber(summary.classPlans)}</span>
+        <span>Chargeables ${formatNumber(summary.loadableClassPlans)}</span>
+        <span>Fiables ${formatNumber(summary.reliableClassPlans)}</span>
+        <span>Base ${bestStrictClassPlan ? `${bestStrictClassPlan.class} ${formatNumber(bestStrictClassPlan.reliableDps)}` : "aucune"}</span>
+      </div>
       <div class="target-bucket-breakdown">
         <span>Base ${formatNumber(buckets.strictBase)}</span>
         <span>Additif ${formatPercent(buckets.additivePct)}</span>
@@ -617,7 +625,31 @@ function renderTargetBucketEnginePlan(bucketEngine) {
       <div class="target-bucket-gates">
         ${gates.map((gate) => `<span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}</span>`).join("")}
       </div>
+      <div class="target-bucket-class-plans">
+        ${classPlans.map(renderBucketClassPlan).join("")}
+      </div>
     </div>
+  `;
+}
+
+function renderBucketClassPlan(plan) {
+  const failed = plan.failedGateIds ?? [];
+  return `
+    <article class="${plan.canLoadAsWorkingBase ? "loadable" : "blocked"}">
+      <div>
+        <strong>${plan.class}</strong>
+        <span>${plan.status}</span>
+      </div>
+      <div class="target-bucket-class-metrics">
+        <span>Strict ${formatNumber(plan.reliableDps)}</span>
+        <span>Delta +${formatNumber(plan.blockedCandidateDelta)}</span>
+        <span>Assets ${(plan.assetIds ?? []).join(", ")}</span>
+      </div>
+      <div class="target-bucket-class-gates">
+        ${(plan.gates ?? []).map((gate) => `<span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}</span>`).join("")}
+      </div>
+      <p>${failed.length ? `Bloque: ${failed.join(", ")}` : "Toutes les portes classe sont ouvertes."}</p>
+    </article>
   `;
 }
 

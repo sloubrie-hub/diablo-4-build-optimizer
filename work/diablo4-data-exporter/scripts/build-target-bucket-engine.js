@@ -53,7 +53,66 @@ function normalizeModifier(modifier, entity, row = null) {
   };
 }
 
-function buildClassPlans(rows) {
+function issueAppliesToRows(issue, rows) {
+  const rowAssetIds = new Set(rows.map((row) => Number(row.assetId)));
+  return (issue.assetIds ?? []).some((assetId) => rowAssetIds.has(Number(assetId)));
+}
+
+function blockerAppliesToRows(blockerAsset, rows) {
+  const rowAssetIds = new Set(rows.map((row) => Number(row.assetId)));
+  return rowAssetIds.has(Number(blockerAsset.assetId));
+}
+
+function classPlanGates(classRows, composition, blockerResolution) {
+  const strictBaseDps = round(classRows.reduce((sum, row) => sum + Number(row.strictBaseDps || 0), 0));
+  const blockedCandidateDelta = round(classRows.reduce((sum, row) => sum + Number(row.blockedCandidateDelta || 0), 0));
+  const scopedIssues = (composition.constraints?.issues ?? [])
+    .filter((issue) => issue.kind !== "mixed-hero-classes")
+    .filter((issue) => issueAppliesToRows(issue, classRows));
+  const classBlockerAssets = (blockerResolution.assets ?? []).filter((asset) => blockerAppliesToRows(asset, classRows));
+  const readiness = composition.bucketEngine?.readiness ?? {};
+  return [
+    {
+      id: "class-scope-isolated",
+      status: "passed",
+      reason: "plan separe par classe",
+    },
+    {
+      id: "strict-base-ready",
+      status: strictBaseDps > 0 && classRows.every((row) => Number(row.strictBaseDps || 0) > 0) ? "passed" : "failed",
+      reason: strictBaseDps > 0 ? "DPS strict disponible" : "DPS strict absent",
+    },
+    {
+      id: "slot-constraints-proven",
+      status: scopedIssues.some((issue) => issue.kind === "slot-data-not-normalized") ? "failed" : "passed",
+      reason: scopedIssues.some((issue) => issue.kind === "slot-data-not-normalized") ? "slots non prouves sur au moins un asset" : "aucun blocage slot dans ce plan",
+    },
+    {
+      id: "blocked-delta-cleared",
+      status: blockedCandidateDelta === 0 ? "passed" : "failed",
+      reason: blockedCandidateDelta === 0 ? "aucun delta conditionnel bloque" : "delta conditionnel exclu du DPS fiable",
+    },
+    {
+      id: "fine-buckets-mapped",
+      status: readiness.fineBucketsReady === true ? "passed" : "failed",
+      reason: readiness.fineBucketsReady === true ? "buckets fins disponibles" : "buckets fins manquants",
+    },
+    {
+      id: "class-blockers-cleared",
+      status: classBlockerAssets.length === 0 ? "passed" : "failed",
+      reason: classBlockerAssets.length === 0 ? "aucun blocage global sur ces assets" : "blocages actifs sur au moins un asset",
+    },
+  ];
+}
+
+function classPlanStatus({ strictConstraintValid, reliableOptimizerReady, blockedCandidateDelta }) {
+  if (!strictConstraintValid) return "blocked-by-class-constraints";
+  if (reliableOptimizerReady) return "reliable-ready";
+  if (blockedCandidateDelta > 0) return "strict-loadable-with-blocked-what-if";
+  return "strict-loadable-not-reliable";
+}
+
+function buildClassPlans(rows, composition, blockerResolution) {
   const groups = new Map();
   for (const row of rows) {
     const className = String(row.class ?? "unknown").toLowerCase();
@@ -61,17 +120,30 @@ function buildClassPlans(rows) {
     groups.get(className).push(row);
   }
   return Array.from(groups.entries())
-    .map(([className, classRows]) => ({
-      class: className,
-      assetIds: classRows.map((row) => row.assetId),
-      strictBaseDps: round(classRows.reduce((sum, row) => sum + Number(row.strictBaseDps || 0), 0)),
-      blockedCandidateDelta: round(classRows.reduce((sum, row) => sum + Number(row.blockedCandidateDelta || 0), 0)),
-      reliableDps: round(classRows.reduce((sum, row) => sum + Number(row.reliableDps || 0), 0)),
-      whatIfDps: round(classRows.reduce((sum, row) => sum + Number(row.reliableDps || 0) + Number(row.blockedCandidateDelta || 0), 0)),
-      status: classRows.some((row) => Number(row.blockedCandidateDelta || 0) > 0)
-        ? "strict-with-blocked-what-if"
-        : "strict-only",
-    }))
+    .map(([className, classRows]) => {
+      const gates = classPlanGates(classRows, composition, blockerResolution);
+      const failedGates = gates.filter((gate) => gate.status !== "passed");
+      const blockingConstraintIds = new Set(["slot-constraints-proven"]);
+      const strictConstraintValid = !failedGates.some((gate) => blockingConstraintIds.has(gate.id));
+      const reliableOptimizerReady = failedGates.length === 0;
+      const strictBaseDps = round(classRows.reduce((sum, row) => sum + Number(row.strictBaseDps || 0), 0));
+      const blockedCandidateDelta = round(classRows.reduce((sum, row) => sum + Number(row.blockedCandidateDelta || 0), 0));
+      return {
+        class: className,
+        assetIds: classRows.map((row) => row.assetId),
+        strictBaseDps,
+        blockedCandidateDelta,
+        reliableDps: round(classRows.reduce((sum, row) => sum + Number(row.reliableDps || 0), 0)),
+        whatIfDps: round(classRows.reduce((sum, row) => sum + Number(row.reliableDps || 0) + Number(row.blockedCandidateDelta || 0), 0)),
+        strictConstraintValid,
+        canLoadAsWorkingBase: strictConstraintValid,
+        reliableOptimizerReady,
+        failedGateIds: failedGates.map((gate) => gate.id),
+        gates,
+        rows: classRows,
+        status: classPlanStatus({ strictConstraintValid, reliableOptimizerReady, blockedCandidateDelta }),
+      };
+    })
     .sort((a, b) => b.reliableDps - a.reliableDps || b.blockedCandidateDelta - a.blockedCandidateDelta);
 }
 
@@ -160,7 +232,15 @@ const deltaUnblockPlan = readOptionalJson(deltaUnblockPlanFile);
 const bucketRows = buildBucketRows(composition, targetDataset);
 const gates = buildPromotionGates(composition, blockerResolution, deltaUnblockPlan);
 const failedGates = gates.filter((gate) => gate.status !== "passed");
-const classPlans = buildClassPlans(bucketRows);
+const classPlans = buildClassPlans(bucketRows, composition, blockerResolution);
+const loadableClassPlans = classPlans.filter((plan) => plan.canLoadAsWorkingBase);
+const reliableClassPlans = classPlans.filter((plan) => plan.reliableOptimizerReady);
+const bestStrictClassPlan = loadableClassPlans
+  .slice()
+  .sort((a, b) => b.reliableDps - a.reliableDps || b.blockedCandidateDelta - a.blockedCandidateDelta)[0] ?? null;
+const bestReliableClassPlan = reliableClassPlans
+  .slice()
+  .sort((a, b) => b.reliableDps - a.reliableDps)[0] ?? null;
 const strictBaseDps = round(bucketRows.reduce((sum, row) => sum + Number(row.strictBaseDps || 0), 0));
 const additivePct = Number(composition.buckets?.additive ?? 0);
 const multiplicativeProduct = Number(composition.buckets?.multiplicative ?? 1);
@@ -189,6 +269,11 @@ const report = {
     reliableDps: round(composition.totals?.strict),
     whatIfDps: round(composition.totals?.whatIf),
     rows: bucketRows.length,
+    classPlans: classPlans.length,
+    loadableClassPlans: loadableClassPlans.length,
+    reliableClassPlans: reliableClassPlans.length,
+    bestStrictClass: bestStrictClassPlan?.class ?? null,
+    bestReliableClass: bestReliableClassPlan?.class ?? null,
     failedGates: failedGates.map((gate) => gate.id),
     assessment: {
       kind: failedGates.length ? "bucket-engine-strict-only-ready-fine-buckets-blocked" : "bucket-engine-reliable-ready",
@@ -219,6 +304,8 @@ const report = {
   gates,
   bucketRows,
   classPlans,
+  bestStrictClassPlan,
+  bestReliableClassPlan,
   safeguards: [
     "Les valeurs strictes agregees restent l'autorite tant que les buckets fins ne sont pas prouves.",
     "Les candidats conditionnels ne changent jamais reliableDps avant fermeture des preuves SF_32, SF_33 et uptime.",

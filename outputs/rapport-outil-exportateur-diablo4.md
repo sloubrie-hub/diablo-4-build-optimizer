@@ -9347,3 +9347,48 @@ Impact site :
 Decision :
 
 Le delta `48960` de `1663210` reste exclu du DPS fiable. Le site peut le simuler comme hypothese utilisateur, mais le moteur fiable doit continuer a utiliser `strictDps = 163200` tant que `SF_32`, `SF_33` et l'uptime ne sont pas prouves.
+
+## Plans buckets par classe
+
+Le moteur buckets a ete enrichi pour eviter de traiter le build de reference mixte `1461593 + 1663210` comme une base optimisable. Le total global reste utile comme regression, mais l'optimiseur doit raisonner par classe.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-target-bucket-engine.js`
+- `outputs/diablo4-target-bucket-engine/target-bucket-engine.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultat :
+
+- plans de classe : `2`
+- plans chargeables : `1`
+- plans fiables : `0`
+- meilleur plan strict chargeable : `spiritborn`
+- asset du plan chargeable : `1663210`
+- DPS strict chargeable : `163200`
+- delta bloque : `48960`
+- meilleur plan fiable : aucun
+- plan `necromancer` : bloque par `slot-constraints-proven` sur `1461593`
+- parite globale du build de reference : `0`
+
+Impact moteur :
+
+- chaque plan de classe porte ses propres gates
+- le gate `mixed-hero-classes` est neutralise par la separation en plans mono-classe
+- les contraintes de slot restent bloquees par classe
+- les deltas conditionnels restent exclus du DPS fiable
+- le plan optimiseur expose `classPlans`, `bestStrictClassPlan` et `bestReliableClassPlan`
+
+Impact site :
+
+- le panneau `Moteur buckets` affiche les plans de classe
+- le site montre combien de plans sont chargeables ou fiables
+- les gates par classe indiquent pourquoi un plan peut etre charge comme base de travail sans etre fiable
+
+Decision :
+
+Le moteur peut proposer une base de travail stricte mono-classe (`spiritborn`, `1663210`) mais aucun build fiable complet. Le total mixte `1276410` reste une regression technique, pas une recommandation optimisable.

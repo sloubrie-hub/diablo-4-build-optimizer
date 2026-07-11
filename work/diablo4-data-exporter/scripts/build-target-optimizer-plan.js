@@ -548,6 +548,9 @@ const report = {
         summary: targetBucketEngine.summary,
         buckets: targetBucketEngine.buckets,
         gates: targetBucketEngine.gates,
+        classPlans: targetBucketEngine.classPlans,
+        bestStrictClassPlan: targetBucketEngine.bestStrictClassPlan,
+        bestReliableClassPlan: targetBucketEngine.bestReliableClassPlan,
       }
     : null,
   fineBucketExtractionPlan: fineBucketExtractionPlan

@@ -490,12 +490,17 @@ input[type="search"] {
 
 .target-bucket-engine-metrics,
 .target-bucket-breakdown,
-.target-bucket-gates {
+.target-bucket-gates,
+.target-bucket-class-summary {
   display: grid;
   gap: 8px;
 }
 
 .target-bucket-engine-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.target-bucket-class-summary {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
@@ -505,7 +510,8 @@ input[type="search"] {
 }
 
 .target-bucket-breakdown span,
-.target-bucket-gates span {
+.target-bucket-gates span,
+.target-bucket-class-summary span {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -523,6 +529,73 @@ input[type="search"] {
 }
 
 .target-bucket-gates span.failed {
+  border-color: #f0b4a8;
+  color: #a64232;
+  background: #fff7f5;
+}
+
+.target-bucket-class-plans {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.target-bucket-class-plans article {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 9px;
+}
+
+.target-bucket-class-plans article.blocked {
+  border-color: #ead7a8;
+  background: #fffdf7;
+}
+
+.target-bucket-class-plans article > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.target-bucket-class-plans strong {
+  color: var(--blue);
+  font-size: 13px;
+}
+
+.target-bucket-class-plans p,
+.target-bucket-class-plans span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.target-bucket-class-metrics,
+.target-bucket-class-gates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.target-bucket-class-metrics span,
+.target-bucket-class-gates span {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 7px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.target-bucket-class-gates span.passed {
+  border-color: #b6dec3;
+  color: #287a45;
+  background: #f4fff7;
+}
+
+.target-bucket-class-gates span.failed {
   border-color: #f0b4a8;
   color: #a64232;
   background: #fff7f5;
@@ -1766,8 +1839,12 @@ input[type="search"] {
   .target-optimizer-grid,
   .target-optimizer-gate-summary,
   .target-bucket-engine-metrics,
+  .target-bucket-class-summary,
   .target-bucket-breakdown,
   .target-bucket-gates,
+  .target-bucket-class-plans,
+  .target-bucket-class-metrics,
+  .target-bucket-class-gates,
   .reliable-gate-list,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
@@ -1812,8 +1889,12 @@ input[type="search"] {
   .target-optimizer-grid,
   .target-optimizer-gate-summary,
   .target-bucket-engine-metrics,
+  .target-bucket-class-summary,
   .target-bucket-breakdown,
   .target-bucket-gates,
+  .target-bucket-class-plans,
+  .target-bucket-class-metrics,
+  .target-bucket-class-gates,
   .reliable-gate-list,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
