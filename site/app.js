@@ -3,6 +3,7 @@ const TARGET_DATASET_URL = "../outputs/diablo4-target-dataset/target-dataset.jso
 const TARGET_VALIDATION_URL = "../outputs/diablo4-target-dataset-validation/target-dataset-validation.json";
 const BLOCKER_AUDIT_URL = "../outputs/diablo4-target-blocker-resolution/target-blocker-resolution.json";
 const TARGET_OPTIMIZER_PLAN_URL = "../outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json";
+const DELTA_PROMOTION_CONCLUSION_URL = "../outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json";
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -13,6 +14,7 @@ const state = {
   targetValidation: null,
   blockerAudit: null,
   targetOptimizerPlan: null,
+  deltaPromotionConclusion: null,
   bonusSelectorSourceProof: null,
   additiveBucketSourceConclusion: null,
   selectedAssetId: null,
@@ -54,6 +56,7 @@ async function boot() {
     await loadTargetDataset();
     await loadBlockerAudit();
     await loadTargetOptimizerPlan();
+    await loadDeltaPromotionConclusion();
     await loadBonusSelectorSourceProof();
     await loadAdditiveBucketSourceConclusion();
     restoreState();
@@ -223,6 +226,10 @@ async function loadTargetOptimizerPlan() {
   byId("targetOptimizerStatus").textContent = state.targetOptimizerPlan ? "Plan charge" : "Plan absent";
 }
 
+async function loadDeltaPromotionConclusion() {
+  state.deltaPromotionConclusion = await fetchOptionalJson(DELTA_PROMOTION_CONCLUSION_URL);
+}
+
 async function loadBonusSelectorSourceProof() {
   state.bonusSelectorSourceProof = await fetchOptionalJson(BONUS_SELECTOR_SOURCE_PROOF_URL);
 }
@@ -275,6 +282,7 @@ function renderTargetOptimizerPlan() {
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
+    ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -283,6 +291,43 @@ function renderTargetOptimizerPlan() {
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderDeltaPromotionConclusion(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const assessment = summary.assessment ?? {};
+  return `
+    <div class="bonus-selector-proof delta-promotion-conclusion">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Conclusion delta ${formatNumber(summary.candidateDeltaDps)}</strong>
+          <span>${assessment.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.canUseForReliableDps ? "positive" : "blocked"}">
+          ${summary.canUseForReliableDps ? "fiable" : "what-if bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Preuves", summary.proofs)}
+        ${targetMetric("Pretes", summary.readyProofs)}
+        ${targetMetric("Bloquees", summary.blockedProofs)}
+        ${targetMetric("Confiance", assessment.confidence ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Local epuise ${summary.localEvidenceExhausted ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canUseForReliableDps ? "oui" : "non"}</span>
+        <span>What-if visible ${summary.canExposeAsWhatIf ? "oui" : "non"}</span>
+      </div>
+      <div class="delta-proof-list">
+        ${(report.proofs ?? []).map((proof) => `
+          <span class="${proof.status === "ready" ? "ready" : "blocked"}">${proof.title}: ${proof.status}</span>
+        `).join("")}
+      </div>
+      <p>${assessment.finding ?? ""}</p>
+      <p>${assessment.nextAction ?? ""}</p>
     </div>
   `;
 }

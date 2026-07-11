@@ -9084,3 +9084,50 @@ Resultats :
 Decision :
 
 Cette etape ne debloque pas le calcul fiable. Elle rend visible, dans le plan de travail principal, que la piste locale additive est terminee et que la prochaine avancee utile doit venir d'une source externe fiable ou d'une nouvelle famille de records binaires.
+
+## Conclusion consolidee de promotion du delta 1663210
+
+Une conclusion dediee au delta `48960` a ete ajoutee. Elle consolide les trois preuves obligatoires du scenario `sf33-active-sf32-30pct` : champ `SF_32`, trigger `SF_33`, et uptime.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-delta-promotion-conclusion.js`
+- `outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultats :
+
+- asset : `1663210`
+- strict : `163200`
+- candidat : `212160`
+- delta : `48960`
+- preuves : `3`
+- preuves pretes : `0`
+- preuves bloquees : `3`
+- preuves bloquees : `sf32-field`, `sf33-trigger`, `uptime`
+- assessment : `delta-promotion-local-evidence-exhausted`
+- confiance : `high`
+- `localEvidenceExhausted true`
+- `canUseForReliableDps false`
+- `canExposeAsWhatIf true`
+
+Impact :
+
+Le plan optimiseur cible expose maintenant `deltaPromotionConclusion.summary`, et l'action #1 `Debloquer le delta conditionnel spiritborn` porte un `promotionConclusion` avec :
+
+- assessment `delta-promotion-local-evidence-exhausted`
+- confiance `high`
+- `localEvidenceExhausted true`
+- `canUseForReliableDps false`
+- `canExposeAsWhatIf true`
+- prochaine action : chercher une source externe fiable, un nouveau record parent binaire, ou exposer une hypothese utilisateur separee
+
+Le site affiche maintenant un panneau `Conclusion delta 48960` avec les trois preuves bloquees.
+
+Decision :
+
+Le delta `48960` reste un scenario what-if bloque. Il n'est pas ajoute a `reliableDps`, car `SF_32`, `SF_33` et l'uptime sont tous encore non promouvables.

@@ -7,6 +7,7 @@ const blockerResolutionFile = process.argv[4] ?? "outputs/diablo4-target-blocker
 const outDir = process.argv[5] ?? "outputs/diablo4-target-optimizer-plan";
 const aspectSlotReadinessFile = "outputs/diablo4-aspect-slot-readiness/aspect-slot-readiness.json";
 const deltaUnblockPlanFile = "outputs/diablo4-delta-unblock-plan/delta-unblock-plan.json";
+const deltaPromotionConclusionFile = "outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json";
 const targetBucketEngineFile = "outputs/diablo4-target-bucket-engine/target-bucket-engine.json";
 const fineBucketExtractionPlanFile = "outputs/diablo4-fine-bucket-extraction-plan/fine-bucket-extraction-plan.json";
 const additiveBucketSourceConclusionFile = "outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
@@ -240,6 +241,7 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
 
 function actionForGate(gateId, plan, context = {}) {
   const deltaPlan = context.deltaUnblockPlan;
+  const deltaConclusion = context.deltaPromotionConclusion;
   const fineBucketPlan = context.fineBucketExtractionPlan;
   const additiveBucketConclusion = context.additiveBucketSourceConclusion;
   const aspectSlotPlan = context.aspectSlotNextSourcePlan;
@@ -259,6 +261,17 @@ function actionForGate(gateId, plan, context = {}) {
             nextStepId: deltaPlan.summary?.nextStepId ?? null,
             nextStepTitle: deltaPlan.summary?.nextStepTitle ?? null,
             assessment: deltaPlan.summary?.assessment?.kind ?? null,
+            promotionConclusion: deltaConclusion
+              ? {
+                  file: deltaPromotionConclusionFile,
+                  assessment: deltaConclusion.summary?.assessment?.kind ?? null,
+                  confidence: deltaConclusion.summary?.assessment?.confidence ?? null,
+                  localEvidenceExhausted: deltaConclusion.summary?.localEvidenceExhausted === true,
+                  canUseForReliableDps: deltaConclusion.summary?.canUseForReliableDps === true,
+                  canExposeAsWhatIf: deltaConclusion.summary?.canExposeAsWhatIf === true,
+                  nextAction: deltaConclusion.summary?.assessment?.nextAction ?? null,
+                }
+              : null,
           }
         : null,
     },
@@ -390,6 +403,7 @@ const composition = readJson(compositionFile);
 const blockerResolution = readJson(blockerResolutionFile);
 const aspectSlotReadiness = readOptionalJson(aspectSlotReadinessFile);
 const deltaUnblockPlan = readOptionalJson(deltaUnblockPlanFile);
+const deltaPromotionConclusion = readOptionalJson(deltaPromotionConclusionFile);
 const targetBucketEngine = readOptionalJson(targetBucketEngineFile);
 const fineBucketExtractionPlan = readOptionalJson(fineBucketExtractionPlanFile);
 const additiveBucketSourceConclusion = readOptionalJson(additiveBucketSourceConclusionFile);
@@ -428,6 +442,7 @@ const validStrictBuilds = recommendedStrictByClass.filter((row) => row.strictCon
 const reliableStrictBuilds = recommendedStrictByClass.filter((row) => row.reliableOptimizerReady);
 const actionQueue = buildActionQueue(recommendedStrictByClass, {
   deltaUnblockPlan,
+  deltaPromotionConclusion,
   fineBucketExtractionPlan,
   additiveBucketSourceConclusion,
   aspectSlotNextSourcePlan,
@@ -443,6 +458,7 @@ const report = {
     blockerResolutionFile,
     aspectSlotReadinessFile: aspectSlotReadiness ? aspectSlotReadinessFile : null,
     deltaUnblockPlanFile: deltaUnblockPlan ? deltaUnblockPlanFile : null,
+    deltaPromotionConclusionFile: deltaPromotionConclusion ? deltaPromotionConclusionFile : null,
     targetBucketEngineFile: targetBucketEngine ? targetBucketEngineFile : null,
     fineBucketExtractionPlanFile: fineBucketExtractionPlan ? fineBucketExtractionPlanFile : null,
     additiveBucketSourceConclusionFile: additiveBucketSourceConclusion ? additiveBucketSourceConclusionFile : null,
@@ -471,6 +487,12 @@ const report = {
     ? {
         file: deltaUnblockPlanFile,
         summary: deltaUnblockPlan.summary,
+      }
+    : null,
+  deltaPromotionConclusion: deltaPromotionConclusion
+    ? {
+        file: deltaPromotionConclusionFile,
+        summary: deltaPromotionConclusion.summary,
       }
     : null,
   targetBucketEngine: targetBucketEngine

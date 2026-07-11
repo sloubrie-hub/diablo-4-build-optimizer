@@ -704,3 +704,12 @@ Build de reference :
   - `site/app.js` charge et affiche un panneau `Conclusion source additive`
   - metriques affichees : `6` pistes, `0` prete, `6` bloquees, confiance `high`, `localEvidenceExhausted true`, `sourceNamed false`, `additiveBucketReady false`
   - decision UI : rendre visible que la prochaine etape n'est plus une variante locale autour de `949/994`, mais une source externe fiable ou une nouvelle famille de records binaires
+- conclusion promotion delta ajoutee pour `1663210`
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-promotion-conclusion.js`
+  - rapport genere : `outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json`
+  - preuves consolidees : `SF_32`, `SF_33`, `uptime`
+  - resultat : `3` preuves, `0` prete, `3` bloquees ; `localEvidenceExhausted true`, `canUseForReliableDps false`, `canExposeAsWhatIf true`
+  - assessment : `delta-promotion-local-evidence-exhausted`, confiance `high`
+  - plan optimiseur regenere : l'action #1 `Debloquer le delta conditionnel spiritborn` porte maintenant `promotionConclusion`
+  - site : nouveau panneau `Conclusion delta 48960`
+  - decision : le delta `48960` reste visible en what-if bloque, jamais ajoute a `reliableDps` sans source externe fiable, nouveau record parent binaire, ou hypothese utilisateur explicitement separee
