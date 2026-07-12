@@ -16,6 +16,7 @@ const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evid
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
+const bucketEngineContractFile = "outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json";
 const targetOptimizerSuiteFile = "outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json";
 
 function readJson(filePath) {
@@ -454,6 +455,7 @@ const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
+const bucketEngineContract = readOptionalJson(bucketEngineContractFile);
 const targetOptimizerSuite = readOptionalJson(targetOptimizerSuiteFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
@@ -515,6 +517,7 @@ const report = {
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
+    bucketEngineContractFile: bucketEngineContract ? bucketEngineContractFile : null,
     targetOptimizerSuiteFile: targetOptimizerSuite ? targetOptimizerSuiteFile : null,
   },
   summary: {
@@ -607,6 +610,14 @@ const report = {
         reliableDpsPolicy: workingBaseContract.reliableDpsPolicy,
         nextEvidence: workingBaseContract.nextEvidence,
         safeguards: workingBaseContract.safeguards,
+      }
+    : null,
+  bucketEngineContract: bucketEngineContract
+    ? {
+        file: bucketEngineContractFile,
+        summary: bucketEngineContract.summary,
+        invariants: bucketEngineContract.invariants,
+        safeguards: bucketEngineContract.safeguards,
       }
     : null,
   targetOptimizerSuite: targetOptimizerSuite

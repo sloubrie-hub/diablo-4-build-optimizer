@@ -14,6 +14,7 @@ const generationSteps = [
   "build-reliable-dps-gates.js",
   "build-next-evidence-roadmap.js",
   "build-working-base-contract.js",
+  "build-bucket-engine-contract.js",
 ];
 
 function runStep(scriptName) {
@@ -42,6 +43,7 @@ for (const step of generationSteps) runStep(step);
 const bucketEngine = readJson("outputs/diablo4-target-bucket-engine/target-bucket-engine.json");
 const workingBase = readJson("outputs/diablo4-working-base-contract/working-base-contract.json");
 const reliableGates = readJson("outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json");
+const bucketEngineContract = readJson("outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -52,6 +54,8 @@ assertInvariant(workingBase.summary.blockedDeltaDps === 48960, "working base blo
 assertInvariant(workingBase.summary.canLoadAsWorkingBase === true, "working base should be loadable");
 assertInvariant(workingBase.summary.reliableOptimizerReady === false, "working base should not be reliable yet");
 assertInvariant(reliableGates.summary.canUseForReliableDps === false, "blocked delta must not enter reliable DPS");
+assertInvariant(bucketEngineContract.summary.status === "bucket-engine-contract-ok", "bucket engine contract must pass");
+assertInvariant(bucketEngineContract.summary.failed === 0, "bucket engine contract failed invariants");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -83,6 +87,7 @@ const report = {
     { id: "working-base-strict-163200", status: "passed", value: workingBase.summary.strictDps },
     { id: "blocked-delta-48960", status: "passed", value: workingBase.summary.blockedDeltaDps },
     { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
+    { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
   ],
 };
 
@@ -94,6 +99,7 @@ runStep("build-target-optimizer-plan.js");
 const optimizerPlan = readJson("outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json");
 assertInvariant(optimizerPlan.workingBaseContract?.summary?.class === "spiritborn", "optimizer plan must embed working base contract");
 assertInvariant(optimizerPlan.targetOptimizerSuite?.summary?.status === "target-optimizer-suite-ok", "optimizer plan must embed suite report");
+assertInvariant(optimizerPlan.bucketEngineContract?.summary?.status === "bucket-engine-contract-ok", "optimizer plan must embed bucket engine contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

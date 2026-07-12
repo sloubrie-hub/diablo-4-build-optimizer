@@ -9606,3 +9606,54 @@ Resolution de Node :
 Decision :
 
 Utiliser ce lanceur comme commande standard pour consulter le site local du projet.
+
+## Contrat moteur buckets
+
+Un contrat verifiable du moteur buckets a ete ajoute pour controler automatiquement la formule stricte et la separation entre DPS fiable, what-if et delta bloque.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-bucket-engine-contract.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- statut contrat : `bucket-engine-contract-ok`
+- invariants : `8`
+- passes : `8`
+- echecs : `0`
+- formule stricte : `strictBaseDps * (1 + additivePct / 100) * multiplicativeProduct * uptimeProduct`
+- strict recalcule : `1276410`
+- parite stricte : `0`
+- delta bloque : `48960`
+- what-if : `1325370`
+- meilleure classe stricte : `spiritborn`
+
+Invariants controles :
+
+- la formule buckets reproduit le strict calcule
+- la parite stricte reste a `0`
+- `reliableDps` reste strict-only
+- `whatIfDps` reste `reliableDps + blockedCandidateDelta`
+- les lignes avec delta bloque ne deviennent pas fiables
+- la base de travail suit le meilleur plan strict valide
+- aucun plan classe fiable n'est promu avant ouverture des portes
+- le delta `1663210` reste interdit dans `reliableDps`
+
+Validation :
+
+- suite optimiseur : `target-optimizer-suite-ok`, `9` etapes
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- artefact contrat : `/outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+
+Decision :
+
+Le moteur buckets est maintenant protege par un contrat strict-only avant l'ajout des buckets fins reels. Toute promotion accidentelle du delta bloque ou derive du what-if doit casser la suite.

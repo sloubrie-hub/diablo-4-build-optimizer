@@ -333,6 +333,7 @@ function renderTargetOptimizerPlan() {
     </div>
     ${renderTargetOptimizerSuite(plan.targetOptimizerSuite)}
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
+    ${renderBucketEngineContract(plan.bucketEngineContract)}
     ${renderWorkingBaseContract(plan.workingBaseContract)}
     ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
     ${renderReliableDpsGates(state.reliableDpsGates ?? plan.reliableDpsGates)}
@@ -346,6 +347,44 @@ function renderTargetOptimizerPlan() {
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderBucketEngineContract(contract) {
+  if (!contract) return "";
+  const summary = contract.summary ?? {};
+  const invariants = contract.invariants ?? [];
+  return `
+    <div class="bonus-selector-proof bucket-engine-contract">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Contrat buckets</strong>
+          <span>${summary.status ?? "n/a"}</span>
+        </div>
+        <div class="${summary.status === "bucket-engine-contract-ok" ? "positive" : "blocked"}">
+          ${summary.status === "bucket-engine-contract-ok" ? "ok" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Invariants", summary.invariants)}
+        ${targetMetric("Passes", summary.passed)}
+        ${targetMetric("Echecs", summary.failed)}
+        ${targetMetric("Parite", summary.strictParityDelta)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Strict recalcule ${formatNumber(summary.recomputedStrictDps)}</span>
+        <span>Reliable ${formatNumber(summary.reliableDps)}</span>
+        <span>Delta bloque +${formatNumber(summary.blockedCandidateDelta)}</span>
+        <span>What-if ${formatNumber(summary.whatIfDps)}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${invariants.map((item) => `
+          <span class="${item.status === "passed" ? "passed" : "failed"}">${item.id}: ${item.status}</span>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }

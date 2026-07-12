@@ -798,3 +798,13 @@ Build de reference :
   - URL par defaut : `http://127.0.0.1:4173/site/`
   - resolution Node identique au lanceur optimiseur
   - decision : utiliser ce lanceur pour ouvrir le site sans dependre d'une commande Node longue
+- contrat moteur buckets ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-bucket-engine-contract.js`
+  - rapport genere : `outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json`
+  - suite optimiseur : `9` etapes, statut `target-optimizer-suite-ok`
+  - invariants contrat : `8` passes, `0` echec
+  - controles : formule stricte, parite `0`, separation `reliableDps`/what-if, delta `48960` exclu du fiable
+  - plan optimiseur : embarque maintenant `bucketEngineContract`
+  - site : nouveau panneau `Contrat buckets`
+  - validation serveur : `/site/`, `bucket-engine-contract.json` et `target-optimizer-plan.json` repondent `200`
+  - decision : rendre le moteur buckets strict-only verifiable avant d'ajouter les buckets fins reels
