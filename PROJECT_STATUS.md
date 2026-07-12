@@ -792,3 +792,9 @@ Build de reference :
   - resolution Node : `D4_OPTIMIZER_NODE`, puis `node` du PATH, puis Node embarque Codex
   - instructions projet mises a jour dans `PROJECT_INSTRUCTIONS.md`
   - decision : utiliser ce lanceur pour regenerer le plan cible sans memoriser le chemin long du script Node
+- lanceur racine du site ajoute
+  - script ajoute : `run-site.ps1`
+  - commande standard : `.\run-site.ps1`
+  - URL par defaut : `http://127.0.0.1:4173/site/`
+  - resolution Node identique au lanceur optimiseur
+  - decision : utiliser ce lanceur pour ouvrir le site sans dependre d'une commande Node longue

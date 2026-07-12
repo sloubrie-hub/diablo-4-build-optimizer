@@ -9575,3 +9575,34 @@ Resolution de Node :
 Decision :
 
 Utiliser ce lanceur pour regenerer le plan cible et ses garde-fous sans dependre d'une commande longue ou d'un ordre manuel de scripts.
+
+## Lanceur racine du site
+
+Un lanceur PowerShell a ete ajoute a la racine du projet pour ouvrir le site sans memoriser la commande Node longue.
+
+Fichiers modifies ou ajoutes :
+
+- `run-site.ps1`
+- `PROJECT_INSTRUCTIONS.md`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Commande standard :
+
+```powershell
+.\run-site.ps1
+```
+
+URL :
+
+- `http://127.0.0.1:4173/site/`
+
+Resolution de Node :
+
+- variable `D4_OPTIMIZER_NODE` si definie
+- `node` disponible dans le PATH
+- Node embarque Codex : `.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe`
+
+Decision :
+
+Utiliser ce lanceur comme commande standard pour consulter le site local du projet.

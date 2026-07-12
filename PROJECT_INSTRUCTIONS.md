@@ -36,8 +36,10 @@ Les exemples ci-dessous utilisent `node`. Si `node` n'est pas disponible dans le
 Lancer le site :
 
 ```powershell
-node site/server.js
+.\run-site.ps1
 ```
+
+Le site est expose par defaut sur `http://127.0.0.1:4173/site/`. Definir `PORT` pour changer le port si necessaire.
 
 Valider le JavaScript :
 
