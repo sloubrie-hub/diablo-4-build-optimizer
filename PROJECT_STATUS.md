@@ -774,3 +774,9 @@ Build de reference :
   - actions autorisees/interdites explicitees pour proteger `reliableDps`
   - plan optimiseur et site : nouveau panneau `Base de travail`
   - decision : le plan `spiritborn` devient une base stricte actionnable, pas une recommandation fiable
+- suite de generation optimiseur cible ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+  - ordre garanti : buckets, plan buckets fins, conclusion delta, what-if utilisateur, portes DPS fiables, roadmap, contrat de base, plan optimiseur
+  - invariants verifies : parite stricte `0`, base `spiritborn`, strict `163200`, delta `48960`, aucun build fiable promu
+  - resultat test : `target-optimizer-suite-ok`, `8` etapes, prochaine porte `blocked-delta-cleared`
+  - decision : utiliser cette suite pour regenerer le plan cible afin d'eviter les sorties partielles ou dans le mauvais ordre

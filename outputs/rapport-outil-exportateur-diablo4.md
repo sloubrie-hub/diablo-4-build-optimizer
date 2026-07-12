@@ -9465,3 +9465,49 @@ Impact site :
 Decision :
 
 La base `spiritborn / 1663210` est le support de travail courant. Elle peut etre chargee et simulee, mais le moteur fiable doit continuer a refuser le delta bloque et les recommandations finales.
+
+## Suite de generation optimiseur cible
+
+Le dernier ajout a rendu l'ordre de generation important : le contrat de base doit etre produit avant le plan optimiseur cible. Une suite sequentielle a donc ete ajoutee pour regenerer les artefacts dans le bon ordre et verifier les invariants critiques.
+
+Fichier ajoute :
+
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+
+Commande :
+
+```powershell
+& 'C:\Users\FlowUP\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' work\diablo4-data-exporter\scripts\build-target-optimizer-suite.js
+```
+
+Ordre execute :
+
+- `build-target-bucket-engine.js`
+- `build-fine-bucket-extraction-plan.js`
+- `build-delta-promotion-conclusion.js`
+- `build-user-whatif-scenarios.js`
+- `build-reliable-dps-gates.js`
+- `build-next-evidence-roadmap.js`
+- `build-working-base-contract.js`
+- `build-target-optimizer-plan.js`
+
+Invariants verifies :
+
+- parite stricte buckets : `0`
+- meilleure classe stricte : `spiritborn`
+- plans fiables : `0`
+- base de travail : `spiritborn`
+- strict base : `163200`
+- delta bloque : `48960`
+- `canUseForReliableDps false`
+- contrat de base embarque dans le plan optimiseur
+
+Resultat du test :
+
+- statut : `target-optimizer-suite-ok`
+- etapes : `8`
+- prochaine porte : `blocked-delta-cleared`
+
+Decision :
+
+Utiliser cette suite comme commande de regeneration normale pour les artefacts cible. Elle evite les plans partiellement obsoletes et bloque immediatement toute promotion accidentelle du delta dans le DPS fiable.
