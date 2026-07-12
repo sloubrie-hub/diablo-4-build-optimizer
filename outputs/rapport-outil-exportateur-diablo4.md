@@ -9548,3 +9548,30 @@ Impact plan/site :
 Decision :
 
 Le site expose maintenant non seulement le resultat de l'optimiseur, mais aussi la sante de la regeneration. Cela rend les erreurs d'ordre ou les promotions accidentelles plus visibles.
+
+## Lanceur racine de suite optimiseur
+
+Un lanceur PowerShell a ete ajoute a la racine du projet pour eviter de retenir le chemin long du script Node.
+
+Fichiers modifies ou ajoutes :
+
+- `run-target-optimizer-suite.ps1`
+- `PROJECT_INSTRUCTIONS.md`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Commande standard :
+
+```powershell
+.\run-target-optimizer-suite.ps1
+```
+
+Resolution de Node :
+
+- variable `D4_OPTIMIZER_NODE` si definie
+- `node` disponible dans le PATH
+- Node embarque Codex : `.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe`
+
+Decision :
+
+Utiliser ce lanceur pour regenerer le plan cible et ses garde-fous sans dependre d'une commande longue ou d'un ordre manuel de scripts.

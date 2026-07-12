@@ -786,3 +786,9 @@ Build de reference :
   - site : nouveau panneau `Suite generation`
   - invariants affiches : parite stricte, classe de base, absence de plan fiable, delta non fiable
   - decision : rendre visible l'etat de generation et les garde-fous directement dans le site
+- lanceur racine de suite ajoute
+  - script ajoute : `run-target-optimizer-suite.ps1`
+  - commande standard : `.\run-target-optimizer-suite.ps1`
+  - resolution Node : `D4_OPTIMIZER_NODE`, puis `node` du PATH, puis Node embarque Codex
+  - instructions projet mises a jour dans `PROJECT_INSTRUCTIONS.md`
+  - decision : utiliser ce lanceur pour regenerer le plan cible sans memoriser le chemin long du script Node

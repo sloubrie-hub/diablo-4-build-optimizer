@@ -52,6 +52,14 @@ Regenerer le dataset cible :
 node work/diablo4-data-exporter/d4export.js export-target-dataset --file outputs/diablo4-optimizer-dataset/optimizer-dataset.json --out outputs/diablo4-target-dataset
 ```
 
+Regenerer et verifier le plan optimiseur cible :
+
+```powershell
+.\run-target-optimizer-suite.ps1
+```
+
+Cette suite regenere les artefacts cible dans le bon ordre, verifie les invariants critiques et bloque toute promotion accidentelle du delta `1663210` dans le DPS fiable.
+
 ## Priorite actuelle
 
 Transformer le prototype de composition en moteur de calcul par buckets Diablo IV, en commencant par resoudre les blocages de `assetId 1663210`.
