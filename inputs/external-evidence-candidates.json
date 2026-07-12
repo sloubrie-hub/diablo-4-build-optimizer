@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "notes": [
+    "Ajouter ici des preuves externes candidates sans modifier le DPS fiable.",
+    "Une entree doit citer une source, un domaine, une cible et une affirmation verifiable.",
+    "Le script d'audit classe les preuves, mais ne promeut jamais reliableDps directement."
+  ],
+  "candidates": []
+}

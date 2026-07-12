@@ -12,6 +12,7 @@ const generationSteps = [
   "build-delta-promotion-conclusion.js",
   "build-user-whatif-scenarios.js",
   "build-reliable-dps-gates.js",
+  "audit-external-evidence-intake.js",
   "build-next-evidence-roadmap.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -44,6 +45,7 @@ const bucketEngine = readJson("outputs/diablo4-target-bucket-engine/target-bucke
 const workingBase = readJson("outputs/diablo4-working-base-contract/working-base-contract.json");
 const reliableGates = readJson("outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json");
 const bucketEngineContract = readJson("outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json");
+const externalEvidenceIntake = readJson("outputs/diablo4-external-evidence-intake/external-evidence-intake.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -56,6 +58,7 @@ assertInvariant(workingBase.summary.reliableOptimizerReady === false, "working b
 assertInvariant(reliableGates.summary.canUseForReliableDps === false, "blocked delta must not enter reliable DPS");
 assertInvariant(bucketEngineContract.summary.status === "bucket-engine-contract-ok", "bucket engine contract must pass");
 assertInvariant(bucketEngineContract.summary.failed === 0, "bucket engine contract failed invariants");
+assertInvariant(externalEvidenceIntake.summary.canModifyReliableDps === false, "external evidence intake must not modify reliable DPS");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -88,6 +91,7 @@ const report = {
     { id: "blocked-delta-48960", status: "passed", value: workingBase.summary.blockedDeltaDps },
     { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
     { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
+    { id: "external-evidence-intake-safe", status: "passed", value: externalEvidenceIntake.summary.canModifyReliableDps },
   ],
 };
 
@@ -100,6 +104,7 @@ const optimizerPlan = readJson("outputs/diablo4-target-optimizer-plan/target-opt
 assertInvariant(optimizerPlan.workingBaseContract?.summary?.class === "spiritborn", "optimizer plan must embed working base contract");
 assertInvariant(optimizerPlan.targetOptimizerSuite?.summary?.status === "target-optimizer-suite-ok", "optimizer plan must embed suite report");
 assertInvariant(optimizerPlan.bucketEngineContract?.summary?.status === "bucket-engine-contract-ok", "optimizer plan must embed bucket engine contract");
+assertInvariant(optimizerPlan.externalEvidenceIntake?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence intake");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

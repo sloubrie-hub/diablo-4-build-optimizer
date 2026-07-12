@@ -808,3 +808,13 @@ Build de reference :
   - site : nouveau panneau `Contrat buckets`
   - validation serveur : `/site/`, `bucket-engine-contract.json` et `target-optimizer-plan.json` repondent `200`
   - decision : rendre le moteur buckets strict-only verifiable avant d'ajouter les buckets fins reels
+- intake de preuves externes ajoute
+  - fichier d'entree : `inputs/external-evidence-candidates.json`
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-external-evidence-intake.js`
+  - rapport genere : `outputs/diablo4-external-evidence-intake/external-evidence-intake.json`
+  - suite optimiseur : `10` etapes, statut `target-optimizer-suite-ok`
+  - statut actuel : `0` preuve candidate, `0` acceptee, `0` rejetee, `canModifyReliableDps false`
+  - roadmap : lit maintenant l'intake et garde `reliableDps` strict tant qu'aucune preuve externe n'est reliee explicitement a un parseur cible
+  - site : nouveau panneau `Preuves externes`
+  - validation serveur : `/site/`, `external-evidence-intake.json` et `target-optimizer-plan.json` repondent `200`
+  - decision : faire passer la prochaine preuve par un sas versionne et audite avant toute consommation par le moteur

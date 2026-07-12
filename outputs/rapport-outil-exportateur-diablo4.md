@@ -9657,3 +9657,83 @@ Validation :
 Decision :
 
 Le moteur buckets est maintenant protege par un contrat strict-only avant l'ajout des buckets fins reels. Toute promotion accidentelle du delta bloque ou derive du what-if doit casser la suite.
+
+## Intake de preuves externes
+
+Un sas d'entree versionne a ete ajoute pour recevoir des preuves externes sans modifier automatiquement le DPS fiable.
+
+Fichiers modifies ou ajoutes :
+
+- `inputs/external-evidence-candidates.json`
+- `work/diablo4-data-exporter/scripts/audit-external-evidence-intake.js`
+- `work/diablo4-data-exporter/scripts/build-next-evidence-roadmap.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `outputs/diablo4-external-evidence-intake/external-evidence-intake.json`
+- `outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `site/app.js`
+- `PROJECT_INSTRUCTIONS.md`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Fichier d'entree :
+
+```text
+inputs/external-evidence-candidates.json
+```
+
+Champs requis pour une preuve promouvable par l'intake :
+
+- `domain`
+- `assetId`
+- `source.kind`
+- `source.title`
+- `source.url` ou `source.version`
+- `claim.type`
+- `claim.field`
+- `claim.value`
+- `claim.excerpt` ou `claim.mapping`
+- `reviewer.status = approved`
+
+Domaines acceptes :
+
+- `delta-1663210`
+- `slots-1461593`
+- `additive-buckets`
+
+Sources acceptees par defaut :
+
+- `official`
+- `extracted-game-data`
+- `tool-output`
+- `documented-dataset`
+
+Sources rejetees :
+
+- `ui-label`
+- `codex-ui`
+- `localization`
+- `inference-only`
+- `layout-analogy`
+
+Resultat actuel :
+
+- statut : `external-evidence-required`
+- candidats : `0`
+- acceptes : `0`
+- en attente : `0`
+- rejetes : `0`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `10` etapes
+
+Validation :
+
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- artefact intake : `/outputs/diablo4-external-evidence-intake/external-evidence-intake.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+
+Decision :
+
+La piste la plus prometteuse est maintenant preparee : ajouter une preuve externe ou documentee dans l'intake, la faire auditer, puis seulement ensuite construire un pont parseur explicite vers le domaine concerne. L'intake ne peut jamais modifier `reliableDps` seul.

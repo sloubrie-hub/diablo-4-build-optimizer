@@ -341,6 +341,7 @@ function renderTargetOptimizerPlan() {
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
+    ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
     <div class="target-optimizer-recommendations">
       ${recommendations.map(renderTargetOptimizerRecommendation).join("") || `<div class="optimizer-empty">Aucune recommandation stricte exploitable.</div>`}
@@ -502,6 +503,54 @@ function renderReliableDpsGates(report) {
       </div>
       <p>${assessment.finding ?? ""}</p>
       <p>${assessment.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderExternalEvidenceIntake(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const requirements = report.requirements ?? {};
+  const candidates = report.candidates ?? [];
+  return `
+    <div class="bonus-selector-proof external-evidence-intake">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Preuves externes</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.accepted > 0 ? "positive" : "blocked"}">
+          ${summary.accepted > 0 ? "a relier" : "requises"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidats", summary.candidates)}
+        ${targetMetric("Acceptes", summary.accepted)}
+        ${targetMetric("En attente", summary.pending)}
+        ${targetMetric("Rejetes", summary.rejected)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Domaines ${(summary.domainsCovered ?? []).join(", ") || "aucun"}</span>
+        <span>Acceptes ${(summary.acceptedDomainsCovered ?? []).join(", ") || "aucun"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${candidates.slice(0, 4).map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.domain || item.id}</strong>
+            <p>${(item.blockers ?? []).join(" - ") || item.claim?.field || "preuve candidate"}</p>
+          </article>
+        `).join("") || `
+          <article>
+            <span>modele</span>
+            <strong>inputs/external-evidence-candidates.json</strong>
+            <p>${(requirements.requiredFields ?? []).slice(0, 4).join(" - ")}</p>
+          </article>
+        `}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }

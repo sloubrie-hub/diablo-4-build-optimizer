@@ -5,6 +5,7 @@ const inputs = {
   deltaPromotionConclusion: process.argv[2] ?? "outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json",
   aspectSlotNextSourcePlan: process.argv[3] ?? "outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json",
   additiveBucketSourceConclusion: process.argv[4] ?? "outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json",
+  externalEvidenceIntake: "outputs/diablo4-external-evidence-intake/external-evidence-intake.json",
 };
 const outDir = process.argv[5] ?? "outputs/diablo4-next-evidence-roadmap";
 
@@ -31,6 +32,7 @@ function action({ id, title, priority, domains, accepts, rejects, unlocks }) {
 const delta = readOptionalJson(inputs.deltaPromotionConclusion);
 const slots = readOptionalJson(inputs.aspectSlotNextSourcePlan);
 const additive = readOptionalJson(inputs.additiveBucketSourceConclusion);
+const externalEvidence = readOptionalJson(inputs.externalEvidenceIntake);
 
 const domains = [
   blocked("delta-1663210", delta, "canUseForReliableDps"),
@@ -99,6 +101,8 @@ const roadmap = [
 ];
 
 const allLocalEvidenceExhausted = blockedDomains.length > 0 && blockedDomains.length === exhaustedDomains.length;
+const acceptedExternalEvidence = externalEvidence?.summary?.accepted ?? 0;
+const pendingExternalEvidence = externalEvidence?.summary?.pending ?? 0;
 
 const report = {
   generatedAt: new Date().toISOString(),
@@ -112,6 +116,9 @@ const report = {
     allLocalEvidenceExhausted,
     actions: roadmap.length,
     highPriorityActions: roadmap.filter((row) => row.priority === "high").length,
+    externalEvidenceCandidates: externalEvidence?.summary?.candidates ?? 0,
+    acceptedExternalEvidence,
+    pendingExternalEvidence,
     promotionReady: false,
     assessment: {
       kind: allLocalEvidenceExhausted
@@ -119,13 +126,24 @@ const report = {
         : "next-evidence-roadmap-partial",
       confidence: "high",
       promotionReady: false,
-      finding: allLocalEvidenceExhausted
+      finding: acceptedExternalEvidence > 0
+        ? "Des preuves externes sont acceptees pour revue; elles doivent etre reliees explicitement a un parseur avant promotion."
+        : allLocalEvidenceExhausted
         ? "Les principaux blocages locaux sont epuisees; la suite doit viser une source externe fiable, une nouvelle famille binaire ou une hypothese utilisateur separee."
         : "Certains domaines ne sont pas encore conclus; poursuivre les preuves restantes avant promotion.",
-      nextAction: "Prioriser source externe fiable ou nouvelle famille de records binaires; garder reliableDps strict.",
+      nextAction: acceptedExternalEvidence > 0
+        ? "Construire le pont parseur vers les preuves externes acceptees; garder reliableDps strict jusqu'a consommation explicite."
+        : "Prioriser source externe fiable ou nouvelle famille de records binaires; garder reliableDps strict.",
     },
   },
   domains,
+  externalEvidenceIntake: externalEvidence
+    ? {
+        file: inputs.externalEvidenceIntake,
+        summary: externalEvidence.summary,
+        requirements: externalEvidence.requirements,
+      }
+    : null,
   roadmap,
   safeguards: [
     "Ne pas promouvoir une preuve par analogie de layout.",

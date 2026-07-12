@@ -62,6 +62,15 @@ Regenerer et verifier le plan optimiseur cible :
 
 Cette suite regenere les artefacts cible dans le bon ordre, verifie les invariants critiques et bloque toute promotion accidentelle du delta `1663210` dans le DPS fiable.
 
+Ajouter une preuve externe candidate :
+
+```powershell
+notepad inputs/external-evidence-candidates.json
+.\run-target-optimizer-suite.ps1
+```
+
+Une preuve externe doit rester dans l'intake tant qu'elle n'est pas reliee explicitement a un parseur cible. Ne jamais modifier `reliableDps` depuis l'intake seul.
+
 ## Priorite actuelle
 
 Transformer le prototype de composition en moteur de calcul par buckets Diablo IV, en commencant par resoudre les blocages de `assetId 1663210`.
