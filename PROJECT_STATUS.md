@@ -780,3 +780,9 @@ Build de reference :
   - invariants verifies : parite stricte `0`, base `spiritborn`, strict `163200`, delta `48960`, aucun build fiable promu
   - resultat test : `target-optimizer-suite-ok`, `8` etapes, prochaine porte `blocked-delta-cleared`
   - decision : utiliser cette suite pour regenerer le plan cible afin d'eviter les sorties partielles ou dans le mauvais ordre
+- rapport persistant de suite ajoute
+  - rapport genere : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+  - plan optimiseur : embarque maintenant `targetOptimizerSuite`
+  - site : nouveau panneau `Suite generation`
+  - invariants affiches : parite stricte, classe de base, absence de plan fiable, delta non fiable
+  - decision : rendre visible l'etat de generation et les garde-fous directement dans le site

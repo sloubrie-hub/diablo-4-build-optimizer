@@ -651,6 +651,11 @@ input[type="search"] {
   background: #f7fcfd;
 }
 
+.target-optimizer-suite {
+  border-color: #c8d8c4;
+  background: #f9fff7;
+}
+
 .additive-source-conclusion p {
   margin: 0;
   color: var(--muted);
@@ -721,6 +726,35 @@ input[type="search"] {
   color: var(--muted);
   font-size: 12px;
   overflow-wrap: anywhere;
+}
+
+.suite-invariant-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.suite-invariant-list span {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.suite-invariant-list span.passed {
+  border-color: #b6dec3;
+  color: #287a45;
+  background: #f4fff7;
+}
+
+.suite-invariant-list span.failed {
+  border-color: #f0b4a8;
+  color: #a64232;
+  background: #fff7f5;
 }
 
 .reliable-gate-list {
@@ -1900,6 +1934,7 @@ input[type="search"] {
   .target-bucket-class-gates,
   .reliable-gate-list,
   .working-base-actions,
+  .suite-invariant-list,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
   .bonus-selector-signals,
@@ -1951,6 +1986,7 @@ input[type="search"] {
   .target-bucket-class-gates,
   .reliable-gate-list,
   .working-base-actions,
+  .suite-invariant-list,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
   .bonus-selector-signals,

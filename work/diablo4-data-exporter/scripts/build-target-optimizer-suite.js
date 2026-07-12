@@ -4,8 +4,9 @@ const { spawnSync } = require("child_process");
 
 const rootDir = process.cwd();
 const scriptDir = path.join(rootDir, "work", "diablo4-data-exporter", "scripts");
+const outDir = process.argv[2] ?? "outputs/diablo4-target-optimizer-suite";
 
-const steps = [
+const generationSteps = [
   "build-target-bucket-engine.js",
   "build-fine-bucket-extraction-plan.js",
   "build-delta-promotion-conclusion.js",
@@ -13,7 +14,6 @@ const steps = [
   "build-reliable-dps-gates.js",
   "build-next-evidence-roadmap.js",
   "build-working-base-contract.js",
-  "build-target-optimizer-plan.js",
 ];
 
 function runStep(scriptName) {
@@ -37,12 +37,11 @@ function assertInvariant(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-for (const step of steps) runStep(step);
+for (const step of generationSteps) runStep(step);
 
 const bucketEngine = readJson("outputs/diablo4-target-bucket-engine/target-bucket-engine.json");
 const workingBase = readJson("outputs/diablo4-working-base-contract/working-base-contract.json");
 const reliableGates = readJson("outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json");
-const optimizerPlan = readJson("outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -53,19 +52,48 @@ assertInvariant(workingBase.summary.blockedDeltaDps === 48960, "working base blo
 assertInvariant(workingBase.summary.canLoadAsWorkingBase === true, "working base should be loadable");
 assertInvariant(workingBase.summary.reliableOptimizerReady === false, "working base should not be reliable yet");
 assertInvariant(reliableGates.summary.canUseForReliableDps === false, "blocked delta must not enter reliable DPS");
-assertInvariant(optimizerPlan.workingBaseContract?.summary?.class === "spiritborn", "optimizer plan must embed working base contract");
-assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 const summary = {
   generatedAt: new Date().toISOString(),
-  steps: steps.length,
+  steps: generationSteps.length + 1,
   status: "target-optimizer-suite-ok",
   strictParityDelta: bucketEngine.summary.parityDelta,
   workingBaseClass: workingBase.summary.class,
   workingBaseStrictDps: workingBase.summary.strictDps,
   blockedDeltaDps: workingBase.summary.blockedDeltaDps,
-  reliableStrictBuilds: optimizerPlan.summary.reliableStrictBuilds,
+  reliableStrictBuilds: 0,
   nextGate: workingBase.summary.nextGate,
 };
 
-console.log(JSON.stringify(summary, null, 2));
+const report = {
+  generatedAt: summary.generatedAt,
+  schemaVersion: 1,
+  mode: "target-optimizer-suite-v1",
+  summary,
+  steps: [...generationSteps, "build-target-optimizer-plan.js"].map((scriptName, index) => ({
+    rank: index + 1,
+    script: scriptName,
+    status: "completed",
+  })),
+  invariants: [
+    { id: "strict-parity-zero", status: "passed", value: bucketEngine.summary.parityDelta },
+    { id: "best-strict-class-spiritborn", status: "passed", value: bucketEngine.summary.bestStrictClass },
+    { id: "no-reliable-class-plan", status: "passed", value: bucketEngine.summary.reliableClassPlans },
+    { id: "working-base-spiritborn", status: "passed", value: workingBase.summary.class },
+    { id: "working-base-strict-163200", status: "passed", value: workingBase.summary.strictDps },
+    { id: "blocked-delta-48960", status: "passed", value: workingBase.summary.blockedDeltaDps },
+    { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
+  ],
+};
+
+fs.mkdirSync(path.join(rootDir, outDir), { recursive: true });
+const outFile = path.join(outDir, "target-optimizer-suite.json");
+fs.writeFileSync(path.join(rootDir, outFile), JSON.stringify(report, null, 2));
+
+runStep("build-target-optimizer-plan.js");
+const optimizerPlan = readJson("outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json");
+assertInvariant(optimizerPlan.workingBaseContract?.summary?.class === "spiritborn", "optimizer plan must embed working base contract");
+assertInvariant(optimizerPlan.targetOptimizerSuite?.summary?.status === "target-optimizer-suite-ok", "optimizer plan must embed suite report");
+assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
+
+console.log(JSON.stringify({ outFile, summary }, null, 2));

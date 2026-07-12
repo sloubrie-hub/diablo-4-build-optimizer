@@ -16,6 +16,7 @@ const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evid
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
+const targetOptimizerSuiteFile = "outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -453,6 +454,7 @@ const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
+const targetOptimizerSuite = readOptionalJson(targetOptimizerSuiteFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -513,6 +515,7 @@ const report = {
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
+    targetOptimizerSuiteFile: targetOptimizerSuite ? targetOptimizerSuiteFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -604,6 +607,14 @@ const report = {
         reliableDpsPolicy: workingBaseContract.reliableDpsPolicy,
         nextEvidence: workingBaseContract.nextEvidence,
         safeguards: workingBaseContract.safeguards,
+      }
+    : null,
+  targetOptimizerSuite: targetOptimizerSuite
+    ? {
+        file: targetOptimizerSuiteFile,
+        summary: targetOptimizerSuite.summary,
+        steps: targetOptimizerSuite.steps,
+        invariants: targetOptimizerSuite.invariants,
       }
     : null,
   byClass,

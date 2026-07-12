@@ -9511,3 +9511,40 @@ Resultat du test :
 Decision :
 
 Utiliser cette suite comme commande de regeneration normale pour les artefacts cible. Elle evite les plans partiellement obsoletes et bloque immediatement toute promotion accidentelle du delta dans le DPS fiable.
+
+## Rapport persistant de suite
+
+La suite de generation ecrit maintenant son propre rapport afin que l'etat de regeneration soit visible dans le plan optimiseur et dans le site.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultat :
+
+- rapport : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- statut : `target-optimizer-suite-ok`
+- etapes : `8`
+- parite stricte : `0`
+- base : `spiritborn`
+- strict : `163200`
+- delta bloque : `48960`
+- builds fiables : `0`
+- prochaine porte : `blocked-delta-cleared`
+
+Impact plan/site :
+
+- `build-target-optimizer-plan.js` lit le rapport de suite
+- le plan cible expose `targetOptimizerSuite`
+- le site affiche un panneau `Suite generation`
+- les invariants sont visibles et colores passe/echec
+
+Decision :
+
+Le site expose maintenant non seulement le resultat de l'optimiseur, mais aussi la sante de la regeneration. Cela rend les erreurs d'ordre ou les promotions accidentelles plus visibles.

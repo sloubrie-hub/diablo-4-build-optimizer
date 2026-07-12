@@ -331,6 +331,7 @@ function renderTargetOptimizerPlan() {
       ${plan.bestValidStrictBuild ? `<span>Meilleur plan strict valide : ${plan.bestValidStrictBuild.class} - ${formatNumber(plan.bestValidStrictBuild.strictDps)} DPS strict</span>` : `<span>Aucun plan strict valide pour le moment.</span>`}
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
+    ${renderTargetOptimizerSuite(plan.targetOptimizerSuite)}
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
     ${renderWorkingBaseContract(plan.workingBaseContract)}
     ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
@@ -345,6 +346,36 @@ function renderTargetOptimizerPlan() {
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderTargetOptimizerSuite(suite) {
+  if (!suite) return "";
+  const summary = suite.summary ?? {};
+  const invariants = suite.invariants ?? [];
+  return `
+    <div class="bonus-selector-proof target-optimizer-suite">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Suite generation</strong>
+          <span>${summary.status ?? "n/a"}</span>
+        </div>
+        <div class="${summary.status === "target-optimizer-suite-ok" ? "positive" : "blocked"}">
+          ${summary.status === "target-optimizer-suite-ok" ? "ok" : "a verifier"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Etapes", summary.steps)}
+        ${targetMetric("Parite", summary.strictParityDelta)}
+        ${targetMetric("Base", summary.workingBaseClass ?? "n/a")}
+        ${targetMetric("Fiables", summary.reliableStrictBuilds)}
+      </div>
+      <div class="suite-invariant-list">
+        ${invariants.map((item) => `
+          <span class="${item.status === "passed" ? "passed" : "failed"}">${item.id}: ${item.value}</span>
+        `).join("")}
+      </div>
     </div>
   `;
 }
