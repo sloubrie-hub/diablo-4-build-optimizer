@@ -332,6 +332,7 @@ function renderTargetOptimizerPlan() {
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
+    ${renderWorkingBaseContract(plan.workingBaseContract)}
     ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
     ${renderReliableDpsGates(state.reliableDpsGates ?? plan.reliableDpsGates)}
     ${renderAspectSlotNextSourcePlan(state.aspectSlotNextSourcePlan ?? plan.aspectSlotNextSourcePlan)}
@@ -344,6 +345,52 @@ function renderTargetOptimizerPlan() {
     </div>
     <div class="target-optimizer-safeguards">
       ${(plan.safeguards ?? []).map((item) => `<span>${item}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderWorkingBaseContract(contract) {
+  if (!contract) return "";
+  const summary = contract.summary ?? {};
+  const base = contract.workingBase ?? {};
+  const policy = contract.reliableDpsPolicy ?? {};
+  return `
+    <div class="bonus-selector-proof working-base-contract">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Base de travail</strong>
+          <span>${summary.status ?? "n/a"}</span>
+        </div>
+        <div class="${summary.reliableOptimizerReady ? "positive" : "blocked"}">
+          ${summary.reliableOptimizerReady ? "fiable" : summary.canLoadAsWorkingBase ? "chargeable" : "bloquee"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Classe", summary.class ?? "n/a")}
+        ${targetMetric("Strict", formatNumber(summary.strictDps))}
+        ${targetMetric("Delta bloque", `+${formatNumber(summary.blockedDeltaDps)}`)}
+        ${targetMetric("What-if", formatNumber(summary.whatIfDps))}
+      </div>
+      <div class="working-base-actions">
+        <div>
+          <strong>Autorise</strong>
+          ${(summary.allowedActions ?? []).slice(0, 4).map((item) => `<span>${item}</span>`).join("")}
+        </div>
+        <div>
+          <strong>Interdit</strong>
+          ${(summary.forbiddenActions ?? []).slice(0, 4).map((item) => `<span>${item}</span>`).join("")}
+        </div>
+      </div>
+      <div class="target-bucket-class-gates">
+        ${Object.entries(base.gateSummary ?? {}).map(([id, status]) => `<span class="${status === "passed" ? "passed" : "failed"}">${id}: ${status}</span>`).join("")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ranking ${policy.reliableRankingUses ?? "strictDps"}</span>
+        <span>Reliable ${policy.canUseForReliableDps ? "oui" : "non"}</span>
+        <span>What-if utilisateur ${policy.canUseForUserWhatIf ? "oui" : "non"}</span>
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }

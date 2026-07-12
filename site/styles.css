@@ -646,6 +646,11 @@ input[type="search"] {
   background: #fbf8ff;
 }
 
+.working-base-contract {
+  border-color: #b9d5dc;
+  background: #f7fcfd;
+}
+
 .additive-source-conclusion p {
   margin: 0;
   color: var(--muted);
@@ -679,6 +684,43 @@ input[type="search"] {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.working-base-contract p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.working-base-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.working-base-actions div {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 8px;
+}
+
+.working-base-actions strong {
+  color: var(--blue);
+  font-size: 12px;
+}
+
+.working-base-actions span {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-soft);
+  padding: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .reliable-gate-list {
@@ -1857,6 +1899,7 @@ input[type="search"] {
   .target-bucket-class-metrics,
   .target-bucket-class-gates,
   .reliable-gate-list,
+  .working-base-actions,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
   .bonus-selector-signals,
@@ -1907,6 +1950,7 @@ input[type="search"] {
   .target-bucket-class-metrics,
   .target-bucket-class-gates,
   .reliable-gate-list,
+  .working-base-actions,
   .bonus-selector-proof-metrics,
   .bonus-selector-family-list,
   .bonus-selector-signals,

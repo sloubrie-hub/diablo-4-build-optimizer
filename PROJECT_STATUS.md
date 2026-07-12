@@ -766,3 +766,11 @@ Build de reference :
   - les plans bloques restent visibles mais le bouton est desactive
   - le statut d'export indique maintenant la classe chargee et si le plan est `base stricte`, `fiable` ou `bloque`
   - decision : faciliter l'utilisation du plan `spiritborn` comme base de travail sans presenter le build mixte comme recommandation fiable
+- contrat de base de travail ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-working-base-contract.js`
+  - rapport genere : `outputs/diablo4-working-base-contract/working-base-contract.json`
+  - base courante : `spiritborn`, asset `1663210`, strict `163200`, delta bloque `48960`, what-if `212160`
+  - statut : `strict-loadable-with-blocked-what-if`, chargeable `true`, fiable `false`
+  - actions autorisees/interdites explicitees pour proteger `reliableDps`
+  - plan optimiseur et site : nouveau panneau `Base de travail`
+  - decision : le plan `spiritborn` devient une base stricte actionnable, pas une recommandation fiable

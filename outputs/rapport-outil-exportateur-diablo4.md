@@ -9414,3 +9414,54 @@ Impact site :
 Decision :
 
 Le site peut maintenant charger la base stricte `spiritborn` issue du moteur buckets sans encourager le build mixte de reference. Les plans bloques restent consultables pour diagnostic, mais ne sont pas actionnables depuis ce panneau.
+
+## Contrat de base de travail
+
+Le plan strict chargeable est maintenant formalise dans un contrat machine. L'objectif est de rendre explicite ce que l'optimiseur peut faire avec la base `spiritborn` et ce qui reste interdit tant que les preuves ne sont pas fermees.
+
+Fichiers generes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-working-base-contract.js`
+- `outputs/diablo4-working-base-contract/working-base-contract.json`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+
+Resultat :
+
+- base : `spiritborn`
+- asset : `1663210`
+- strict : `163200`
+- delta bloque : `48960`
+- what-if : `212160`
+- statut : `strict-loadable-with-blocked-what-if`
+- chargeable : `true`
+- fiable : `false`
+- prochaine porte : `blocked-delta-cleared`
+
+Actions autorisees :
+
+- charger cette base stricte mono-classe
+- activer un scenario utilisateur what-if separe
+- inspecter les preuves et blocages sans modifier `reliableDps`
+- ajouter des assets de meme classe seulement apres validation des contraintes
+
+Actions interdites :
+
+- utiliser le build mixte de reference comme recommandation optimisable
+- ajouter le delta bloque au ranking fiable
+- promouvoir `SF_32`, `SF_33` ou uptime sans preuve source
+- valider un plan `necromancer` tant que les slots de `1461593` restent bloques
+
+Impact site :
+
+- nouveau panneau `Base de travail`
+- affichage des actions autorisees/interdites
+- affichage des gates de la base chargeable
+- rappel que le ranking fiable utilise `strictDps`
+
+Decision :
+
+La base `spiritborn / 1663210` est le support de travail courant. Elle peut etre chargee et simulee, mais le moteur fiable doit continuer a refuser le delta bloque et les recommandations finales.

@@ -15,6 +15,7 @@ const aspectSlotNextSourcePlanFile = "outputs/diablo4-aspect-slot-next-source-pl
 const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
+const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -451,6 +452,7 @@ const aspectSlotNextSourcePlan = readOptionalJson(aspectSlotNextSourcePlanFile);
 const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
+const workingBaseContract = readOptionalJson(workingBaseContractFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -510,6 +512,7 @@ const report = {
     nextEvidenceRoadmapFile: nextEvidenceRoadmap ? nextEvidenceRoadmapFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
+    workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -591,6 +594,16 @@ const report = {
         summary: reliableDpsGates.summary,
         gates: reliableDpsGates.gates,
         policy: reliableDpsGates.policy,
+      }
+    : null,
+  workingBaseContract: workingBaseContract
+    ? {
+        file: workingBaseContractFile,
+        summary: workingBaseContract.summary,
+        workingBase: workingBaseContract.workingBase,
+        reliableDpsPolicy: workingBaseContract.reliableDpsPolicy,
+        nextEvidence: workingBaseContract.nextEvidence,
+        safeguards: workingBaseContract.safeguards,
       }
     : null,
   byClass,
