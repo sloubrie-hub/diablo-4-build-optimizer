@@ -9392,3 +9392,25 @@ Impact site :
 Decision :
 
 Le moteur peut proposer une base de travail stricte mono-classe (`spiritborn`, `1663210`) mais aucun build fiable complet. Le total mixte `1276410` reste une regression technique, pas une recommandation optimisable.
+
+## Chargement UI des bases buckets par classe
+
+Une fois les plans buckets par classe disponibles, le site a ete ajuste pour permettre de charger directement une base mono-classe chargeable.
+
+Fichiers modifies :
+
+- `site/app.js`
+- `site/styles.css`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Impact site :
+
+- bouton `Charger base` sur les plans buckets par classe chargeables
+- bouton desactive pour les plans bloques
+- message de statut plus explicite : classe chargee et statut `base stricte`, `fiable` ou `bloque`
+- les boutons existants du plan optimiseur utilisent le meme libelle de statut
+
+Decision :
+
+Le site peut maintenant charger la base stricte `spiritborn` issue du moteur buckets sans encourager le build mixte de reference. Les plans bloques restent consultables pour diagnostic, mais ne sont pas actionnables depuis ce panneau.

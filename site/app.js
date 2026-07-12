@@ -634,8 +634,10 @@ function renderTargetBucketEnginePlan(bucketEngine) {
 
 function renderBucketClassPlan(plan) {
   const failed = plan.failedGateIds ?? [];
+  const loadable = plan.canLoadAsWorkingBase === true;
+  const reliable = plan.reliableOptimizerReady === true;
   return `
-    <article class="${plan.canLoadAsWorkingBase ? "loadable" : "blocked"}">
+    <article class="${loadable ? "loadable" : "blocked"}">
       <div>
         <strong>${plan.class}</strong>
         <span>${plan.status}</span>
@@ -649,6 +651,14 @@ function renderBucketClassPlan(plan) {
         ${(plan.gates ?? []).map((gate) => `<span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}</span>`).join("")}
       </div>
       <p>${failed.length ? `Bloque: ${failed.join(", ")}` : "Toutes les portes classe sont ouvertes."}</p>
+      <button
+        class="ghost-button target-bucket-class-apply"
+        type="button"
+        data-asset-ids="${(plan.assetIds ?? []).join(",")}"
+        data-plan-label="${plan.class}"
+        data-plan-status="${reliable ? "fiable" : loadable ? "base stricte" : "bloque"}"
+        ${loadable ? "" : "disabled"}
+      >Charger base</button>
     </article>
   `;
 }
@@ -708,7 +718,13 @@ function renderTargetOptimizerRecommendation(row) {
       <p>${row.note}</p>
       ${issues.length ? `<p>Blocages contraintes : ${issues.join(", ")}</p>` : `<p>Contraintes minimales : OK</p>`}
       ${renderTargetOptimizerReliability(row)}
-      <button class="ghost-button target-optimizer-apply" type="button" data-asset-ids="${row.assetIds.join(",")}">Charger</button>
+      <button
+        class="ghost-button target-optimizer-apply"
+        type="button"
+        data-asset-ids="${row.assetIds.join(",")}"
+        data-plan-label="${row.class}"
+        data-plan-status="${row.reliableOptimizerReady ? "fiable" : row.strictConstraintValid ? "base stricte" : "bloque"}"
+      >Charger</button>
     </article>
   `;
 }
@@ -1042,7 +1058,11 @@ function handleGlobalClick(event) {
       .map((assetId) => Number(assetId))
       .filter((assetId) => Number.isFinite(assetId));
     state.selectedAssetId = state.buildAssetIds[0] ?? state.selectedAssetId;
-    setBuildExportStatus(`Plan charge (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})`);
+    const label = targetOptimizerApply.dataset.planLabel;
+    const status = targetOptimizerApply.dataset.planStatus;
+    const prefix = label ? `Plan ${label}` : "Plan";
+    const suffix = status ? ` - ${status}` : "";
+    setBuildExportStatus(`${prefix} charge${suffix} (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})`);
     render();
     byId("buildSummary").scrollIntoView({ behavior: "smooth", block: "start" });
     return;

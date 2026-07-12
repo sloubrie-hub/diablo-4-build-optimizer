@@ -245,6 +245,13 @@ input[type="search"] {
   filter: brightness(0.97);
 }
 
+.ghost-button:disabled,
+.action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: none;
+}
+
 .asset-list-body {
   max-height: calc(100vh - 210px);
   overflow: auto;
@@ -570,6 +577,10 @@ input[type="search"] {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
+}
+
+.target-bucket-class-apply {
+  justify-self: end;
 }
 
 .target-bucket-class-metrics,

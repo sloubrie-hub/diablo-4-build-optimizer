@@ -761,3 +761,8 @@ Build de reference :
   - plan optimiseur : le moteur buckets expose maintenant `classPlans`, `bestStrictClassPlan`, `bestReliableClassPlan`
   - site : le panneau `Moteur buckets` affiche les plans par classe et les portes associees
   - decision : ne plus utiliser le total mixte `1461593 + 1663210` comme base optimisable ; charger seulement un plan strict mono-classe
+- chargement UI des bases buckets par classe ajoute
+  - site : bouton `Charger base` sur chaque plan buckets chargeable
+  - les plans bloques restent visibles mais le bouton est desactive
+  - le statut d'export indique maintenant la classe chargee et si le plan est `base stricte`, `fiable` ou `bloque`
+  - decision : faciliter l'utilisation du plan `spiritborn` comme base de travail sans presenter le build mixte comme recommandation fiable
