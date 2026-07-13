@@ -23,6 +23,7 @@ const generationSteps = [
   "build-delta-parent-expanded-decode-plan.js",
   "audit-delta-parent-upgrade-structure.js",
   "audit-delta-parent-offset-reference-graph.js",
+  "scan-delta-parent-systems-tuning-contexts.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -62,6 +63,7 @@ const deltaParentConsumerCorpusScan = readJson("outputs/diablo4-delta-parent-con
 const deltaParentExpandedDecodePlan = readJson("outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json");
 const deltaParentUpgradeStructureAudit = readJson("outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json");
 const deltaParentOffsetReferenceGraph = readJson("outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json");
+const deltaParentSystemsTuningContexts = readJson("outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -90,6 +92,9 @@ assertInvariant(deltaParentUpgradeStructureAudit.summary.upgradeAnalogyAssets >=
 assertInvariant(deltaParentOffsetReferenceGraph.summary.canModifyReliableDps === false, "delta parent offset reference graph must not modify reliable DPS");
 assertInvariant(deltaParentOffsetReferenceGraph.summary.exactParentConsumerProven === false, "delta parent offset reference graph must not prove exact parent automatically");
 assertInvariant(deltaParentOffsetReferenceGraph.summary.inspectedAnchors >= 1, "delta parent offset reference graph must inspect anchors");
+assertInvariant(deltaParentSystemsTuningContexts.summary.canModifyReliableDps === false, "delta parent systems tuning contexts must not modify reliable DPS");
+assertInvariant(deltaParentSystemsTuningContexts.summary.exactParentConsumerProven === false, "delta parent systems tuning contexts must not prove exact parent automatically");
+assertInvariant(deltaParentSystemsTuningContexts.summary.targetContexts >= 1, "delta parent systems tuning contexts must inspect the target hash");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -138,6 +143,9 @@ const report = {
     { id: "delta-parent-offset-reference-safe", status: "passed", value: deltaParentOffsetReferenceGraph.summary.canModifyReliableDps },
     { id: "delta-parent-offset-reference-not-auto-proven", status: "passed", value: deltaParentOffsetReferenceGraph.summary.exactParentConsumerProven },
     { id: "delta-parent-offset-reference-anchors-present", status: "passed", value: deltaParentOffsetReferenceGraph.summary.inspectedAnchors },
+    { id: "delta-parent-systems-tuning-safe", status: "passed", value: deltaParentSystemsTuningContexts.summary.canModifyReliableDps },
+    { id: "delta-parent-systems-tuning-not-auto-proven", status: "passed", value: deltaParentSystemsTuningContexts.summary.exactParentConsumerProven },
+    { id: "delta-parent-systems-tuning-target-context-present", status: "passed", value: deltaParentSystemsTuningContexts.summary.targetContexts },
   ],
 };
 
@@ -158,6 +166,7 @@ assertInvariant(optimizerPlan.deltaParentConsumerCorpusScan?.summary?.canModifyR
 assertInvariant(optimizerPlan.deltaParentExpandedDecodePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent expanded decode plan");
 assertInvariant(optimizerPlan.deltaParentUpgradeStructureAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent upgrade structure audit");
 assertInvariant(optimizerPlan.deltaParentOffsetReferenceGraph?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent offset reference graph");
+assertInvariant(optimizerPlan.deltaParentSystemsTuningContexts?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent systems tuning contexts");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

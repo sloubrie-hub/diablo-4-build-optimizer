@@ -10206,3 +10206,49 @@ Validation :
 Decision :
 
 Les offsets directs prouvent la relation `chaine Mod.* -> entree de table`, mais ces entrees ne sont pas referencees a leur tour dans les payloads inspectes. La piste locale est donc terminale pour cette couche; la suite doit chercher le consommateur dans une table superieure hors payload local ou dans des records binaires non textuels.
+
+## Scan SystemsTuningGlobals cible
+
+Un scan cible a ete ajoute pour comparer le hash `SystemsTuningGlobals` voisin de `Mod.SoilRuler_B` avec les hashes voisins des analogies `Mod.UpgradeB/C`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/scan-delta-parent-systems-tuning-contexts.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- fichiers decodes scannes : `123`
+- hashes cibles compares : `4`
+- contextes hash trouves : `80`
+- contextes `SystemsTuningGlobals` : `2`
+- hash cible SoilRuler : `2084621218`
+- contextes hash cible : `2`
+- contextes hash cible externes : `0`
+- contextes `SystemsTuningGlobals` cible externes : `0`
+- contextes Upgrade : `78`
+- contextes Upgrade externes : `48`
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- statut : `delta-parent-systems-tuning-target-local-only`
+- suite optimiseur : `target-optimizer-suite-ok`, `20` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport SystemsTuning : genere dans `outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree
+
+Decision :
+
+Le hash `SystemsTuningGlobals` cible `2084621218` reste local a l'asset SoilRuler dans le corpus decode, alors que les hashes Upgrade ont des contextes externes. Cette difference renforce le blocage SF_33 : aucune activation externe de `Mod.SoilRuler_B` n'est prouvee. La suite utile est de scanner les payloads non decodes ou des tables superieures non textuelles.

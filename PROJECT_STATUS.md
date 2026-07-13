@@ -918,3 +918,19 @@ Build de reference :
   - statut : `delta-parent-offset-reference-terminal-table-only`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `Graphe offsets`
   - decision : les offsets directs prouvent la liaison chaine -> entree de table, mais pas de consommateur local; chercher maintenant une table superieure hors payload local ou un record binaire non textuel
+- scan SystemsTuningGlobals cible ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/scan-delta-parent-systems-tuning-contexts.js`
+  - rapport genere : `outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json`
+  - suite optimiseur : `20` etapes, statut `target-optimizer-suite-ok`
+  - fichiers decodes scannes : `123`
+  - hashes cibles compares : `4`
+  - contextes hash trouves : `80`
+  - contextes `SystemsTuningGlobals` : `2`
+  - hash cible SoilRuler : `2084621218`
+  - contextes hash cible : `2`
+  - contextes hash cible externes : `0`
+  - contextes `SystemsTuningGlobals` cible externes : `0`
+  - contextes Upgrade : `78`, dont `48` externes
+  - statut : `delta-parent-systems-tuning-target-local-only`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `SystemsTuning`
+  - decision : le hash cible reste local dans le corpus decode; poursuivre vers payloads non decodes ou tables superieures non textuelles, sans promotion SF_33

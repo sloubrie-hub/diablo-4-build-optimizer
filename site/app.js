@@ -14,6 +14,7 @@ const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-c
 const DELTA_PARENT_EXPANDED_DECODE_PLAN_URL = "../outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json";
 const DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL = "../outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json";
 const DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL = "../outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json";
+const DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL = "../outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -35,6 +36,7 @@ const state = {
   deltaParentExpandedDecodePlan: null,
   deltaParentUpgradeStructureAudit: null,
   deltaParentOffsetReferenceGraph: null,
+  deltaParentSystemsTuningContexts: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -91,6 +93,7 @@ async function boot() {
     await loadDeltaParentExpandedDecodePlan();
     await loadDeltaParentUpgradeStructureAudit();
     await loadDeltaParentOffsetReferenceGraph();
+    await loadDeltaParentSystemsTuningContexts();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -322,6 +325,10 @@ async function loadDeltaParentOffsetReferenceGraph() {
   state.deltaParentOffsetReferenceGraph = await fetchOptionalJson(DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL);
 }
 
+async function loadDeltaParentSystemsTuningContexts() {
+  state.deltaParentSystemsTuningContexts = await fetchOptionalJson(DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -389,6 +396,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentExpandedDecodePlan(state.deltaParentExpandedDecodePlan ?? plan.deltaParentExpandedDecodePlan)}
     ${renderDeltaParentUpgradeStructureAudit(state.deltaParentUpgradeStructureAudit ?? plan.deltaParentUpgradeStructureAudit)}
     ${renderDeltaParentOffsetReferenceGraph(state.deltaParentOffsetReferenceGraph ?? plan.deltaParentOffsetReferenceGraph)}
+    ${renderDeltaParentSystemsTuningContexts(state.deltaParentSystemsTuningContexts ?? plan.deltaParentSystemsTuningContexts)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -855,6 +863,55 @@ function renderDeltaParentOffsetReferenceGraph(report) {
             <span>scan</span>
             <strong>Aucun parent local direct</strong>
             <p>Chercher dans une table superieure ou un record binaire non textuel.</p>
+          </article>
+        `}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentSystemsTuningContexts(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const externalTargets = report.externalTargetContexts ?? [];
+  const targetContexts = report.targetContexts ?? [];
+  return `
+    <div class="bonus-selector-proof delta-parent-systems-tuning-contexts">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>SystemsTuning</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.externalTargetSystemsTuningContexts > 0 ? "positive" : "blocked"}">
+          ${summary.externalTargetSystemsTuningContexts > 0 ? "externe" : "local"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Fichiers", summary.filesScanned)}
+        ${targetMetric("Contextes", summary.contexts)}
+        ${targetMetric("Cible", summary.targetContexts)}
+        ${targetMetric("Ext.", summary.externalTargetContexts)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Hash cible ${summary.targetHash ?? "n/a"}</span>
+        <span>Systems ext. ${formatNumber(summary.externalTargetSystemsTuningContexts)}</span>
+        <span>Upgrade ext. ${formatNumber(summary.externalUpgradeContexts)}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${(externalTargets.length ? externalTargets : targetContexts).slice(0, 4).map((item) => `
+          <article>
+            <span>${item.kind}</span>
+            <strong>${item.assetId} - ${item.hash}</strong>
+            <p>${(item.strings ?? []).slice(0, 2).map((row) => row.value).join(" - ") || "n/a"}</p>
+          </article>
+        `).join("") || `
+          <article>
+            <span>scan</span>
+            <strong>Aucun contexte cible</strong>
+            <p>Elargir le corpus decode avant de conclure.</p>
           </article>
         `}
       </div>
