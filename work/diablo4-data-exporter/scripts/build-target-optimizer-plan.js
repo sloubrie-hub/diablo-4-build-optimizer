@@ -16,6 +16,7 @@ const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evid
 const externalEvidenceIntakeFile = "outputs/diablo4-external-evidence-intake/external-evidence-intake.json";
 const externalEvidenceBridgePlanFile = "outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json";
 const externalDeltaEvidencePlanFile = "outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json";
+const externalDeltaEvidenceWorkorderFile = "outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -470,6 +471,7 @@ const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const externalEvidenceIntake = readOptionalJson(externalEvidenceIntakeFile);
 const externalEvidenceBridgePlan = readOptionalJson(externalEvidenceBridgePlanFile);
 const externalDeltaEvidencePlan = readOptionalJson(externalDeltaEvidencePlanFile);
+const externalDeltaEvidenceWorkorder = readOptionalJson(externalDeltaEvidenceWorkorderFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
@@ -656,6 +658,15 @@ const report = {
         requiredProofs: externalDeltaEvidencePlan.requiredProofs,
         exampleCandidates: externalDeltaEvidencePlan.exampleCandidates,
         safeguards: externalDeltaEvidencePlan.safeguards,
+      }
+    : null,
+  externalDeltaEvidenceWorkorder: externalDeltaEvidenceWorkorder
+    ? {
+        file: externalDeltaEvidenceWorkorderFile,
+        summary: externalDeltaEvidenceWorkorder.summary,
+        tasks: externalDeltaEvidenceWorkorder.tasks,
+        intakeAppendix: externalDeltaEvidenceWorkorder.intakeAppendix,
+        safeguards: externalDeltaEvidenceWorkorder.safeguards,
       }
     : null,
   newBinaryFamilyPlan: newBinaryFamilyPlan

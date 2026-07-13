@@ -10599,3 +10599,50 @@ Validation :
 Decision :
 
 Meme si les trois preuves delta sont acceptees dans un intake de test, elles ne modifient pas `reliableDps` et ne marquent pas la promotion comme prete. Elles ne permettent que l'etape suivante : construire un parser bridge cible, avec des invariants de promotion separes.
+
+## Workorder preuves externes delta
+
+Un workorder de collecte a ete ajoute pour transformer le plan de preuves externes delta en file exploitable. Il produit les trois taches de revue attendues, les checklists de validation, les rejets explicites et les templates JSON a renseigner dans `inputs/external-evidence-candidates.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-delta-evidence-workorder.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- taches de collecte : `3`
+- taches pretes : `0`
+- taches ouvertes : `3`
+- prochaine tache : `delta-proof-sf32-owner`
+- preuves externes acceptees : `0`
+- templates intake generes : `3`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- statut : `external-delta-evidence-workorder-open`
+- suite optimiseur : `target-optimizer-suite-ok`, `28` etapes
+
+Taches generees :
+
+- `delta-proof-sf32-owner` : prouver `sf32-field-ownership` / `selector:949`
+- `delta-proof-sf33-trigger` : prouver `sf33-trigger` / `Mod.SoilRuler_B`
+- `delta-proof-uptime` : prouver `uptime` / `uptime`
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport workorder : genere dans `outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json`
+- plan optimiseur : regenere avec `externalDeltaEvidenceWorkorder`
+- site : nouveau panneau `Collecte delta`
+
+Decision :
+
+La suite est maintenant operationnelle pour l'entree de preuves externes : le projet sait exactement quelles preuves collecter et quel JSON renseigner. Le workorder ne fabrique pas de preuve, ne valide pas les templates et ne modifie pas `reliableDps`; il organise seulement la collecte et la revue.

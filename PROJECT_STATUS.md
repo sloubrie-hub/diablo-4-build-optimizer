@@ -1038,3 +1038,15 @@ Build de reference :
   - reliableDps modifiable : `false`
   - plan reel : `3` preuves requises, `0` pretes, `3` manquantes
   - decision : une preuve externe acceptee ne suffit pas a promouvoir; elle ne debloque qu'un futur parser bridge avec invariants dedies
+- workorder preuves externes delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-delta-evidence-workorder.js`
+  - rapport genere : `outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json`
+  - suite optimiseur : `28` etapes, statut `target-optimizer-suite-ok`
+  - taches de collecte : `3`
+  - taches pretes : `0`
+  - taches ouvertes : `3`
+  - prochaine tache : `delta-proof-sf32-owner`
+  - templates intake generes : `3`
+  - plan optimiseur et site : nouveau panneau `Collecte delta`
+  - reliableDps modifiable : `false`
+  - decision : transformer les preuves requises en file de collecte/revue exploitable sans creer de preuve artificielle ni promotion automatique
