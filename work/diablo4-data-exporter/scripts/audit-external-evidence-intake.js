@@ -7,6 +7,26 @@ const outDir = process.argv[3] ?? "outputs/diablo4-external-evidence-intake";
 const acceptedDomains = new Set(["delta-1663210", "slots-1461593", "additive-buckets"]);
 const acceptedSourceKinds = new Set(["official", "extracted-game-data", "tool-output", "documented-dataset"]);
 const rejectedSourceKinds = new Set(["ui-label", "codex-ui", "localization", "inference-only", "layout-analogy"]);
+const domainRules = {
+  "delta-1663210": {
+    assetIds: new Set([1663210]),
+    claimTypes: new Set(["sf32-field-ownership", "sf33-trigger", "uptime", "source-mapping"]),
+    fields: new Set(["SF_32", "SF_33", "uptime", "Mod.SoilRuler_B", "selector:949", "Bonus_Percent_Per_Power"]),
+    requiredMappingTerms: ["1663210"],
+  },
+  "slots-1461593": {
+    assetIds: new Set([1461593]),
+    claimTypes: new Set(["allowed-slots", "equipment-slot-field", "source-mapping"]),
+    fields: new Set(["allowedSlots", "equipmentSlots", "itemTypes", "aspectSlots"]),
+    requiredMappingTerms: ["1461593"],
+  },
+  "additive-buckets": {
+    assetIds: null,
+    claimTypes: new Set(["bucket-family", "modifier-classification", "source-mapping"]),
+    fields: new Set(["Bonus_Percent_Per_Power", "additive", "multiplicative", "bucket", "modifierFamily"]),
+    requiredMappingTerms: ["Bonus_Percent_Per_Power"],
+  },
+};
 
 function readOptionalJson(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -60,8 +80,17 @@ function normalizeCandidate(candidate, index) {
 function evaluateCandidate(candidate) {
   const blockers = [];
   const warnings = [];
+  const domainRule = domainRules[candidate.domain] ?? null;
 
   if (!acceptedDomains.has(candidate.domain)) blockers.push("domain-not-supported");
+  if (domainRule?.assetIds && !domainRule.assetIds.has(Number(candidate.assetId))) blockers.push("domain-asset-mismatch");
+  if (domainRule?.claimTypes && !domainRule.claimTypes.has(candidate.claim.type)) blockers.push("claim-type-not-valid-for-domain");
+  if (domainRule?.fields && !domainRule.fields.has(candidate.claim.field)) blockers.push("claim-field-not-valid-for-domain");
+  if (domainRule?.requiredMappingTerms?.length) {
+    const mappingText = `${candidate.claim.mapping} ${candidate.claim.excerpt} ${candidate.claim.value}`.toLowerCase();
+    const missingTerms = domainRule.requiredMappingTerms.filter((term) => !mappingText.includes(String(term).toLowerCase()));
+    if (missingTerms.length) blockers.push("claim-mapping-missing-domain-anchor");
+  }
   if (candidate.assetId == null) blockers.push("asset-id-required");
   if (!hasText(candidate.source.kind)) blockers.push("source-kind-required");
   if (rejectedSourceKinds.has(candidate.source.kind)) blockers.push("source-kind-rejected");
@@ -80,6 +109,13 @@ function evaluateCandidate(candidate) {
     status: accepted ? "accepted" : blockers.includes("source-kind-rejected") ? "rejected" : "pending",
     blockers,
     warnings,
+    domainRule: domainRule
+      ? {
+          claimTypes: Array.from(domainRule.claimTypes).sort(),
+          fields: Array.from(domainRule.fields).sort(),
+          requiredMappingTerms: domainRule.requiredMappingTerms,
+        }
+      : null,
     usableForPromotion: false,
     promotionGuard: "accepted evidence is intake-only; target scripts must consume it explicitly before any reliableDps change",
   };
@@ -126,6 +162,15 @@ const report = {
     acceptedDomains: Array.from(acceptedDomains).sort(),
     acceptedSourceKinds: Array.from(acceptedSourceKinds).sort(),
     rejectedSourceKinds: Array.from(rejectedSourceKinds).sort(),
+    domainRules: Object.fromEntries(Object.entries(domainRules).map(([domain, rule]) => [
+      domain,
+      {
+        assetIds: rule.assetIds ? Array.from(rule.assetIds).sort((a, b) => a - b) : "any",
+        claimTypes: Array.from(rule.claimTypes).sort(),
+        fields: Array.from(rule.fields).sort(),
+        requiredMappingTerms: rule.requiredMappingTerms,
+      },
+    ])),
     requiredFields: [
       "domain",
       "assetId",

@@ -818,3 +818,10 @@ Build de reference :
   - site : nouveau panneau `Preuves externes`
   - validation serveur : `/site/`, `external-evidence-intake.json` et `target-optimizer-plan.json` repondent `200`
   - decision : faire passer la prochaine preuve par un sas versionne et audite avant toute consommation par le moteur
+- intake de preuves externes durci
+  - exemple ajoute : `inputs/external-evidence-candidates.example.json`
+  - regles par domaine ajoutees pour `delta-1663210`, `slots-1461593`, `additive-buckets`
+  - controles ajoutes : asset attendu, type de claim, champ autorise, ancrage de mapping
+  - test synthetique : `1` preuve acceptee pour revue, `1` preuve rejetee, `canModifyReliableDps false`
+  - suite optimiseur : `10` etapes, statut `target-optimizer-suite-ok`, parite stricte `0`
+  - decision : aucune preuve externe ne peut passer le sas sans correspondre au domaine cible exact

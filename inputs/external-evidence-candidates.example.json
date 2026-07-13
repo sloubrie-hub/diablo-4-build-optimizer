@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "notes": [
+    "Ce fichier est un exemple; il n'est pas lu par la suite.",
+    "Copier une entree dans external-evidence-candidates.json seulement quand la source est verifiee.",
+    "Garder reviewer.status a pending tant que la preuve n'a pas ete revue."
+  ],
+  "candidates": [
+    {
+      "id": "example-delta-1663210-sf33-trigger",
+      "domain": "delta-1663210",
+      "assetId": 1663210,
+      "entityId": "skill:1663210",
+      "source": {
+        "kind": "extracted-game-data",
+        "title": "Nom du rapport ou de la table source",
+        "url": "",
+        "version": "build-or-dataset-version",
+        "capturedAt": "YYYY-MM-DD"
+      },
+      "claim": {
+        "type": "sf33-trigger",
+        "field": "SF_33",
+        "value": "condition explicite",
+        "excerpt": "Extrait court montrant 1663210 et SF_33 ou Mod.SoilRuler_B.",
+        "mapping": "1663210 -> Mod.SoilRuler_B -> condition explicite"
+      },
+      "reviewer": {
+        "status": "pending",
+        "notes": [
+          "Passer a approved seulement si la source nomme le trigger sans inference."
+        ]
+      }
+    },
+    {
+      "id": "example-slots-1461593-allowed-slots",
+      "domain": "slots-1461593",
+      "assetId": 1461593,
+      "entityId": "aspect:1461593",
+      "source": {
+        "kind": "documented-dataset",
+        "title": "Nom de la table aspect/equipement",
+        "url": "",
+        "version": "build-or-dataset-version",
+        "capturedAt": "YYYY-MM-DD"
+      },
+      "claim": {
+        "type": "allowed-slots",
+        "field": "allowedSlots",
+        "value": [
+          "helm"
+        ],
+        "excerpt": "Extrait court montrant 1461593 et allowedSlots.",
+        "mapping": "1461593 -> allowedSlots -> helm"
+      },
+      "reviewer": {
+        "status": "pending",
+        "notes": [
+          "Ne pas utiliser de prefixe Helm_ ou libelle UI seul."
+        ]
+      }
+    },
+    {
+      "id": "example-additive-bucket-bonus-percent",
+      "domain": "additive-buckets",
+      "assetId": 1663210,
+      "entityId": "skill:1663210",
+      "source": {
+        "kind": "official",
+        "title": "Nom de la source qui classe les buckets",
+        "url": "https://example.invalid/source",
+        "version": "",
+        "capturedAt": "YYYY-MM-DD"
+      },
+      "claim": {
+        "type": "bucket-family",
+        "field": "Bonus_Percent_Per_Power",
+        "value": "additive",
+        "excerpt": "Extrait court montrant Bonus_Percent_Per_Power et additive.",
+        "mapping": "Bonus_Percent_Per_Power -> additive"
+      },
+      "reviewer": {
+        "status": "pending",
+        "notes": [
+          "La source doit classer la famille, pas seulement afficher un pourcentage."
+        ]
+      }
+    }
+  ]
+}

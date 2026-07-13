@@ -9737,3 +9737,50 @@ Validation :
 Decision :
 
 La piste la plus prometteuse est maintenant preparee : ajouter une preuve externe ou documentee dans l'intake, la faire auditer, puis seulement ensuite construire un pont parseur explicite vers le domaine concerne. L'intake ne peut jamais modifier `reliableDps` seul.
+
+## Durcissement de l'intake de preuves externes
+
+L'intake de preuves externes valide maintenant les preuves candidates avec des regles specifiques par domaine afin d'eviter qu'une preuve trop vague ou associee au mauvais asset passe le sas.
+
+Fichiers modifies ou ajoutes :
+
+- `inputs/external-evidence-candidates.example.json`
+- `work/diablo4-data-exporter/scripts/audit-external-evidence-intake.js`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Regles par domaine :
+
+- `delta-1663210`
+  - asset requis : `1663210`
+  - claims acceptes : `sf32-field-ownership`, `sf33-trigger`, `uptime`, `source-mapping`
+  - champs acceptes : `SF_32`, `SF_33`, `uptime`, `Mod.SoilRuler_B`, `selector:949`, `Bonus_Percent_Per_Power`
+  - ancrage requis : `1663210`
+- `slots-1461593`
+  - asset requis : `1461593`
+  - claims acceptes : `allowed-slots`, `equipment-slot-field`, `source-mapping`
+  - champs acceptes : `allowedSlots`, `equipmentSlots`, `itemTypes`, `aspectSlots`
+  - ancrage requis : `1461593`
+- `additive-buckets`
+  - asset libre
+  - claims acceptes : `bucket-family`, `modifier-classification`, `source-mapping`
+  - champs acceptes : `Bonus_Percent_Per_Power`, `additive`, `multiplicative`, `bucket`, `modifierFamily`
+  - ancrage requis : `Bonus_Percent_Per_Power`
+
+Test synthetique :
+
+- entree conforme `delta-1663210` : acceptee pour revue
+- entree UI avec mauvais asset : rejetee
+- `canModifyReliableDps false`
+
+Validation :
+
+- suite optimiseur : `target-optimizer-suite-ok`, `10` etapes
+- parite stricte : `0`
+- base de travail : `spiritborn`
+- strict base : `163200`
+- delta bloque : `48960`
+
+Decision :
+
+Une preuve externe acceptee n'est toujours pas une promotion. Elle devient seulement une preuve revue, prete a etre reliee explicitement a un parseur cible.
