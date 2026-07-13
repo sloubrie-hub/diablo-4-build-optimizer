@@ -9784,3 +9784,53 @@ Validation :
 Decision :
 
 Une preuve externe acceptee n'est toujours pas une promotion. Elle devient seulement une preuve revue, prete a etre reliee explicitement a un parseur cible.
+
+## Plan de pont des preuves externes
+
+Un plan de pont a ete ajoute entre l'intake des preuves externes et les parseurs cible. Il decrit quoi faire avec une preuve acceptee sans permettre a cette preuve de modifier directement `reliableDps`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-bridge-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `site/app.js`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Domaines de bridge :
+
+- `bridge-delta-1663210`
+  - relier une preuve acceptee a `SF_32`, `SF_33` ou `uptime`
+  - ne fermer `blocked-delta-cleared` que si les trois preuves sont pretes
+- `bridge-slots-1461593`
+  - relier une preuve acceptee a `allowedSlots`
+  - recalculer les contraintes de build sans utiliser de libelle UI seul
+- `bridge-additive-buckets`
+  - relier une preuve acceptee a `additive`, `multiplicative`, `uptime` ou `cap`
+  - alimenter le moteur buckets fins sans inclure les candidats bloques
+
+Resultat actuel :
+
+- statut : `external-evidence-bridge-blocked`
+- etapes : `3`
+- pretes : `0`
+- bloquees : `3`
+- preuves acceptees : `0`
+- `canModifyReliableDps false`
+- `reliableDpsStillBlocked true`
+- `bucketContractSafe true`
+- suite optimiseur : `target-optimizer-suite-ok`, `11` etapes
+
+Validation :
+
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- artefact bridge : `/outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+
+Decision :
+
+Le chemin de promotion est maintenant explicite : intake -> preuve acceptee -> bridge parseur -> invariant de suite -> seulement ensuite modification potentielle du modele. Tant qu'une de ces etapes manque, `reliableDps` reste strict.

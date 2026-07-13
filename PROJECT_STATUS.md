@@ -825,3 +825,12 @@ Build de reference :
   - test synthetique : `1` preuve acceptee pour revue, `1` preuve rejetee, `canModifyReliableDps false`
   - suite optimiseur : `10` etapes, statut `target-optimizer-suite-ok`, parite stricte `0`
   - decision : aucune preuve externe ne peut passer le sas sans correspondre au domaine cible exact
+- plan de pont preuves externes ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-bridge-plan.js`
+  - rapport genere : `outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json`
+  - suite optimiseur : `11` etapes, statut `target-optimizer-suite-ok`
+  - statut bridge : `3` etapes, `0` prete, `3` bloquees, `canModifyReliableDps false`
+  - domaines couverts : delta `1663210`, slots `1461593`, buckets additifs
+  - plan optimiseur et site : nouveau panneau `Pont preuves`
+  - validation serveur : `/site/`, `external-evidence-bridge-plan.json` et `target-optimizer-plan.json` repondent `200`
+  - decision : une preuve acceptee doit encore passer par un pont parseur explicite avant toute promotion

@@ -14,6 +14,7 @@ const additiveBucketSourceConclusionFile = "outputs/diablo4-additive-bucket-sour
 const aspectSlotNextSourcePlanFile = "outputs/diablo4-aspect-slot-next-source-plan/aspect-slot-next-source-plan.json";
 const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const externalEvidenceIntakeFile = "outputs/diablo4-external-evidence-intake/external-evidence-intake.json";
+const externalEvidenceBridgePlanFile = "outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
@@ -454,6 +455,7 @@ const additiveBucketSourceConclusion = readOptionalJson(additiveBucketSourceConc
 const aspectSlotNextSourcePlan = readOptionalJson(aspectSlotNextSourcePlanFile);
 const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const externalEvidenceIntake = readOptionalJson(externalEvidenceIntakeFile);
+const externalEvidenceBridgePlan = readOptionalJson(externalEvidenceBridgePlanFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
@@ -517,6 +519,7 @@ const report = {
     aspectSlotNextSourcePlanFile: aspectSlotNextSourcePlan ? aspectSlotNextSourcePlanFile : null,
     nextEvidenceRoadmapFile: nextEvidenceRoadmap ? nextEvidenceRoadmapFile : null,
     externalEvidenceIntakeFile: externalEvidenceIntake ? externalEvidenceIntakeFile : null,
+    externalEvidenceBridgePlanFile: externalEvidenceBridgePlan ? externalEvidenceBridgePlanFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -597,6 +600,14 @@ const report = {
         candidates: externalEvidenceIntake.candidates,
         requirements: externalEvidenceIntake.requirements,
         safeguards: externalEvidenceIntake.safeguards,
+      }
+    : null,
+  externalEvidenceBridgePlan: externalEvidenceBridgePlan
+    ? {
+        file: externalEvidenceBridgePlanFile,
+        summary: externalEvidenceBridgePlan.summary,
+        steps: externalEvidenceBridgePlan.steps,
+        safeguards: externalEvidenceBridgePlan.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

@@ -13,6 +13,7 @@ const generationSteps = [
   "build-user-whatif-scenarios.js",
   "build-reliable-dps-gates.js",
   "audit-external-evidence-intake.js",
+  "build-external-evidence-bridge-plan.js",
   "build-next-evidence-roadmap.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -46,6 +47,7 @@ const workingBase = readJson("outputs/diablo4-working-base-contract/working-base
 const reliableGates = readJson("outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json");
 const bucketEngineContract = readJson("outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json");
 const externalEvidenceIntake = readJson("outputs/diablo4-external-evidence-intake/external-evidence-intake.json");
+const externalEvidenceBridge = readJson("outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -59,6 +61,7 @@ assertInvariant(reliableGates.summary.canUseForReliableDps === false, "blocked d
 assertInvariant(bucketEngineContract.summary.status === "bucket-engine-contract-ok", "bucket engine contract must pass");
 assertInvariant(bucketEngineContract.summary.failed === 0, "bucket engine contract failed invariants");
 assertInvariant(externalEvidenceIntake.summary.canModifyReliableDps === false, "external evidence intake must not modify reliable DPS");
+assertInvariant(externalEvidenceBridge.summary.canModifyReliableDps === false, "external evidence bridge must not modify reliable DPS");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -92,6 +95,7 @@ const report = {
     { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
     { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
     { id: "external-evidence-intake-safe", status: "passed", value: externalEvidenceIntake.summary.canModifyReliableDps },
+    { id: "external-evidence-bridge-safe", status: "passed", value: externalEvidenceBridge.summary.canModifyReliableDps },
   ],
 };
 
@@ -105,6 +109,7 @@ assertInvariant(optimizerPlan.workingBaseContract?.summary?.class === "spiritbor
 assertInvariant(optimizerPlan.targetOptimizerSuite?.summary?.status === "target-optimizer-suite-ok", "optimizer plan must embed suite report");
 assertInvariant(optimizerPlan.bucketEngineContract?.summary?.status === "bucket-engine-contract-ok", "optimizer plan must embed bucket engine contract");
 assertInvariant(optimizerPlan.externalEvidenceIntake?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence intake");
+assertInvariant(optimizerPlan.externalEvidenceBridgePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence bridge plan");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

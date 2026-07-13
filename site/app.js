@@ -342,6 +342,7 @@ function renderTargetOptimizerPlan() {
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
+    ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
     <div class="target-optimizer-recommendations">
       ${recommendations.map(renderTargetOptimizerRecommendation).join("") || `<div class="optimizer-empty">Aucune recommandation stricte exploitable.</div>`}
@@ -503,6 +504,47 @@ function renderReliableDpsGates(report) {
       </div>
       <p>${assessment.finding ?? ""}</p>
       <p>${assessment.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderExternalEvidenceBridgePlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const steps = report.steps ?? [];
+  return `
+    <div class="bonus-selector-proof external-evidence-bridge">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Pont preuves</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readySteps > 0 ? "positive" : "blocked"}">
+          ${summary.readySteps > 0 ? "pret" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Etapes", summary.steps)}
+        ${targetMetric("Pretes", summary.readySteps)}
+        ${targetMetric("Bloquees", summary.blockedSteps)}
+        ${targetMetric("Preuves", summary.acceptedEvidence)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Portes DPS ${summary.reliableDpsStillBlocked ? "bloquees" : "ouvertes"}</span>
+        <span>Contrat buckets ${summary.bucketContractSafe ? "ok" : "a verifier"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${steps.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.title}</strong>
+            <p>${item.unlocks}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }
