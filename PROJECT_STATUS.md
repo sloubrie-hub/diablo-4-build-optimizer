@@ -848,3 +848,13 @@ Build de reference :
   - resultat test : `0` acceptee, `4` en attente avec blockers, `1` rejetee, `canModifyReliableDps false`
   - validation serveur : `/site/`, `target-optimizer-suite.json` et `target-optimizer-plan.json` repondent `200`
   - decision : les mauvaises preuves sont verifiees automatiquement avant toute tentative de bridge
+- plan nouvelle famille binaire ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-new-binary-family-plan.js`
+  - rapport genere : `outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json`
+  - suite optimiseur : `14` etapes, statut `target-optimizer-suite-ok`
+  - sondes : `binary-family-delta-parent-1663210`, `binary-family-slots-1461593`, `binary-family-bucket-source`
+  - prochaine sonde prioritaire : `binary-family-delta-parent-1663210`
+  - statut : `3` sondes, `0` prete, `3` bloquees, preuves locales epuisees, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Famille binaire`
+  - validation serveur : `/site/`, `new-binary-family-plan.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
+  - decision : chercher un record parent/consommateur source-backed avant toute promotion du delta, des slots ou des buckets fins

@@ -9926,3 +9926,57 @@ Validation :
 Decision :
 
 Les preuves externes invalides sont maintenant couvertes par regression automatique. Cela protege le chemin de promotion avant meme le bridge parseur.
+
+## Plan nouvelle famille binaire
+
+Un plan de recherche source-backed a ete ajoute pour cadrer la prochaine piste locale prometteuse : trouver une nouvelle famille de records binaires au lieu de promouvoir par analogie.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-new-binary-family-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Sondes definies :
+
+- `binary-family-delta-parent-1663210`
+  - domaine : `delta-1663210`
+  - objectif : record parent ou consommateur exact autour de `Mod.SoilRuler_B`
+  - portes : `sf32-field-ownership`, `sf33-trigger`, `uptime-proven-or-separated`
+- `binary-family-slots-1461593`
+  - domaine : `slots-1461593`
+  - objectif : famille aspect-equipement non localisation avec champ slot direct
+  - portes : `slot-field-direct`, `asset-mapping-1461593`
+- `binary-family-bucket-source`
+  - domaine : `additive-buckets`
+  - objectif : famille qui classe `Bonus_Percent_Per_Power` en bucket additif/multiplicatif
+  - portes : `bucket-family-named`, `bonus-percent-anchor`
+
+Resultat :
+
+- sondes : `3`
+- pretes : `0`
+- bloquees : `3`
+- preuves locales epuisees : `true`
+- prochaine sonde : `binary-family-delta-parent-1663210`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `14` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- nouveau plan : `/outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+- suite JSON : `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` repond `200`
+
+Decision :
+
+La suite sait maintenant quoi chercher dans les donnees binaires avant de coder un parseur. Le delta `48960`, les slots de `1461593` et les buckets fins restent bloques tant qu'une preuve source explicite n'a pas ete trouvee puis reliee a un parseur avec invariant.

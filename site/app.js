@@ -8,6 +8,7 @@ const ASPECT_SLOT_NEXT_SOURCE_PLAN_URL = "../outputs/diablo4-aspect-slot-next-so
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
+const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -23,6 +24,7 @@ const state = {
   bonusSelectorSourceProof: null,
   additiveBucketSourceConclusion: null,
   nextEvidenceRoadmap: null,
+  newBinaryFamilyPlan: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -73,6 +75,7 @@ async function boot() {
     await loadBonusSelectorSourceProof();
     await loadAdditiveBucketSourceConclusion();
     await loadNextEvidenceRoadmap();
+    await loadNewBinaryFamilyPlan();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -280,6 +283,10 @@ async function loadNextEvidenceRoadmap() {
   state.nextEvidenceRoadmap = await fetchOptionalJson(NEXT_EVIDENCE_ROADMAP_URL);
 }
 
+async function loadNewBinaryFamilyPlan() {
+  state.newBinaryFamilyPlan = await fetchOptionalJson(NEW_BINARY_FAMILY_PLAN_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -341,6 +348,7 @@ function renderTargetOptimizerPlan() {
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
+    ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -540,6 +548,47 @@ function renderExternalEvidenceBridgePlan(report) {
             <span>${item.status}</span>
             <strong>${item.title}</strong>
             <p>${item.unlocks}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderNewBinaryFamilyPlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const probes = report.probes ?? [];
+  return `
+    <div class="bonus-selector-proof new-binary-family-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Famille binaire</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyProbes > 0 ? "positive" : "blocked"}">
+          ${summary.readyProbes > 0 ? "pret" : "a scanner"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Sondes", summary.probes)}
+        ${targetMetric("Pretes", summary.readyProbes)}
+        ${targetMetric("Bloquees", summary.blockedProbes)}
+        ${targetMetric("Priorite", summary.nextProbeId ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Preuves locales ${summary.localEvidenceExhausted ? "epuisees" : "a verifier"}</span>
+        <span>Pont externe ${formatNumber(summary.externalBridgeReadySteps)} pret</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${probes.map((item) => `
+          <article>
+            <span>${item.priority} - ${item.status}</span>
+            <strong>${item.title}</strong>
+            <p>${(item.missingGates ?? []).join(" - ") || item.unlocks}</p>
           </article>
         `).join("")}
       </div>
