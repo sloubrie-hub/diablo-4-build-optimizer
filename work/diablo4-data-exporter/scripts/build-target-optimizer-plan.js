@@ -738,6 +738,7 @@ const report = {
         file: deltaLocalExhaustionConclusionFile,
         summary: deltaLocalExhaustionConclusion.summary,
         gates: deltaLocalExhaustionConclusion.gates,
+        localConclusions: deltaLocalExhaustionConclusion.localConclusions,
         sf33Evidence: deltaLocalExhaustionConclusion.sf33Evidence,
         nextFocus: deltaLocalExhaustionConclusion.nextFocus,
         safeguards: deltaLocalExhaustionConclusion.safeguards,

@@ -10468,3 +10468,45 @@ Validation :
 Decision :
 
 Les preuves locales d'uptime ne prouvent pas le DPS fiable : `SF_28/SF_29` sont des probabilites/procs locaux non relies a `SF_32/SF_33` et sans valeur d'uptime explicite. Le site peut conserver l'uptime comme hypothese utilisateur separee, mais aucune valeur d'uptime ne doit entrer dans `reliableDps` sans preuve externe numerique ou mapping source-backed.
+
+## Conclusion delta globale enrichie
+
+La conclusion delta locale a ete enrichie pour consommer les conclusions `SF_32` et uptime. Elle ne se limite plus a la piste `SF_33`; elle consolide maintenant les trois verrous obligatoires du delta `48960`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-local-exhaustion-conclusion.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- SF32 local epuise : `true`
+- SF33 local epuise : `true`
+- uptime fiable locale epuisee : `true`
+- scenario utilisateur separe : `true`
+- preuves locales delta toutes epuisees : `true`
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- prochaine priorite : `external-delta-evidence`
+- statut : `delta-local-all-evidence-exhausted`
+- suite optimiseur : `target-optimizer-suite-ok`, `25` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le script delta, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport conclusion delta : regenere avec `allLocalEvidenceExhausted true`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere avec `localConclusions`
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree avec les invariants delta globaux
+
+Decision :
+
+Le delta `48960` de `1663210` reste un what-if bloque. Les trois preuves locales obligatoires sont epuisees pour le DPS fiable. La suite utile n'est plus un audit local redondant : il faut soit une preuve externe acceptee, soit une nouvelle famille binaire source-backed, soit maintenir le contrat what-if utilisateur separe sans jamais toucher `reliableDps`.

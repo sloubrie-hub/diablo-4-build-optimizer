@@ -26,9 +26,9 @@ const generationSteps = [
   "scan-delta-parent-systems-tuning-contexts.js",
   "build-delta-parent-undecoded-source-plan.js",
   "audit-delta-parent-nontext-table-signals.js",
-  "build-delta-local-exhaustion-conclusion.js",
   "build-sf32-local-exhaustion-conclusion.js",
   "build-uptime-local-exhaustion-conclusion.js",
+  "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -114,6 +114,7 @@ assertInvariant(deltaParentNontextTableSignals.summary.inspectedPayloads >= 1, "
 assertInvariant(deltaLocalExhaustionConclusion.summary.canModifyReliableDps === false, "delta local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(deltaLocalExhaustionConclusion.summary.exactParentConsumerProven === false, "delta local exhaustion conclusion must not prove exact parent automatically");
 assertInvariant(deltaLocalExhaustionConclusion.summary.sf33LocalExhausted === true, "delta local exhaustion conclusion should close local SF_33 exploration");
+assertInvariant(deltaLocalExhaustionConclusion.summary.allLocalEvidenceExhausted === true, "delta local exhaustion conclusion should close all local delta evidence");
 assertInvariant(sf32LocalExhaustionConclusion.summary.canModifyReliableDps === false, "SF_32 local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(sf32LocalExhaustionConclusion.summary.fieldOwnershipProven === false, "SF_32 local exhaustion conclusion must not prove field ownership automatically");
 assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === true, "SF_32 local exhaustion conclusion should close local SF_32 exploration");
@@ -179,6 +180,7 @@ const report = {
     { id: "delta-parent-nontext-table-payloads-inspected", status: "passed", value: deltaParentNontextTableSignals.summary.inspectedPayloads },
     { id: "delta-local-exhaustion-safe", status: "passed", value: deltaLocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "delta-local-sf33-exhausted", status: "passed", value: deltaLocalExhaustionConclusion.summary.sf33LocalExhausted },
+    { id: "delta-local-all-exhausted", status: "passed", value: deltaLocalExhaustionConclusion.summary.allLocalEvidenceExhausted },
     { id: "delta-local-next-focus", status: "passed", value: deltaLocalExhaustionConclusion.summary.recommendedNextFocus },
     { id: "sf32-local-exhaustion-safe", status: "passed", value: sf32LocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "sf32-local-field-not-proven", status: "passed", value: sf32LocalExhaustionConclusion.summary.fieldOwnershipProven },

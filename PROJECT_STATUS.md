@@ -1001,3 +1001,16 @@ Build de reference :
   - statut : `uptime-local-reliable-evidence-exhausted`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `Conclusion uptime`
   - decision : garder SF28/SF29 hors DPS fiable; conserver l'uptime comme what-if utilisateur separe ou exiger une preuve externe numerique
+- conclusion delta globale enrichie
+  - script modifie : `work/diablo4-data-exporter/scripts/build-delta-local-exhaustion-conclusion.js`
+  - rapport regenere : `outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json`
+  - suite optimiseur : `25` etapes, statut `target-optimizer-suite-ok`
+  - SF32 local epuise : `true`
+  - SF33 local epuise : `true`
+  - uptime fiable locale epuisee : `true`
+  - scenario utilisateur separe : `true`
+  - preuves locales delta toutes epuisees : `true`
+  - prochaine priorite : `external-delta-evidence`
+  - statut : `delta-local-all-evidence-exhausted`, `canModifyReliableDps false`
+  - plan optimiseur et site : panneau `Conclusion delta` enrichi avec les trois verrous
+  - decision : le delta `48960` reste un what-if bloque; la suite utile est preuve externe acceptee, nouvelle famille binaire source-backed ou contrat what-if utilisateur

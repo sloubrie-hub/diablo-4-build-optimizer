@@ -1050,6 +1050,7 @@ function renderDeltaLocalExhaustionConclusion(report) {
   if (!report) return "";
   const summary = report.summary ?? {};
   const evidence = report.sf33Evidence ?? [];
+  const localConclusions = report.localConclusions ?? [];
   const nextFocus = report.nextFocus ?? [];
   return `
     <div class="bonus-selector-proof delta-local-exhaustion-conclusion">
@@ -1058,20 +1059,25 @@ function renderDeltaLocalExhaustionConclusion(report) {
           <strong>Conclusion delta</strong>
           <span>${summary.assessment?.kind ?? "n/a"}</span>
         </div>
-        <div class="${summary.sf33LocalExhausted ? "blocked" : "positive"}">
-          ${summary.sf33LocalExhausted ? "SF33 clos local" : "SF33 a revoir"}
+        <div class="${summary.allLocalEvidenceExhausted ? "blocked" : "positive"}">
+          ${summary.allLocalEvidenceExhausted ? "local clos" : "a revoir"}
         </div>
       </div>
       <div class="bonus-selector-proof-metrics">
-        ${targetMetric("Checks SF33", summary.sf33LocalEvidenceChecks)}
-        ${targetMetric("Signaux", summary.sf33ReadySignals)}
+        ${targetMetric("SF32", summary.sf32LocalExhausted ? "clos" : "ouvert")}
+        ${targetMetric("SF33", summary.sf33LocalExhausted ? "clos" : "ouvert")}
+        ${targetMetric("Uptime", summary.uptimeLocalReliableEvidenceExhausted ? "clos" : "ouvert")}
         ${targetMetric("Delta", summary.blockedDeltaDps)}
-        ${targetMetric("Focus", summary.recommendedNextFocus ?? "n/a")}
       </div>
       <div class="bonus-selector-signals">
         <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
         <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
-        <span>SF33 local ${summary.sf33LocalExhausted ? "epuise" : "ouvert"}</span>
+        <span>What-if utilisateur ${summary.userScenarioSeparated ? "separe" : "a verifier"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${localConclusions.map((item) => `
+          <span class="${item.status?.includes("exhausted") ? "failed" : "passed"}">${item.id}: ${item.status}</span>
+        `).join("")}
       </div>
       <div class="next-evidence-actions">
         ${(nextFocus.length ? nextFocus : evidence).slice(0, 5).map((item) => `

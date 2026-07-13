@@ -8,7 +8,9 @@ const inputs = {
   systemsTuning: process.argv[5] ?? "outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json",
   nontextSignals: process.argv[6] ?? "outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json",
   undecodedPlan: process.argv[7] ?? "outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json",
-  outDir: process.argv[8] ?? "outputs/diablo4-delta-local-exhaustion-conclusion",
+  sf32Conclusion: process.argv[8] ?? "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json",
+  uptimeConclusion: process.argv[9] ?? "outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json",
+  outDir: process.argv[10] ?? "outputs/diablo4-delta-local-exhaustion-conclusion",
 };
 
 function readJson(filePath) {
@@ -21,6 +23,8 @@ const corpusScan = readJson(inputs.corpusScan);
 const systemsTuning = readJson(inputs.systemsTuning);
 const nontextSignals = readJson(inputs.nontextSignals);
 const undecodedPlan = readJson(inputs.undecodedPlan);
+const sf32Conclusion = readJson(inputs.sf32Conclusion);
+const uptimeConclusion = readJson(inputs.uptimeConclusion);
 
 const gates = reliableGates.gates ?? [];
 const sf32Gate = gates.find((gate) => gate.id === "sf32-field") ?? null;
@@ -78,30 +82,76 @@ const sf33Evidence = [
 
 const sf33ReadySignals = sf33Evidence.filter((row) => row.status === "ready" || row.status === "review" || row.status === "decode-required");
 const sf33LocalExhausted = sf33ReadySignals.length === 0;
+const sf32LocalExhausted = sf32Conclusion.summary?.sf32LocalExhausted === true;
+const uptimeLocalReliableEvidenceExhausted = uptimeConclusion.summary?.localReliableEvidenceExhausted === true;
+const userScenarioSeparated = uptimeConclusion.summary?.userScenarioSeparated === true;
+const allLocalEvidenceExhausted = sf32LocalExhausted && sf33LocalExhausted && uptimeLocalReliableEvidenceExhausted;
 const canModifyReliableDps = false;
 const promotionReady = false;
 
-const nextFocus = sf33LocalExhausted
+const localConclusions = [
+  {
+    id: "sf32-field-ownership",
+    status: sf32LocalExhausted ? "local-exhausted" : "open",
+    blocker: sf32Gate?.blocker ?? "field-level-parser-required",
+    assessment: sf32Conclusion.summary?.assessment?.kind ?? sf32Gate?.assessment ?? null,
+    readySignals: sf32Conclusion.summary?.readySignals ?? null,
+    localEvidenceChecks: sf32Conclusion.summary?.localEvidenceChecks ?? null,
+    canModifyReliableDps: sf32Conclusion.summary?.canModifyReliableDps === true,
+    finding: sf32Conclusion.summary?.assessment?.finding ?? sf32Gate?.reason ?? null,
+    nextAction: sf32Conclusion.summary?.assessment?.nextAction ?? null,
+  },
+  {
+    id: "sf33-trigger",
+    status: sf33LocalExhausted ? "local-exhausted" : "open",
+    blocker: sf33Gate?.blocker ?? "sf33-trigger-build-state-unmapped",
+    assessment: sf33LocalExhausted ? "delta-local-sf33-evidence-exhausted" : "delta-local-sf33-review-still-open",
+    readySignals: sf33ReadySignals.length,
+    localEvidenceChecks: sf33Evidence.length,
+    canModifyReliableDps: false,
+    finding: sf33LocalExhausted
+      ? "Les pistes locales SF_33 inspectees ne prouvent ni parent/consommateur, ni contexte externe, ni decode cible manquant."
+      : "Certaines pistes SF_33 restent a examiner avant de clore le blocage local.",
+    nextAction: sf33LocalExhausted
+      ? "Ne plus prioriser SF_33 en local sans nouvelle source."
+      : "Examiner les candidats SF_33 restants sans modifier reliableDps.",
+  },
+  {
+    id: "uptime",
+    status: uptimeLocalReliableEvidenceExhausted ? "local-reliable-evidence-exhausted" : "open",
+    blocker: uptimeGate?.blocker ?? "uptime-not-proven",
+    assessment: uptimeConclusion.summary?.assessment?.kind ?? uptimeGate?.assessment ?? null,
+    readySignals: uptimeConclusion.summary?.reliableReadySignals ?? null,
+    localEvidenceChecks: uptimeConclusion.summary?.localEvidenceChecks ?? null,
+    canModifyReliableDps: uptimeConclusion.summary?.canModifyReliableDps === true,
+    finding: uptimeConclusion.summary?.assessment?.finding ?? uptimeGate?.reason ?? null,
+    nextAction: uptimeConclusion.summary?.assessment?.nextAction ?? null,
+  },
+];
+
+const nextFocus = allLocalEvidenceExhausted
   ? [
       {
-        id: "sf32-field-ownership",
+        id: "external-delta-evidence",
         priority: "high",
-        reason: sf32Gate?.reason ?? "SF_32 field ownership remains blocked.",
-        nextAction: "Chercher une preuve source-backed du champ selector 949 / SF_32 ou une source externe acceptee.",
+        reason: "Les preuves locales SF_32, SF_33 et uptime sont epuisees pour le DPS fiable.",
+        nextAction: "Ajouter une preuve externe acceptee dans inputs/external-evidence-candidates.json ou identifier une nouvelle famille binaire source-backed.",
       },
       {
-        id: "uptime-user-hypothesis",
+        id: "user-uptime-scenario-contract",
         priority: "medium",
-        reason: uptimeGate?.reason ?? "Uptime remains unproven.",
-        nextAction: "Ameliorer le scenario what-if utilisateur sans le promouvoir en reliableDps, ou trouver une source d'uptime externe.",
+        reason: userScenarioSeparated
+          ? "Le scenario utilisateur est separe du reliableDps."
+          : "Le scenario utilisateur doit rester separe du reliableDps.",
+        nextAction: "Conserver SF_33/uptime comme what-if utilisateur, desactive par defaut, sans classement fiable.",
       },
     ]
   : [
       {
-        id: "sf33-review-candidates",
+        id: "local-delta-review",
         priority: "high",
-        reason: "Some SF_33 evidence still has review candidates.",
-        nextAction: "Inspecter les candidats SF_33 avant de changer de blocage.",
+        reason: "Une des conclusions locales du delta reste ouverte.",
+        nextAction: "Fermer les conclusions locales restantes sans modifier reliableDps.",
       },
     ];
 
@@ -119,23 +169,29 @@ const report = {
     sf33LocalEvidenceChecks: sf33Evidence.length,
     sf33ReadySignals: sf33ReadySignals.length,
     sf33LocalExhausted,
+    sf32LocalExhausted,
+    uptimeLocalReliableEvidenceExhausted,
+    userScenarioSeparated,
+    allLocalEvidenceExhausted,
     recommendedNextFocus: nextFocus[0]?.id ?? null,
     exactParentConsumerProven: false,
     promotionReady,
     canModifyReliableDps,
     assessment: {
-      kind: sf33LocalExhausted
-        ? "delta-local-sf33-evidence-exhausted"
-        : "delta-local-sf33-review-still-open",
-      confidence: sf33LocalExhausted ? "high" : "medium",
+      kind: allLocalEvidenceExhausted
+        ? "delta-local-all-evidence-exhausted"
+        : sf33LocalExhausted
+          ? "delta-local-sf33-evidence-exhausted"
+          : "delta-local-review-still-open",
+      confidence: allLocalEvidenceExhausted || sf33LocalExhausted ? "high" : "medium",
       blocker: "blocked-delta-cleared",
       promotionReady,
-      finding: sf33LocalExhausted
-        ? "Les pistes locales SF_33 inspectees ne prouvent ni parent/consommateur, ni contexte externe, ni decode cible manquant."
-        : "Certaines pistes SF_33 restent a examiner avant de clore le blocage local.",
-      nextAction: sf33LocalExhausted
-        ? "Ne plus prioriser SF_33 en local; basculer vers SF_32 ownership, uptime utilisateur separee, ou preuve externe source-backed."
-        : "Examiner les candidats SF_33 restants sans modifier reliableDps.",
+      finding: allLocalEvidenceExhausted
+        ? "Les preuves locales SF_32, SF_33 et uptime sont epuisees pour le DPS fiable; le delta reste un what-if bloque."
+        : "Certaines pistes locales du delta restent a examiner avant de clore le blocage local complet.",
+      nextAction: allLocalEvidenceExhausted
+        ? "Basculer vers preuve externe acceptee, nouvelle famille binaire source-backed, ou contrat what-if utilisateur separe; ne pas modifier reliableDps."
+        : "Fermer les pistes locales restantes sans modifier reliableDps.",
     },
   },
   gates: {
@@ -143,6 +199,7 @@ const report = {
     sf33: sf33Gate,
     uptime: uptimeGate,
   },
+  localConclusions,
   sf33Evidence,
   nextFocus,
   safeguards: {
