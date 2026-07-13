@@ -10164,3 +10164,45 @@ Validation :
 Decision :
 
 Le motif structurel `Mod.*` autour du trailer `5:90` est confirme sur les analogies UpgradeB/C, mais ce n'est pas une preuve de trigger ni d'uptime. `Mod.SoilRuler_B` reste bloque pour le DPS fiable; la prochaine etape utile est d'identifier la table ou le record parent qui reference ces flags.
+
+## Graphe de references offsets Mod.*
+
+Un audit de graphe de references a ete ajoute pour verifier si les entrees de table pointees par `Mod.SoilRuler_B` et les flags `Mod.UpgradeB/C` sont elles-memes referencees par un parent local.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-parent-offset-reference-graph.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- ancres inspectees : `4`
+- ancre cible SoilRuler : `1`
+- ancres UpgradeB/C : `3`
+- references parentes vers les entrees de table : `0`
+- references parentes cible : `0`
+- references parentes Upgrade : `0`
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- statut : `delta-parent-offset-reference-terminal-table-only`
+- suite optimiseur : `target-optimizer-suite-ok`, `19` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport graphe offsets : genere dans `outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree
+
+Decision :
+
+Les offsets directs prouvent la relation `chaine Mod.* -> entree de table`, mais ces entrees ne sont pas referencees a leur tour dans les payloads inspectes. La piste locale est donc terminale pour cette couche; la suite doit chercher le consommateur dans une table superieure hors payload local ou dans des records binaires non textuels.

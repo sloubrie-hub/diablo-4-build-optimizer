@@ -905,3 +905,16 @@ Build de reference :
   - parent/consommateur exact : `false`
   - plan optimiseur et site : nouveau panneau `Structure Upgrade`
   - decision : le motif Mod.* est confirme, mais il ne prouve toujours pas l'activation SF_33; chercher maintenant la table ou le record parent qui reference ces flags
+- graphe de references offsets Mod.* ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-parent-offset-reference-graph.js`
+  - rapport genere : `outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json`
+  - suite optimiseur : `19` etapes, statut `target-optimizer-suite-ok`
+  - ancres inspectees : `4`
+  - ancre cible : `1`
+  - ancres UpgradeB/C : `3`
+  - references parentes vers entrees de table : `0`
+  - references parentes cible : `0`
+  - references parentes Upgrade : `0`
+  - statut : `delta-parent-offset-reference-terminal-table-only`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Graphe offsets`
+  - decision : les offsets directs prouvent la liaison chaine -> entree de table, mais pas de consommateur local; chercher maintenant une table superieure hors payload local ou un record binaire non textuel

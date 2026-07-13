@@ -22,6 +22,7 @@ const generationSteps = [
   "scan-delta-parent-consumer-corpus.js",
   "build-delta-parent-expanded-decode-plan.js",
   "audit-delta-parent-upgrade-structure.js",
+  "audit-delta-parent-offset-reference-graph.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -60,6 +61,7 @@ const newBinaryFamilyDeltaParentAudit = readJson("outputs/diablo4-new-binary-fam
 const deltaParentConsumerCorpusScan = readJson("outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json");
 const deltaParentExpandedDecodePlan = readJson("outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json");
 const deltaParentUpgradeStructureAudit = readJson("outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json");
+const deltaParentOffsetReferenceGraph = readJson("outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -85,6 +87,9 @@ assertInvariant(deltaParentExpandedDecodePlan.summary.upgradeAnalogyAssets >= 1,
 assertInvariant(deltaParentUpgradeStructureAudit.summary.canModifyReliableDps === false, "delta parent upgrade structure audit must not modify reliable DPS");
 assertInvariant(deltaParentUpgradeStructureAudit.summary.exactParentConsumerProven === false, "delta parent upgrade structure audit must not prove exact parent automatically");
 assertInvariant(deltaParentUpgradeStructureAudit.summary.upgradeAnalogyAssets >= 1, "delta parent upgrade structure audit must inspect upgrade analogies");
+assertInvariant(deltaParentOffsetReferenceGraph.summary.canModifyReliableDps === false, "delta parent offset reference graph must not modify reliable DPS");
+assertInvariant(deltaParentOffsetReferenceGraph.summary.exactParentConsumerProven === false, "delta parent offset reference graph must not prove exact parent automatically");
+assertInvariant(deltaParentOffsetReferenceGraph.summary.inspectedAnchors >= 1, "delta parent offset reference graph must inspect anchors");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -130,6 +135,9 @@ const report = {
     { id: "delta-parent-upgrade-structure-safe", status: "passed", value: deltaParentUpgradeStructureAudit.summary.canModifyReliableDps },
     { id: "delta-parent-upgrade-structure-not-auto-proven", status: "passed", value: deltaParentUpgradeStructureAudit.summary.exactParentConsumerProven },
     { id: "delta-parent-upgrade-structure-assets-present", status: "passed", value: deltaParentUpgradeStructureAudit.summary.upgradeAnalogyAssets },
+    { id: "delta-parent-offset-reference-safe", status: "passed", value: deltaParentOffsetReferenceGraph.summary.canModifyReliableDps },
+    { id: "delta-parent-offset-reference-not-auto-proven", status: "passed", value: deltaParentOffsetReferenceGraph.summary.exactParentConsumerProven },
+    { id: "delta-parent-offset-reference-anchors-present", status: "passed", value: deltaParentOffsetReferenceGraph.summary.inspectedAnchors },
   ],
 };
 
@@ -149,6 +157,7 @@ assertInvariant(optimizerPlan.newBinaryFamilyDeltaParentAudit?.summary?.canModif
 assertInvariant(optimizerPlan.deltaParentConsumerCorpusScan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent corpus scan");
 assertInvariant(optimizerPlan.deltaParentExpandedDecodePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent expanded decode plan");
 assertInvariant(optimizerPlan.deltaParentUpgradeStructureAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent upgrade structure audit");
+assertInvariant(optimizerPlan.deltaParentOffsetReferenceGraph?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent offset reference graph");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

@@ -13,6 +13,7 @@ const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-
 const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
 const DELTA_PARENT_EXPANDED_DECODE_PLAN_URL = "../outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json";
 const DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL = "../outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json";
+const DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL = "../outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -33,6 +34,7 @@ const state = {
   deltaParentConsumerCorpusScan: null,
   deltaParentExpandedDecodePlan: null,
   deltaParentUpgradeStructureAudit: null,
+  deltaParentOffsetReferenceGraph: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -88,6 +90,7 @@ async function boot() {
     await loadDeltaParentConsumerCorpusScan();
     await loadDeltaParentExpandedDecodePlan();
     await loadDeltaParentUpgradeStructureAudit();
+    await loadDeltaParentOffsetReferenceGraph();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -315,6 +318,10 @@ async function loadDeltaParentUpgradeStructureAudit() {
   state.deltaParentUpgradeStructureAudit = await fetchOptionalJson(DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL);
 }
 
+async function loadDeltaParentOffsetReferenceGraph() {
+  state.deltaParentOffsetReferenceGraph = await fetchOptionalJson(DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -381,6 +388,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
     ${renderDeltaParentExpandedDecodePlan(state.deltaParentExpandedDecodePlan ?? plan.deltaParentExpandedDecodePlan)}
     ${renderDeltaParentUpgradeStructureAudit(state.deltaParentUpgradeStructureAudit ?? plan.deltaParentUpgradeStructureAudit)}
+    ${renderDeltaParentOffsetReferenceGraph(state.deltaParentOffsetReferenceGraph ?? plan.deltaParentOffsetReferenceGraph)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -801,6 +809,54 @@ function renderDeltaParentUpgradeStructureAudit(report) {
             <p>${item.trailerSignature || "n/a"} - refs ${formatNumber(item.directOffsetReferenceCount)}</p>
           </article>
         `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentOffsetReferenceGraph(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const parentRefs = report.anchorsWithParentRefs ?? [];
+  return `
+    <div class="bonus-selector-proof delta-parent-offset-reference-graph">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Graphe offsets</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.anchorsWithParentRefs > 0 ? "positive" : "blocked"}">
+          ${summary.anchorsWithParentRefs > 0 ? "parent candidat" : "terminal"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Ancres", summary.inspectedAnchors)}
+        ${targetMetric("Cible", summary.targetAnchors)}
+        ${targetMetric("Upgrade", summary.upgradeAnchors)}
+        ${targetMetric("Parents", summary.anchorsWithParentRefs)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>Refs cible ${formatNumber(summary.targetParentRefs)}</span>
+        <span>Refs upgrade ${formatNumber(summary.upgradeParentRefs)}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${parentRefs.slice(0, 4).map((item) => `
+          <article>
+            <span>${item.term}</span>
+            <strong>${item.assetId} - ${item.entryOffset}</strong>
+            <p>${(item.entryRefs ?? []).join(", ") || "n/a"}</p>
+          </article>
+        `).join("") || `
+          <article>
+            <span>scan</span>
+            <strong>Aucun parent local direct</strong>
+            <p>Chercher dans une table superieure ou un record binaire non textuel.</p>
+          </article>
+        `}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

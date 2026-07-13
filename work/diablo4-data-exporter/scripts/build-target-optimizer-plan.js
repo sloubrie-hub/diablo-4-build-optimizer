@@ -20,6 +20,7 @@ const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-d
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
 const deltaParentExpandedDecodePlanFile = "outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json";
 const deltaParentUpgradeStructureAuditFile = "outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json";
+const deltaParentOffsetReferenceGraphFile = "outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
@@ -466,6 +467,7 @@ const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaPar
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
 const deltaParentExpandedDecodePlan = readOptionalJson(deltaParentExpandedDecodePlanFile);
 const deltaParentUpgradeStructureAudit = readOptionalJson(deltaParentUpgradeStructureAuditFile);
+const deltaParentOffsetReferenceGraph = readOptionalJson(deltaParentOffsetReferenceGraphFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
@@ -535,6 +537,7 @@ const report = {
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
     deltaParentExpandedDecodePlanFile: deltaParentExpandedDecodePlan ? deltaParentExpandedDecodePlanFile : null,
     deltaParentUpgradeStructureAuditFile: deltaParentUpgradeStructureAudit ? deltaParentUpgradeStructureAuditFile : null,
+    deltaParentOffsetReferenceGraphFile: deltaParentOffsetReferenceGraph ? deltaParentOffsetReferenceGraphFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -670,6 +673,16 @@ const report = {
         assets: deltaParentUpgradeStructureAudit.assets,
         topHits: deltaParentUpgradeStructureAudit.topHits,
         safeguards: deltaParentUpgradeStructureAudit.safeguards,
+      }
+    : null,
+  deltaParentOffsetReferenceGraph: deltaParentOffsetReferenceGraph
+    ? {
+        file: deltaParentOffsetReferenceGraphFile,
+        summary: deltaParentOffsetReferenceGraph.summary,
+        target: deltaParentOffsetReferenceGraph.target,
+        upgrades: deltaParentOffsetReferenceGraph.upgrades,
+        anchorsWithParentRefs: deltaParentOffsetReferenceGraph.anchorsWithParentRefs,
+        safeguards: deltaParentOffsetReferenceGraph.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios
