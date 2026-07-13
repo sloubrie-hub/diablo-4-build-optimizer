@@ -891,3 +891,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Extension decode delta`
   - validation serveur : `/site/`, `delta-parent-expanded-decode-plan.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
   - decision : ne plus decoder davantage pour cette piste avant d'auditer structurellement les analogies UpgradeB/C deja disponibles
+- audit structurel UpgradeB/C vs SoilRuler ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-parent-upgrade-structure.js`
+  - rapport genere : `outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json`
+  - suite optimiseur : `18` etapes, statut `target-optimizer-suite-ok`
+  - analogies inspectees : `8`
+  - hits UpgradeB/C : `13`
+  - flags autonomes : `3`
+  - formules conditionnelles : `10`
+  - signatures trailer compatibles avec SoilRuler `5:90` : `13`
+  - assets compatibles : `199516`, `1489641`, `1690398`, `2302974`, `2245719`, `1631672`, `266570`, `202484`
+  - statut : `delta-parent-upgrade-structure-pattern-only`, `canModifyReliableDps false`
+  - parent/consommateur exact : `false`
+  - plan optimiseur et site : nouveau panneau `Structure Upgrade`
+  - decision : le motif Mod.* est confirme, mais il ne prouve toujours pas l'activation SF_33; chercher maintenant la table ou le record parent qui reference ces flags

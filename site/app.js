@@ -12,6 +12,7 @@ const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/ne
 const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
 const DELTA_PARENT_EXPANDED_DECODE_PLAN_URL = "../outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json";
+const DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL = "../outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -31,6 +32,7 @@ const state = {
   newBinaryFamilyDeltaParentAudit: null,
   deltaParentConsumerCorpusScan: null,
   deltaParentExpandedDecodePlan: null,
+  deltaParentUpgradeStructureAudit: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -85,6 +87,7 @@ async function boot() {
     await loadNewBinaryFamilyDeltaParentAudit();
     await loadDeltaParentConsumerCorpusScan();
     await loadDeltaParentExpandedDecodePlan();
+    await loadDeltaParentUpgradeStructureAudit();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -308,6 +311,10 @@ async function loadDeltaParentExpandedDecodePlan() {
   state.deltaParentExpandedDecodePlan = await fetchOptionalJson(DELTA_PARENT_EXPANDED_DECODE_PLAN_URL);
 }
 
+async function loadDeltaParentUpgradeStructureAudit() {
+  state.deltaParentUpgradeStructureAudit = await fetchOptionalJson(DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -373,6 +380,7 @@ function renderTargetOptimizerPlan() {
     ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
     ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
     ${renderDeltaParentExpandedDecodePlan(state.deltaParentExpandedDecodePlan ?? plan.deltaParentExpandedDecodePlan)}
+    ${renderDeltaParentUpgradeStructureAudit(state.deltaParentUpgradeStructureAudit ?? plan.deltaParentUpgradeStructureAudit)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -749,6 +757,48 @@ function renderDeltaParentExpandedDecodePlan(report) {
             <span>${item.requiredAction ?? "inspect"}</span>
             <strong>${item.assetId} - ${item.fileName}</strong>
             <p>${(item.sampleValues ?? []).slice(0, 2).join(" - ")}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentUpgradeStructureAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const topHits = report.topHits ?? [];
+  return `
+    <div class="bonus-selector-proof delta-parent-upgrade-structure-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Structure Upgrade</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.exactParentConsumerProven ? "positive" : "blocked"}">
+          ${summary.exactParentConsumerProven ? "parent prouve" : "motif seul"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Assets", summary.upgradeAnalogyAssets)}
+        ${targetMetric("Hits", summary.upgradeHits)}
+        ${targetMetric("Flags", summary.standaloneFlags)}
+        ${targetMetric("Trailer", summary.trailerMatchesTarget)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>Motif reutilisable ${summary.reusablePatternCandidate ? "oui" : "non"}</span>
+        <span>Assets ${(summary.trailerMatchAssets ?? []).join(", ") || "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${topHits.slice(0, 5).map((item) => `
+          <article>
+            <span>${item.kind}</span>
+            <strong>${item.assetId} - ${item.term}</strong>
+            <p>${item.trailerSignature || "n/a"} - refs ${formatNumber(item.directOffsetReferenceCount)}</p>
           </article>
         `).join("")}
       </div>

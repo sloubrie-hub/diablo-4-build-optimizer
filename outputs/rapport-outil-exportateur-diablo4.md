@@ -10121,3 +10121,46 @@ Validation :
 Decision :
 
 Il n'est pas necessaire de decoder plus pour exploiter les analogies UpgradeB/C prioritaires : elles sont deja disponibles. La prochaine etape doit comparer leurs structures parent/consommateur a `Mod.SoilRuler_B`, sans promouvoir SF33 ni modifier `reliableDps`.
+
+## Audit structurel UpgradeB/C vs SoilRuler
+
+Un audit structurel a ete ajoute pour comparer les analogies `Mod.UpgradeB` / `Mod.UpgradeC` deja decodees avec le cas cible `Mod.SoilRuler_B`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-parent-upgrade-structure.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- analogies inspectees : `8`
+- hits UpgradeB/C : `13`
+- flags autonomes : `3`
+- formules conditionnelles : `10`
+- hits avec references d'offset directes : `3`
+- signatures trailer compatibles avec SoilRuler `5:90` : `13`
+- assets compatibles : `199516`, `1489641`, `1690398`, `2302974`, `2245719`, `1631672`, `266570`, `202484`
+- candidat motif reutilisable : `true`
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `18` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport audit structurel : genere dans `outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree
+
+Decision :
+
+Le motif structurel `Mod.*` autour du trailer `5:90` est confirme sur les analogies UpgradeB/C, mais ce n'est pas une preuve de trigger ni d'uptime. `Mod.SoilRuler_B` reste bloque pour le DPS fiable; la prochaine etape utile est d'identifier la table ou le record parent qui reference ces flags.
