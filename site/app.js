@@ -21,6 +21,7 @@ const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-
 const DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL = "../outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
+const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
@@ -51,6 +52,7 @@ const state = {
   deltaParentNontextTableSignals: null,
   deltaLocalExhaustionConclusion: null,
   sf32LocalExhaustionConclusion: null,
+  sf32OwnerSourcePacket: null,
   uptimeLocalExhaustionConclusion: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
@@ -116,6 +118,7 @@ async function boot() {
     await loadDeltaParentNontextTableSignals();
     await loadDeltaLocalExhaustionConclusion();
     await loadSf32LocalExhaustionConclusion();
+    await loadSf32OwnerSourcePacket();
     await loadUptimeLocalExhaustionConclusion();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
@@ -377,6 +380,10 @@ async function loadSf32LocalExhaustionConclusion() {
   state.sf32LocalExhaustionConclusion = await fetchOptionalJson(SF32_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
 
+async function loadSf32OwnerSourcePacket() {
+  state.sf32OwnerSourcePacket = await fetchOptionalJson(SF32_OWNER_SOURCE_PACKET_URL);
+}
+
 async function loadUptimeLocalExhaustionConclusion() {
   state.uptimeLocalExhaustionConclusion = await fetchOptionalJson(UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
@@ -459,6 +466,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentNontextTableSignals(state.deltaParentNontextTableSignals ?? plan.deltaParentNontextTableSignals)}
     ${renderDeltaLocalExhaustionConclusion(state.deltaLocalExhaustionConclusion ?? plan.deltaLocalExhaustionConclusion)}
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
+    ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
     ${renderUptimeLocalExhaustionConclusion(state.uptimeLocalExhaustionConclusion ?? plan.uptimeLocalExhaustionConclusion)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
@@ -1157,6 +1165,49 @@ function renderSf32LocalExhaustionConclusion(report) {
             <span>${item.priority}</span>
             <strong>${item.id}</strong>
             <p>${item.requiredEvidence}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSf32OwnerSourcePacket(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const claim = report.requiredClaim ?? {};
+  const bridge = report.parserBridgeContract ?? {};
+  const rejected = report.rejectedLocalSignals ?? [];
+  return `
+    <div class="bonus-selector-proof sf32-owner-source-packet">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Packet SF_32</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.acceptedEvidence > 0 ? "positive" : "blocked"}">
+          ${summary.acceptedEvidence > 0 ? "preuve acceptee" : "source requise"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Asset", summary.assetId)}
+        ${targetMetric("Champ", summary.targetField ?? "n/a")}
+        ${targetMetric("Selecteur", summary.targetSelector ?? "n/a")}
+        ${targetMetric("Rejets locaux", summary.rejectedLocalSignals)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Bridge ${bridge.status ?? "n/a"}</span>
+        <span>Claim ${claim.type ?? "n/a"} / ${claim.field ?? "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${rejected.slice(0, 4).map((item) => `
+          <article>
+            <span>${item.sourceAssessment ?? item.id}</span>
+            <strong>${item.id}</strong>
+            <p>${item.reasonRejectedForOwnership}</p>
           </article>
         `).join("")}
       </div>

@@ -10723,3 +10723,54 @@ Validation :
 Decision :
 
 Les imports de build peuvent restaurer l'hypothese utilisateur `SF_33 + uptime`, mais ils ne peuvent pas injecter de score fiable, de promotion ou d'autorisation de ranking. Le DPS fiable reste derive du moteur strict et des gates, jamais du JSON importe.
+
+## Packet source SF32 owner
+
+Un packet source dedie a `delta-proof-sf32-owner` a ete ajoute. Il consolide la cible exacte, les signaux locaux rejetes, le claim attendu et le contrat du futur parser bridge.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-source-packet.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`, `selector:949`, `SF_32`
+- preuves acceptees : `0`
+- signaux locaux rejetes : `7`
+- local epuise : `true`
+- bridge parser requis : `true`
+- claim attendu : `sf32-field-ownership` / `selector:949`
+- statut bridge : `blocked-waiting-for-source`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `31` etapes
+
+Signaux locaux rejetes conserves :
+
+- `selector-owner-fields`
+- `second-compact-selector-949`
+- `metadata-12337-scale-10`
+- `named-local-source-table`
+- `fresh-record-source-links`
+- `compact-cross-selector-analogy`
+- `numeric-table-contexts`
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport packet : genere dans `outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json`
+- plan optimiseur : regenere avec `sf32OwnerSourcePacket`
+- site : nouveau panneau `Packet SF_32`
+
+Decision :
+
+La prochaine avance SF32 doit venir d'une preuve source-backed ou d'un parser bridge capable de nommer le champ proprietaire. Le packet ne fabrique aucune preuve et garde tous les signaux locaux rejetes hors promotion; `reliableDps` reste strict-only.

@@ -1073,3 +1073,16 @@ Build de reference :
   - scenario importe conserve : `sf33Active true`, `uptime 1`
   - reliableDps modifiable : `false`
   - decision : un export/import de build peut transporter le scenario what-if, mais ne peut pas injecter de promotion ou de score fiable
+- packet source SF32 owner ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-sf32-owner-source-packet.js`
+  - rapport genere : `outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json`
+  - suite optimiseur : `31` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `selector:949`, `SF_32`
+  - preuves acceptees : `0`
+  - signaux locaux rejetes : `7`
+  - local epuise : `true`
+  - bridge parser requis : `true`
+  - claim attendu : `sf32-field-ownership` / `selector:949`
+  - plan optimiseur et site : nouveau panneau `Packet SF_32`
+  - reliableDps modifiable : `false`
+  - decision : cadrer la prochaine preuve SF32 avec les rejets locaux et le contrat de bridge sans creer de preuve artificielle
