@@ -14,6 +14,7 @@ const generationSteps = [
   "build-reliable-dps-gates.js",
   "audit-external-evidence-intake.js",
   "build-external-evidence-bridge-plan.js",
+  "test-external-evidence-bridge.js",
   "build-next-evidence-roadmap.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",

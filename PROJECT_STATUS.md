@@ -834,3 +834,10 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Pont preuves`
   - validation serveur : `/site/`, `external-evidence-bridge-plan.json` et `target-optimizer-plan.json` repondent `200`
   - decision : une preuve acceptee doit encore passer par un pont parseur explicite avant toute promotion
+- test bridge preuves externes ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-bridge.js`
+  - suite optimiseur : `12` etapes, statut `target-optimizer-suite-ok`
+  - fixture temporaire : `1` preuve `delta-1663210` acceptee, bridge delta pret, slots/buckets bloques
+  - invariant : `canModifyReliableDps false`
+  - validation serveur : `/site/`, `target-optimizer-suite.json` et `target-optimizer-plan.json` repondent `200`
+  - decision : le chemin preuve acceptee -> bridge pret est teste sans modifier le modele fiable

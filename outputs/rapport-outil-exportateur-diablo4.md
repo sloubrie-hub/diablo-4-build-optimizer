@@ -9834,3 +9834,46 @@ Validation :
 Decision :
 
 Le chemin de promotion est maintenant explicite : intake -> preuve acceptee -> bridge parseur -> invariant de suite -> seulement ensuite modification potentielle du modele. Tant qu'une de ces etapes manque, `reliableDps` reste strict.
+
+## Test du bridge de preuves externes
+
+Un test autonome a ete ajoute pour verifier le comportement du bridge quand une preuve externe acceptee existe, sans modifier l'intake reel du projet.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/test-external-evidence-bridge.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Scenario teste :
+
+- creation temporaire d'une preuve `delta-1663210`
+- domaine : `delta-1663210`
+- asset : `1663210`
+- claim : `sf33-trigger`
+- champ : `SF_33`
+- source : `extracted-game-data`
+- revue : `approved`
+
+Resultat attendu :
+
+- intake temporaire : `1` preuve acceptee
+- bridge : `1` etape prete
+- bridge delta : `ready-for-parser-bridge`
+- bridge slots : `blocked-waiting-for-accepted-evidence`
+- bridge buckets : `blocked-waiting-for-accepted-evidence`
+- `canModifyReliableDps false`
+
+Validation :
+
+- suite optimiseur : `target-optimizer-suite-ok`, `12` etapes
+- script inclus : `test-external-evidence-bridge.js`
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- suite JSON : `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+
+Decision :
+
+Le bridge sait maintenant detecter une preuve acceptee et preparer le parser cible, tout en prouvant que le DPS fiable reste inchange tant qu'aucun parser et invariant de promotion ne sont ajoutes.
