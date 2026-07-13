@@ -10252,3 +10252,46 @@ Validation :
 Decision :
 
 Le hash `SystemsTuningGlobals` cible `2084621218` reste local a l'asset SoilRuler dans le corpus decode, alors que les hashes Upgrade ont des contextes externes. Cette difference renforce le blocage SF_33 : aucune activation externe de `Mod.SoilRuler_B` n'est prouvee. La suite utile est de scanner les payloads non decodes ou des tables superieures non textuelles.
+
+## Plan sources non decodees delta
+
+Un plan de decodage cible a ete ajoute pour verifier si le graphe de references externes contient encore des sources SoilRuler/SF33 prioritaires non decodees.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-parent-undecoded-source-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json`
+- `outputs/diablo4-delta-parent-undecoded-source-plan/run-targeted-delta-parent-decodes.ps1`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- assets de references externes : `19`
+- assets scores : `19`
+- assets haute priorite SoilRuler/SF33 : `2`
+- assets haute priorite deja decodes : `2`
+- assets haute priorite a decoder : `0`
+- prochaine file de decode : vide
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- statut : `delta-parent-undecoded-source-plan-no-missing-targeted-decodes`
+- suite optimiseur : `target-optimizer-suite-ok`, `21` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport sources non decodees : genere dans `outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree
+
+Decision :
+
+Il ne manque pas de decode cible dans les sources externes prioritaires pour SoilRuler/SF33 : les deux assets pertinents sont deja disponibles. La prochaine etape doit donc inspecter des tables superieures non textuelles dans les payloads deja decodes, pas decoder plus largement.

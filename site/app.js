@@ -15,6 +15,7 @@ const DELTA_PARENT_EXPANDED_DECODE_PLAN_URL = "../outputs/diablo4-delta-parent-e
 const DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL = "../outputs/diablo4-delta-parent-upgrade-structure-audit/delta-parent-upgrade-structure-audit.json";
 const DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL = "../outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json";
 const DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL = "../outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json";
+const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -37,6 +38,7 @@ const state = {
   deltaParentUpgradeStructureAudit: null,
   deltaParentOffsetReferenceGraph: null,
   deltaParentSystemsTuningContexts: null,
+  deltaParentUndecodedSourcePlan: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -94,6 +96,7 @@ async function boot() {
     await loadDeltaParentUpgradeStructureAudit();
     await loadDeltaParentOffsetReferenceGraph();
     await loadDeltaParentSystemsTuningContexts();
+    await loadDeltaParentUndecodedSourcePlan();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -329,6 +332,10 @@ async function loadDeltaParentSystemsTuningContexts() {
   state.deltaParentSystemsTuningContexts = await fetchOptionalJson(DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL);
 }
 
+async function loadDeltaParentUndecodedSourcePlan() {
+  state.deltaParentUndecodedSourcePlan = await fetchOptionalJson(DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -397,6 +404,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentUpgradeStructureAudit(state.deltaParentUpgradeStructureAudit ?? plan.deltaParentUpgradeStructureAudit)}
     ${renderDeltaParentOffsetReferenceGraph(state.deltaParentOffsetReferenceGraph ?? plan.deltaParentOffsetReferenceGraph)}
     ${renderDeltaParentSystemsTuningContexts(state.deltaParentSystemsTuningContexts ?? plan.deltaParentSystemsTuningContexts)}
+    ${renderDeltaParentUndecodedSourcePlan(state.deltaParentUndecodedSourcePlan ?? plan.deltaParentUndecodedSourcePlan)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -914,6 +922,49 @@ function renderDeltaParentSystemsTuningContexts(report) {
             <p>Elargir le corpus decode avant de conclure.</p>
           </article>
         `}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentUndecodedSourcePlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const queue = report.nextDecodeQueue ?? [];
+  const highPriority = report.highPriority ?? [];
+  return `
+    <div class="bonus-selector-proof delta-parent-undecoded-source-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Sources non decodees</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.missingDecodeHighPriority > 0 ? "blocked" : "positive"}">
+          ${summary.missingDecodeHighPriority > 0 ? "decode cible" : "pret"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Assets", summary.externalReferenceAssets)}
+        ${targetMetric("Scores", summary.scoredAssets)}
+        ${targetMetric("Priorite", summary.highPriorityAssets)}
+        ${targetMetric("A decoder", summary.missingDecodeHighPriority)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>Deja decodes ${formatNumber(summary.alreadyDecodedHighPriority)}</span>
+        <span>File ${(summary.nextDecodeAssets ?? []).join(", ") || "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${(queue.length ? queue : highPriority).slice(0, 5).map((item) => `
+          <article>
+            <span>${item.requiredAction}</span>
+            <strong>${item.assetId} - ${item.fileName}</strong>
+            <p>${(item.matchedTerms ?? []).slice(0, 2).join(" - ") || item.tags?.join(", ") || "n/a"}</p>
+          </article>
+        `).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

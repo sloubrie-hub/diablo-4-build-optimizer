@@ -934,3 +934,16 @@ Build de reference :
   - statut : `delta-parent-systems-tuning-target-local-only`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `SystemsTuning`
   - decision : le hash cible reste local dans le corpus decode; poursuivre vers payloads non decodes ou tables superieures non textuelles, sans promotion SF_33
+- plan sources non decodees delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-parent-undecoded-source-plan.js`
+  - rapport genere : `outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json`
+  - suite optimiseur : `21` etapes, statut `target-optimizer-suite-ok`
+  - assets de references externes : `19`
+  - assets scores : `19`
+  - assets haute priorite SoilRuler/SF33 : `2`
+  - assets haute priorite deja decodes : `2`
+  - assets haute priorite a decoder : `0`
+  - prochaine file de decode : vide
+  - statut : `delta-parent-undecoded-source-plan-no-missing-targeted-decodes`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Sources non decodees`
+  - decision : il ne manque pas de decode cible dans les sources externes prioritaires; passer aux tables superieures non textuelles sur les payloads deja disponibles
