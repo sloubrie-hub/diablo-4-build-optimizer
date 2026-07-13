@@ -2828,6 +2828,14 @@ function buildExportPayload() {
   const assets = buildAssets();
   const composition = buildComposition(assets);
   const totals = composition.totals;
+  const userScenarioContract = state.userWhatIfContract
+    ? {
+        scenarioId: state.userWhatIfContract.summary?.scenarioId,
+        mode: state.userWhatIfContract.mode,
+        canModifyReliableDps: state.userWhatIfContract.summary?.canModifyReliableDps === true,
+        exportPolicy: state.userWhatIfContract.exportPolicy ?? null,
+      }
+    : null;
   return {
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
@@ -2835,6 +2843,7 @@ function buildExportPayload() {
     totals,
     composition,
     userScenario: composition.userScenario,
+    userScenarioContract,
     assetIds: assets.map((asset) => asset.assetId),
     assets: assets.map((asset) => {
       const candidate = bestCandidate(asset);
@@ -2892,20 +2901,37 @@ function importBuildJson() {
     state.selectedAssetId = state.buildAssetIds[0] ?? state.selectedAssetId;
     if (payload.mode === "what-if") state.includeCandidates = true;
     if (payload.mode === "strict") state.includeCandidates = false;
+    let ignoredForbiddenFields = [];
     if (payload.userScenario && typeof payload.userScenario === "object") {
-      state.userScenario = {
-        sf33Active: Boolean(payload.userScenario.sf33Active),
-        uptime: normalizeUptimeValue(payload.userScenario.uptime ?? 1),
-      };
+      const sanitizedScenario = sanitizeImportedUserScenario(payload.userScenario);
+      state.userScenario = sanitizedScenario.value;
+      ignoredForbiddenFields = sanitizedScenario.ignoredForbiddenFields;
       if (state.userScenario.sf33Active) state.includeCandidates = true;
     }
     byId("buildImportText").value = "";
     syncControls();
-    setBuildExportStatus(`Import OK (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})`);
+    const ignored = ignoredForbiddenFields.length ? ` - champs ignores: ${ignoredForbiddenFields.join(", ")}` : "";
+    setBuildExportStatus(`Import OK (${state.buildAssetIds.length} asset${state.buildAssetIds.length > 1 ? "s" : ""})${ignored}`);
     render();
   } catch {
     setBuildExportStatus("Import refuse : JSON invalide.");
   }
+}
+
+function sanitizeImportedUserScenario(userScenario) {
+  const forbiddenFields = state.userWhatIfContract?.exportPolicy?.forbiddenFields ?? [
+    "reliableDpsOverride",
+    "promotionReady",
+    "canUseForReliableDps",
+  ];
+  return {
+    value: {
+      sf33Active: Boolean(userScenario.sf33Active),
+      uptime: normalizeUptimeValue(userScenario.uptime ?? 1),
+    },
+    ignoredForbiddenFields: forbiddenFields.filter((field) =>
+      Object.prototype.hasOwnProperty.call(userScenario, field)),
+  };
 }
 
 function importAssetIds(payload) {

@@ -1063,3 +1063,13 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Contrat what-if`
   - reliableDps modifiable : `false`
   - decision : formaliser l'uptime utilisateur comme simulation/export stable sans preuve source et sans ranking fiable
+- garde-fou import/export what-if ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/test-user-whatif-import-contract.js`
+  - site modifie : export enrichi avec `userScenarioContract`, import sanitise via `sanitizeImportedUserScenario`
+  - suite optimiseur : `30` etapes, statut `target-optimizer-suite-ok`
+  - test import hostile : OK
+  - champs interdits ignores : `reliableDpsOverride`, `promotionReady`, `canUseForReliableDps`
+  - uptime importee hors borne : clamp `1.75` vers `1`
+  - scenario importe conserve : `sf33Active true`, `uptime 1`
+  - reliableDps modifiable : `false`
+  - decision : un export/import de build peut transporter le scenario what-if, mais ne peut pas injecter de promotion ou de score fiable

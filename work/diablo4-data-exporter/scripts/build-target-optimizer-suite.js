@@ -13,6 +13,7 @@ const generationSteps = [
   "build-user-whatif-scenarios.js",
   "build-reliable-dps-gates.js",
   "build-user-whatif-contract.js",
+  "test-user-whatif-import-contract.js",
   "audit-external-evidence-intake.js",
   "test-external-evidence-intake-rejections.js",
   "build-external-evidence-bridge-plan.js",

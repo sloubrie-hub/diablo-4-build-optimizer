@@ -10690,3 +10690,36 @@ Validation :
 Decision :
 
 L'uptime utilisateur devient un contrat de simulation stable pour l'interface et l'export de build. Ce contrat n'est pas une preuve source-backed : `configuredWhatIfDps` ne remplace jamais `reliableDps`, le ranking fiable reste strict-only et les portes `SF_32`, `SF_33`, `uptime` restent bloquees.
+
+## Garde-fou import/export what-if
+
+L'export de build embarque maintenant la politique du contrat what-if utilisateur, et l'import sanitise explicitement les champs interdits. Un test dedie simule un payload hostile contenant une tentative de promotion fiable.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/test-user-whatif-import-contract.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `site/app.js`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- export enrichi : `userScenarioContract`
+- import sanitise : `sanitizeImportedUserScenario`
+- champs interdits ignores : `reliableDpsOverride`, `promotionReady`, `canUseForReliableDps`
+- uptime hostile `1.75` bornee a `1`
+- scenario importe conserve : `sf33Active true`, `uptime 1`
+- reliableDps override : absent du scenario sanitise
+- test : `user-whatif-import-contract-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `30` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau test, la suite et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- test import hostile : OK
+
+Decision :
+
+Les imports de build peuvent restaurer l'hypothese utilisateur `SF_33 + uptime`, mais ils ne peuvent pas injecter de score fiable, de promotion ou d'autorisation de ranking. Le DPS fiable reste derive du moteur strict et des gates, jamais du JSON importe.
