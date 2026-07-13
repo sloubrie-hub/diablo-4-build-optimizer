@@ -20,6 +20,7 @@ const generationSteps = [
   "build-new-binary-family-plan.js",
   "audit-new-binary-family-delta-parent.js",
   "scan-delta-parent-consumer-corpus.js",
+  "build-delta-parent-expanded-decode-plan.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -56,6 +57,7 @@ const externalEvidenceBridge = readJson("outputs/diablo4-external-evidence-bridg
 const newBinaryFamilyPlan = readJson("outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json");
 const newBinaryFamilyDeltaParentAudit = readJson("outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json");
 const deltaParentConsumerCorpusScan = readJson("outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json");
+const deltaParentExpandedDecodePlan = readJson("outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -76,6 +78,8 @@ assertInvariant(newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps ===
 assertInvariant(newBinaryFamilyDeltaParentAudit.summary.failedGateIds.includes("sf33-trigger"), "delta parent audit must keep SF_33 blocked without a parent consumer");
 assertInvariant(deltaParentConsumerCorpusScan.summary.canModifyReliableDps === false, "delta parent consumer corpus scan must not modify reliable DPS");
 assertInvariant(deltaParentConsumerCorpusScan.summary.exactParentConsumerProven === false, "delta parent consumer corpus scan must not prove exact parent automatically");
+assertInvariant(deltaParentExpandedDecodePlan.summary.canModifyReliableDps === false, "delta parent expanded decode plan must not modify reliable DPS");
+assertInvariant(deltaParentExpandedDecodePlan.summary.upgradeAnalogyAssets >= 1, "delta parent expanded decode plan must keep upgrade analogies");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -116,6 +120,8 @@ const report = {
     { id: "new-binary-family-delta-parent-sf33-blocked", status: "passed", value: newBinaryFamilyDeltaParentAudit.summary.failedGateIds },
     { id: "delta-parent-consumer-corpus-safe", status: "passed", value: deltaParentConsumerCorpusScan.summary.canModifyReliableDps },
     { id: "delta-parent-consumer-not-auto-proven", status: "passed", value: deltaParentConsumerCorpusScan.summary.exactParentConsumerProven },
+    { id: "delta-parent-expanded-decode-safe", status: "passed", value: deltaParentExpandedDecodePlan.summary.canModifyReliableDps },
+    { id: "delta-parent-upgrade-analogies-present", status: "passed", value: deltaParentExpandedDecodePlan.summary.upgradeAnalogyAssets },
   ],
 };
 
@@ -133,6 +139,7 @@ assertInvariant(optimizerPlan.externalEvidenceBridgePlan?.summary?.canModifyReli
 assertInvariant(optimizerPlan.newBinaryFamilyPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe new binary family plan");
 assertInvariant(optimizerPlan.newBinaryFamilyDeltaParentAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent audit");
 assertInvariant(optimizerPlan.deltaParentConsumerCorpusScan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent corpus scan");
+assertInvariant(optimizerPlan.deltaParentExpandedDecodePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent expanded decode plan");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

@@ -10082,3 +10082,42 @@ Validation :
 Decision :
 
 Le corpus decode actuel ne contient pas de parent/consommateur externe pour `Mod.SoilRuler_B`. La prochaine piste utile n'est plus de reparser le local 1663210, mais d'elargir aux payloads non encore decodes ou aux tables binaires hors chaines.
+
+## Plan d'extension decode delta
+
+Un plan d'elargissement a ete ajoute pour transformer le resultat `local-only` du scan corpus en file d'inspection concrete. Il s'appuie sur les analogies `Mod.UpgradeB` / `Mod.UpgradeC` trouvees par le scan SF33 complet.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-parent-expanded-decode-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- analogies UpgradeB/C : `8`
+- candidats deja decodes : `8`
+- payloads manquants : `0`
+- haute confiance decodee : `2`
+- file d'inspection : `1489641`, `2245719`, `199516`, `1690398`, `2302974`, `1631672`, `266570`, `202484`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `17` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- plan extension decode : `/outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+- suite JSON : `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` repond `200`
+
+Decision :
+
+Il n'est pas necessaire de decoder plus pour exploiter les analogies UpgradeB/C prioritaires : elles sont deja disponibles. La prochaine etape doit comparer leurs structures parent/consommateur a `Mod.SoilRuler_B`, sans promouvoir SF33 ni modifier `reliableDps`.

@@ -879,3 +879,15 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Scan corpus delta`
   - validation serveur : `/site/`, `delta-parent-consumer-corpus-scan.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
   - decision : elargir maintenant aux payloads non encore decodes ou aux tables binaires hors chaines
+- plan d'extension decode delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-parent-expanded-decode-plan.js`
+  - rapport genere : `outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json`
+  - suite optimiseur : `17` etapes, statut `target-optimizer-suite-ok`
+  - analogies UpgradeB/C : `8`
+  - candidats deja decodes : `8`
+  - decodes manquants : `0`
+  - prochaine file d'inspection : `1489641`, `2245719`, `199516`, `1690398`, `2302974`, `1631672`, `266570`, `202484`
+  - statut : `delta-parent-expanded-decode-plan-ready-for-structural-inspection`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Extension decode delta`
+  - validation serveur : `/site/`, `delta-parent-expanded-decode-plan.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
+  - decision : ne plus decoder davantage pour cette piste avant d'auditer structurellement les analogies UpgradeB/C deja disponibles

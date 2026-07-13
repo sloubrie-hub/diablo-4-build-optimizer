@@ -11,6 +11,7 @@ const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next
 const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
+const DELTA_PARENT_EXPANDED_DECODE_PLAN_URL = "../outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -29,6 +30,7 @@ const state = {
   newBinaryFamilyPlan: null,
   newBinaryFamilyDeltaParentAudit: null,
   deltaParentConsumerCorpusScan: null,
+  deltaParentExpandedDecodePlan: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -82,6 +84,7 @@ async function boot() {
     await loadNewBinaryFamilyPlan();
     await loadNewBinaryFamilyDeltaParentAudit();
     await loadDeltaParentConsumerCorpusScan();
+    await loadDeltaParentExpandedDecodePlan();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -301,6 +304,10 @@ async function loadDeltaParentConsumerCorpusScan() {
   state.deltaParentConsumerCorpusScan = await fetchOptionalJson(DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL);
 }
 
+async function loadDeltaParentExpandedDecodePlan() {
+  state.deltaParentExpandedDecodePlan = await fetchOptionalJson(DELTA_PARENT_EXPANDED_DECODE_PLAN_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -365,6 +372,7 @@ function renderTargetOptimizerPlan() {
     ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
     ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
     ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
+    ${renderDeltaParentExpandedDecodePlan(state.deltaParentExpandedDecodePlan ?? plan.deltaParentExpandedDecodePlan)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -702,6 +710,47 @@ function renderDeltaParentConsumerCorpusScan(report) {
             <p>Elargir aux payloads non decodes ou aux tables binaires hors chaines.</p>
           </article>
         `}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentExpandedDecodePlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const queue = report.nextInspectionQueue ?? [];
+  const missing = (report.candidates ?? []).filter((item) => !item.decoded);
+  return `
+    <div class="bonus-selector-proof delta-parent-expanded-decode-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Extension decode delta</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.missingDecode > 0 ? "blocked" : "positive"}">
+          ${summary.missingDecode > 0 ? "decode requis" : "pret inspection"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Analogies", summary.upgradeAnalogyAssets)}
+        ${targetMetric("Decodees", summary.decodedCandidates)}
+        ${targetMetric("Manquantes", summary.missingDecode)}
+        ${targetMetric("Haute conf.", summary.highConfidenceDecoded)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Inspection ${(summary.nextInspectionAssets ?? []).join(", ") || "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${(missing.length ? missing : queue).slice(0, 5).map((item) => `
+          <article>
+            <span>${item.requiredAction ?? "inspect"}</span>
+            <strong>${item.assetId} - ${item.fileName}</strong>
+            <p>${(item.sampleValues ?? []).slice(0, 2).join(" - ")}</p>
+          </article>
+        `).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

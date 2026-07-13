@@ -18,6 +18,7 @@ const externalEvidenceBridgePlanFile = "outputs/diablo4-external-evidence-bridge
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
+const deltaParentExpandedDecodePlanFile = "outputs/diablo4-delta-parent-expanded-decode-plan/delta-parent-expanded-decode-plan.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
@@ -462,6 +463,7 @@ const externalEvidenceBridgePlan = readOptionalJson(externalEvidenceBridgePlanFi
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
+const deltaParentExpandedDecodePlan = readOptionalJson(deltaParentExpandedDecodePlanFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
@@ -529,6 +531,7 @@ const report = {
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
     newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
+    deltaParentExpandedDecodePlanFile: deltaParentExpandedDecodePlan ? deltaParentExpandedDecodePlanFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -644,6 +647,16 @@ const report = {
         hashOnlyCandidates: deltaParentConsumerCorpusScan.hashOnlyCandidates,
         targetLocalHits: deltaParentConsumerCorpusScan.targetLocalHits,
         safeguards: deltaParentConsumerCorpusScan.safeguards,
+      }
+    : null,
+  deltaParentExpandedDecodePlan: deltaParentExpandedDecodePlan
+    ? {
+        file: deltaParentExpandedDecodePlanFile,
+        summary: deltaParentExpandedDecodePlan.summary,
+        candidates: deltaParentExpandedDecodePlan.candidates,
+        nextInspectionQueue: deltaParentExpandedDecodePlan.nextInspectionQueue,
+        decodeScript: deltaParentExpandedDecodePlan.decodeScript,
+        safeguards: deltaParentExpandedDecodePlan.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios
