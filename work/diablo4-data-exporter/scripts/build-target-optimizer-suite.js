@@ -26,6 +26,7 @@ const generationSteps = [
   "scan-delta-parent-systems-tuning-contexts.js",
   "build-delta-parent-undecoded-source-plan.js",
   "audit-delta-parent-nontext-table-signals.js",
+  "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -68,6 +69,7 @@ const deltaParentOffsetReferenceGraph = readJson("outputs/diablo4-delta-parent-o
 const deltaParentSystemsTuningContexts = readJson("outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json");
 const deltaParentUndecodedSourcePlan = readJson("outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json");
 const deltaParentNontextTableSignals = readJson("outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json");
+const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -105,6 +107,9 @@ assertInvariant(deltaParentUndecodedSourcePlan.summary.scoredAssets >= 1, "delta
 assertInvariant(deltaParentNontextTableSignals.summary.canModifyReliableDps === false, "delta parent nontext table signals must not modify reliable DPS");
 assertInvariant(deltaParentNontextTableSignals.summary.exactParentConsumerProven === false, "delta parent nontext table signals must not prove exact parent automatically");
 assertInvariant(deltaParentNontextTableSignals.summary.inspectedPayloads >= 1, "delta parent nontext table signals must inspect payloads");
+assertInvariant(deltaLocalExhaustionConclusion.summary.canModifyReliableDps === false, "delta local exhaustion conclusion must not modify reliable DPS");
+assertInvariant(deltaLocalExhaustionConclusion.summary.exactParentConsumerProven === false, "delta local exhaustion conclusion must not prove exact parent automatically");
+assertInvariant(deltaLocalExhaustionConclusion.summary.sf33LocalExhausted === true, "delta local exhaustion conclusion should close local SF_33 exploration");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -162,6 +167,9 @@ const report = {
     { id: "delta-parent-nontext-table-safe", status: "passed", value: deltaParentNontextTableSignals.summary.canModifyReliableDps },
     { id: "delta-parent-nontext-table-not-auto-proven", status: "passed", value: deltaParentNontextTableSignals.summary.exactParentConsumerProven },
     { id: "delta-parent-nontext-table-payloads-inspected", status: "passed", value: deltaParentNontextTableSignals.summary.inspectedPayloads },
+    { id: "delta-local-exhaustion-safe", status: "passed", value: deltaLocalExhaustionConclusion.summary.canModifyReliableDps },
+    { id: "delta-local-sf33-exhausted", status: "passed", value: deltaLocalExhaustionConclusion.summary.sf33LocalExhausted },
+    { id: "delta-local-next-focus", status: "passed", value: deltaLocalExhaustionConclusion.summary.recommendedNextFocus },
   ],
 };
 
@@ -185,6 +193,7 @@ assertInvariant(optimizerPlan.deltaParentOffsetReferenceGraph?.summary?.canModif
 assertInvariant(optimizerPlan.deltaParentSystemsTuningContexts?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent systems tuning contexts");
 assertInvariant(optimizerPlan.deltaParentUndecodedSourcePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent undecoded source plan");
 assertInvariant(optimizerPlan.deltaParentNontextTableSignals?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent nontext table signals");
+assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta local exhaustion conclusion");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

@@ -960,3 +960,14 @@ Build de reference :
   - statut : `delta-parent-nontext-target-hash-unlinked`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `Tables non texte`
   - decision : l'occurrence non textuelle du hash cible n'est pas reliee au trigger, au selector ou a l'asset cible; clore cette couche locale pour SF_33
+- conclusion locale delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-local-exhaustion-conclusion.js`
+  - rapport genere : `outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json`
+  - suite optimiseur : `23` etapes, statut `target-optimizer-suite-ok`
+  - checks locaux SF33 : `5`
+  - signaux SF33 prets : `0`
+  - SF33 local epuise : `true`
+  - prochaine priorite : `sf32-field-ownership`
+  - statut : `delta-local-sf33-evidence-exhausted`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Conclusion delta`
+  - decision : ne plus prioriser SF33 en local; basculer vers SF32 ownership ou uptime utilisateur separee/source externe

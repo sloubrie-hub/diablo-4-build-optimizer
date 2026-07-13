@@ -10337,3 +10337,43 @@ Validation :
 Decision :
 
 Une occurrence non textuelle du hash cible existe, mais elle n'est pas reliee localement au trigger `Mod.SoilRuler_B`, au selector `949`, ni a l'asset `1663210`. Cette couche locale ne prouve donc pas SF_33. Le delta reste hors `reliableDps`.
+
+## Conclusion locale delta
+
+Une conclusion de cloture locale a ete ajoutee pour agreger les pistes SF_33 deja inspectees et eviter de continuer a tourner sur la meme hypothese locale sans nouveau type de preuve.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-local-exhaustion-conclusion.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- checks locaux SF33 : `5`
+- signaux SF33 prets : `0`
+- SF33 local epuise : `true`
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- prochaine priorite : `sf32-field-ownership`
+- statut : `delta-local-sf33-evidence-exhausted`
+- suite optimiseur : `target-optimizer-suite-ok`, `23` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport conclusion delta : genere dans `outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere avec la conclusion
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree
+
+Decision :
+
+Les pistes locales SF_33 inspectees ne prouvent ni parent/consommateur, ni contexte externe, ni decode cible manquant. SF_33 est donc clos localement pour l'instant. La suite prioritaire devient `sf32-field-ownership`; l'uptime reste une hypothese utilisateur ou une preuve externe separee. Le delta reste hors `reliableDps`.

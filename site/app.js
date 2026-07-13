@@ -17,6 +17,7 @@ const DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL = "../outputs/diablo4-delta-parent
 const DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL = "../outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json";
 const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
 const DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL = "../outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
+const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -41,6 +42,7 @@ const state = {
   deltaParentSystemsTuningContexts: null,
   deltaParentUndecodedSourcePlan: null,
   deltaParentNontextTableSignals: null,
+  deltaLocalExhaustionConclusion: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -100,6 +102,7 @@ async function boot() {
     await loadDeltaParentSystemsTuningContexts();
     await loadDeltaParentUndecodedSourcePlan();
     await loadDeltaParentNontextTableSignals();
+    await loadDeltaLocalExhaustionConclusion();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -343,6 +346,10 @@ async function loadDeltaParentNontextTableSignals() {
   state.deltaParentNontextTableSignals = await fetchOptionalJson(DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL);
 }
 
+async function loadDeltaLocalExhaustionConclusion() {
+  state.deltaLocalExhaustionConclusion = await fetchOptionalJson(DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -413,6 +420,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentSystemsTuningContexts(state.deltaParentSystemsTuningContexts ?? plan.deltaParentSystemsTuningContexts)}
     ${renderDeltaParentUndecodedSourcePlan(state.deltaParentUndecodedSourcePlan ?? plan.deltaParentUndecodedSourcePlan)}
     ${renderDeltaParentNontextTableSignals(state.deltaParentNontextTableSignals ?? plan.deltaParentNontextTableSignals)}
+    ${renderDeltaLocalExhaustionConclusion(state.deltaLocalExhaustionConclusion ?? plan.deltaLocalExhaustionConclusion)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -1013,6 +1021,48 @@ function renderDeltaParentNontextTableSignals(report) {
             <span>${item.kind}</span>
             <strong>${item.assetId} - ${item.valueName} @ ${item.offset}</strong>
             <p>${(item.pointerLikeWords ?? []).slice(0, 3).map((word) => `${word.delta}:${word.u32}`).join(" - ") || "n/a"}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaLocalExhaustionConclusion(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const evidence = report.sf33Evidence ?? [];
+  const nextFocus = report.nextFocus ?? [];
+  return `
+    <div class="bonus-selector-proof delta-local-exhaustion-conclusion">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Conclusion delta</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.sf33LocalExhausted ? "blocked" : "positive"}">
+          ${summary.sf33LocalExhausted ? "SF33 clos local" : "SF33 a revoir"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Checks SF33", summary.sf33LocalEvidenceChecks)}
+        ${targetMetric("Signaux", summary.sf33ReadySignals)}
+        ${targetMetric("Delta", summary.blockedDeltaDps)}
+        ${targetMetric("Focus", summary.recommendedNextFocus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>SF33 local ${summary.sf33LocalExhausted ? "epuise" : "ouvert"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${(nextFocus.length ? nextFocus : evidence).slice(0, 5).map((item) => `
+          <article>
+            <span>${item.priority ?? item.status ?? "audit"}</span>
+            <strong>${item.id}</strong>
+            <p>${item.nextAction ?? item.finding ?? item.reason ?? ""}</p>
           </article>
         `).join("")}
       </div>
