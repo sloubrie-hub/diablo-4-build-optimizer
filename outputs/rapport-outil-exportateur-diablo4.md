@@ -9980,3 +9980,54 @@ Validation :
 Decision :
 
 La suite sait maintenant quoi chercher dans les donnees binaires avant de coder un parseur. Le delta `48960`, les slots de `1461593` et les buckets fins restent bloques tant qu'une preuve source explicite n'a pas ete trouvee puis reliee a un parseur avec invariant.
+
+## Audit delta parent de la famille binaire
+
+Un audit cible a ete ajoute pour la sonde prioritaire `binary-family-delta-parent-1663210`. Il consolide les artefacts locaux existants au lieu de relancer un scan lourd, puis classe les preuves par gate promouvable.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-new-binary-family-delta-parent.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Sources consolidees :
+
+- `outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json`
+- `outputs/diablo4-source-asset-1663210-record-headers/record-header-inspection.json`
+- `outputs/diablo4-source-asset-1663210-field-records/field-record-inspection.json`
+- `outputs/diablo4-source-asset-1663210-structural-relations/structural-relations.json`
+- `outputs/diablo4-sf33-binary-parent-source/sf33-binary-parent-source.json`
+- `outputs/diablo4-delta-promotion-conclusion/delta-promotion-conclusion.json`
+
+Resultat :
+
+- probe : `binary-family-delta-parent-1663210`
+- asset : `1663210`
+- gates : `3`
+- gates passees : `0`
+- gates bloquees : `sf32-field-ownership`, `sf33-trigger`, `uptime-proven-or-separated`
+- contexte local : present
+- parent/consommateur exact : absent
+- `canModifyReliableDps false`
+- prochaine recherche : `corpus-binary-parent-consumer-scan`
+- suite optimiseur : `target-optimizer-suite-ok`, `15` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- audit delta parent : `/outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+- suite JSON : `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` repond `200`
+
+Decision :
+
+Le contexte local autour de `Mod.SoilRuler_B` et du hash `Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate` est utile mais non promouvable. La prochaine avance doit etre un scan corpus-wide des parents/consommateurs binaires; aucun parseur de promotion ni changement de `reliableDps` ne doit etre ajoute avant cette preuve.

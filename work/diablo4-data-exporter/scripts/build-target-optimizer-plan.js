@@ -16,6 +16,7 @@ const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evid
 const externalEvidenceIntakeFile = "outputs/diablo4-external-evidence-intake/external-evidence-intake.json";
 const externalEvidenceBridgePlanFile = "outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
+const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
@@ -458,6 +459,7 @@ const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const externalEvidenceIntake = readOptionalJson(externalEvidenceIntakeFile);
 const externalEvidenceBridgePlan = readOptionalJson(externalEvidenceBridgePlanFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
+const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
@@ -523,6 +525,7 @@ const report = {
     externalEvidenceIntakeFile: externalEvidenceIntake ? externalEvidenceIntakeFile : null,
     externalEvidenceBridgePlanFile: externalEvidenceBridgePlan ? externalEvidenceBridgePlanFile : null,
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
+    newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -619,6 +622,15 @@ const report = {
         summary: newBinaryFamilyPlan.summary,
         probes: newBinaryFamilyPlan.probes,
         safeguards: newBinaryFamilyPlan.safeguards,
+      }
+    : null,
+  newBinaryFamilyDeltaParentAudit: newBinaryFamilyDeltaParentAudit
+    ? {
+        file: newBinaryFamilyDeltaParentAuditFile,
+        summary: newBinaryFamilyDeltaParentAudit.summary,
+        gates: newBinaryFamilyDeltaParentAudit.gates,
+        nextSearchPlan: newBinaryFamilyDeltaParentAudit.nextSearchPlan,
+        safeguards: newBinaryFamilyDeltaParentAudit.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

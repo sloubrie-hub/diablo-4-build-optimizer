@@ -858,3 +858,14 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Famille binaire`
   - validation serveur : `/site/`, `new-binary-family-plan.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
   - decision : chercher un record parent/consommateur source-backed avant toute promotion du delta, des slots ou des buckets fins
+- audit delta parent de la famille binaire ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-new-binary-family-delta-parent.js`
+  - rapport genere : `outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json`
+  - suite optimiseur : `15` etapes, statut `target-optimizer-suite-ok`
+  - resultat : `3` gates, `0` passee, `3` echouees
+  - gates bloquees : `sf32-field-ownership`, `sf33-trigger`, `uptime-proven-or-separated`
+  - conclusion : contexte local present, parent/consommateur exact absent, `canModifyReliableDps false`
+  - prochaine recherche : `corpus-binary-parent-consumer-scan`
+  - plan optimiseur et site : nouveau panneau `Audit delta parent`
+  - validation serveur : `/site/`, `delta-parent-audit.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
+  - decision : ne pas coder de parseur de promotion tant que le scan corpus-wide n'a pas trouve un parent/consommateur source-backed

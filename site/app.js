@@ -9,6 +9,7 @@ const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-sourc
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
+const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -25,6 +26,7 @@ const state = {
   additiveBucketSourceConclusion: null,
   nextEvidenceRoadmap: null,
   newBinaryFamilyPlan: null,
+  newBinaryFamilyDeltaParentAudit: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -76,6 +78,7 @@ async function boot() {
     await loadAdditiveBucketSourceConclusion();
     await loadNextEvidenceRoadmap();
     await loadNewBinaryFamilyPlan();
+    await loadNewBinaryFamilyDeltaParentAudit();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -287,6 +290,10 @@ async function loadNewBinaryFamilyPlan() {
   state.newBinaryFamilyPlan = await fetchOptionalJson(NEW_BINARY_FAMILY_PLAN_URL);
 }
 
+async function loadNewBinaryFamilyDeltaParentAudit() {
+  state.newBinaryFamilyDeltaParentAudit = await fetchOptionalJson(NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -349,6 +356,7 @@ function renderTargetOptimizerPlan() {
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
     ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
+    ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -591,6 +599,52 @@ function renderNewBinaryFamilyPlan(report) {
             <p>${(item.missingGates ?? []).join(" - ") || item.unlocks}</p>
           </article>
         `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderNewBinaryFamilyDeltaParentAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const gates = report.gates ?? [];
+  const nextSearch = report.nextSearchPlan ?? {};
+  return `
+    <div class="bonus-selector-proof new-binary-family-delta-parent-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Audit delta parent</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.promotionReady ? "positive" : "blocked"}">
+          ${summary.promotionReady ? "promouvable" : "non promouvable"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Asset", summary.assetId)}
+        ${targetMetric("Gates", summary.gates)}
+        ${targetMetric("Echecs", summary.failedGates)}
+        ${targetMetric("Recherche", summary.nextSearchKind ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>SF_32 ${summary.sf32OwnershipProven ? "prouve" : "bloque"}</span>
+        <span>Uptime ${summary.uptimeProvenOrSeparated ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${gates.map((gate) => `
+          <span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}: ${gate.status}</span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        <article>
+          <span>${nextSearch.priority ?? "high"}</span>
+          <strong>${nextSearch.id ?? "corpus-binary-parent-consumer-scan-1663210"}</strong>
+          <p>${(nextSearch.targetAnchors ?? []).join(" - ")}</p>
+        </article>
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
