@@ -12,6 +12,7 @@ const generationSteps = [
   "build-delta-promotion-conclusion.js",
   "build-user-whatif-scenarios.js",
   "build-reliable-dps-gates.js",
+  "build-user-whatif-contract.js",
   "audit-external-evidence-intake.js",
   "test-external-evidence-intake-rejections.js",
   "build-external-evidence-bridge-plan.js",
@@ -79,6 +80,7 @@ const deltaParentNontextTableSignals = readJson("outputs/diablo4-delta-parent-no
 const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json");
 const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 const uptimeLocalExhaustionConclusion = readJson("outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json");
+const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -130,6 +132,9 @@ assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === tru
 assertInvariant(uptimeLocalExhaustionConclusion.summary.canModifyReliableDps === false, "uptime local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.uptimeReliableProven === false, "uptime local exhaustion conclusion must not prove reliable uptime automatically");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.userScenarioSeparated === true, "uptime local exhaustion conclusion should keep user what-if separated");
+assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
+assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
+assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -201,6 +206,9 @@ const report = {
     { id: "uptime-local-exhaustion-safe", status: "passed", value: uptimeLocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "uptime-local-reliable-not-proven", status: "passed", value: uptimeLocalExhaustionConclusion.summary.uptimeReliableProven },
     { id: "uptime-local-user-scenario-separated", status: "passed", value: uptimeLocalExhaustionConclusion.summary.userScenarioSeparated },
+    { id: "user-whatif-contract-safe", status: "passed", value: userWhatIfContract.summary.canModifyReliableDps },
+    { id: "user-whatif-contract-checks", status: "passed", value: userWhatIfContract.summary.failedChecks },
+    { id: "user-whatif-contract-50pct", status: "passed", value: userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps },
   ],
 };
 
@@ -229,6 +237,7 @@ assertInvariant(optimizerPlan.deltaParentNontextTableSignals?.summary?.canModify
 assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.uptimeLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime local exhaustion conclusion");
+assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

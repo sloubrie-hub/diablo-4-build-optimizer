@@ -30,6 +30,7 @@ const deltaLocalExhaustionConclusionFile = "outputs/diablo4-delta-local-exhausti
 const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const uptimeLocalExhaustionConclusionFile = "outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
+const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
 const bucketEngineContractFile = "outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json";
@@ -485,6 +486,7 @@ const deltaLocalExhaustionConclusion = readOptionalJson(deltaLocalExhaustionConc
 const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclusionFile);
 const uptimeLocalExhaustionConclusion = readOptionalJson(uptimeLocalExhaustionConclusionFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
+const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
 const bucketEngineContract = readOptionalJson(bucketEngineContractFile);
@@ -790,6 +792,17 @@ const report = {
         file: userWhatIfScenariosFile,
         summary: userWhatIfScenarios.summary,
         scenarios: userWhatIfScenarios.scenarios,
+      }
+    : null,
+  userWhatIfContract: userWhatIfContract
+    ? {
+        file: userWhatIfContractFile,
+        summary: userWhatIfContract.summary,
+        scenario: userWhatIfContract.scenario,
+        samples: userWhatIfContract.samples,
+        contractChecks: userWhatIfContract.contractChecks,
+        exportPolicy: userWhatIfContract.exportPolicy,
+        safeguards: userWhatIfContract.safeguards,
       }
     : null,
   reliableDpsGates: reliableDpsGates

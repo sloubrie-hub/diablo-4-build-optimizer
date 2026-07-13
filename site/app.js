@@ -23,6 +23,7 @@ const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-ex
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
+const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
 
@@ -52,6 +53,7 @@ const state = {
   sf32LocalExhaustionConclusion: null,
   uptimeLocalExhaustionConclusion: null,
   userWhatIfScenarios: null,
+  userWhatIfContract: null,
   reliableDpsGates: null,
   userScenario: {
     sf33Active: false,
@@ -116,6 +118,7 @@ async function boot() {
     await loadSf32LocalExhaustionConclusion();
     await loadUptimeLocalExhaustionConclusion();
     await loadUserWhatIfScenarios();
+    await loadUserWhatIfContract();
     await loadReliableDpsGates();
     restoreState();
     state.selectedAssetId = selectRestoredAsset(state.dataset);
@@ -382,6 +385,10 @@ async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
 
+async function loadUserWhatIfContract() {
+  state.userWhatIfContract = await fetchOptionalJson(USER_WHATIF_CONTRACT_URL);
+}
+
 async function loadReliableDpsGates() {
   state.reliableDpsGates = await fetchOptionalJson(RELIABLE_DPS_GATES_URL);
 }
@@ -453,6 +460,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaLocalExhaustionConclusion(state.deltaLocalExhaustionConclusion ?? plan.deltaLocalExhaustionConclusion)}
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
     ${renderUptimeLocalExhaustionConclusion(state.uptimeLocalExhaustionConclusion ?? plan.uptimeLocalExhaustionConclusion)}
+    ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -1198,6 +1206,45 @@ function renderUptimeLocalExhaustionConclusion(report) {
             <strong>${item.id}</strong>
             <p>${item.requiredEvidence}</p>
           </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderUserWhatIfContract(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const checks = report.contractChecks ?? [];
+  const samples = report.samples ?? [];
+  const sample50 = samples.find((sample) => Number(sample.uptime) === 0.5 && sample.sf33Active === true);
+  return `
+    <div class="bonus-selector-proof user-whatif-contract">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Contrat what-if</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.failedChecks === 0 ? "positive" : "blocked"}">
+          ${summary.failedChecks === 0 ? "stable" : "a corriger"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Strict", formatNumber(summary.strictDps))}
+        ${targetMetric("Delta", `+${formatNumber(summary.blockedDeltaDps)}`)}
+        ${targetMetric("50% uptime", sample50 ? formatNumber(sample50.configuredWhatIfDps) : "n/a")}
+        ${targetMetric("Checks", `${formatNumber(summary.checks - summary.failedChecks)}/${formatNumber(summary.checks)}`)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Ranking ${summary.canUseForRanking ? "autorise" : "strict-only"}</span>
+        <span>Export ${report.exportPolicy?.includeInBuildExport ? "oui" : "non"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${checks.map((check) => `
+          <span class="${check.status === "passed" ? "passed" : "failed"}">${check.id}: ${check.status}</span>
         `).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>

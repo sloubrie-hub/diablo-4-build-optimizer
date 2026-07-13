@@ -10646,3 +10646,47 @@ Validation :
 Decision :
 
 La suite est maintenant operationnelle pour l'entree de preuves externes : le projet sait exactement quelles preuves collecter et quel JSON renseigner. Le workorder ne fabrique pas de preuve, ne valide pas les templates et ne modifie pas `reliableDps`; il organise seulement la collecte et la revue.
+
+## Contrat what-if utilisateur
+
+Un contrat what-if utilisateur a ete ajoute pour formaliser le scenario `SF_33 actif avec uptime utilisateur`. Il fixe les bornes, la formule, les exemples de calcul et la politique d'export/import sans transformer cette hypothese en preuve fiable.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-user-whatif-contract.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-user-whatif-contract/user-whatif-contract.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- scenario : `user-scenario-1663210-sf33-uptime`
+- strict DPS : `163200`
+- delta bloque : `48960`
+- samples : `6`
+- checks contrat : `5`
+- checks echoues : `0`
+- uptime `0%` avec SF33 actif : `163200`
+- uptime `50%` avec SF33 actif : `187680`
+- uptime `100%` avec SF33 actif : `212160`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- statut : `user-whatif-contract-safe`
+- suite optimiseur : `target-optimizer-suite-ok`, `29` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport contrat : genere dans `outputs/diablo4-user-whatif-contract/user-whatif-contract.json`
+- plan optimiseur : regenere avec `userWhatIfContract`
+- site : nouveau panneau `Contrat what-if`
+
+Decision :
+
+L'uptime utilisateur devient un contrat de simulation stable pour l'interface et l'export de build. Ce contrat n'est pas une preuve source-backed : `configuredWhatIfDps` ne remplace jamais `reliableDps`, le ranking fiable reste strict-only et les portes `SF_32`, `SF_33`, `uptime` restent bloquees.

@@ -1050,3 +1050,16 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Collecte delta`
   - reliableDps modifiable : `false`
   - decision : transformer les preuves requises en file de collecte/revue exploitable sans creer de preuve artificielle ni promotion automatique
+- contrat what-if utilisateur ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-user-whatif-contract.js`
+  - rapport genere : `outputs/diablo4-user-whatif-contract/user-whatif-contract.json`
+  - suite optimiseur : `29` etapes, statut `target-optimizer-suite-ok`
+  - scenario : `user-scenario-1663210-sf33-uptime`
+  - samples what-if : `6`
+  - checks contrat : `5`
+  - checks echoues : `0`
+  - uptime `50%` : DPS what-if `187680`
+  - reliableDps : `163200`
+  - plan optimiseur et site : nouveau panneau `Contrat what-if`
+  - reliableDps modifiable : `false`
+  - decision : formaliser l'uptime utilisateur comme simulation/export stable sans preuve source et sans ranking fiable
