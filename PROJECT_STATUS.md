@@ -841,3 +841,10 @@ Build de reference :
   - invariant : `canModifyReliableDps false`
   - validation serveur : `/site/`, `target-optimizer-suite.json` et `target-optimizer-plan.json` repondent `200`
   - decision : le chemin preuve acceptee -> bridge pret est teste sans modifier le modele fiable
+- test refus intake preuves externes ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-intake-rejections.js`
+  - suite optimiseur : `13` etapes, statut `target-optimizer-suite-ok`
+  - fixtures negatives : source UI rejetee, mauvais asset bloque, mauvais claim/champ bloque, ancrage absent bloque, revue manuelle requise
+  - resultat test : `0` acceptee, `4` en attente avec blockers, `1` rejetee, `canModifyReliableDps false`
+  - validation serveur : `/site/`, `target-optimizer-suite.json` et `target-optimizer-plan.json` repondent `200`
+  - decision : les mauvaises preuves sont verifiees automatiquement avant toute tentative de bridge

@@ -9877,3 +9877,52 @@ Validation :
 Decision :
 
 Le bridge sait maintenant detecter une preuve acceptee et preparer le parser cible, tout en prouvant que le DPS fiable reste inchange tant qu'aucun parser et invariant de promotion ne sont ajoutes.
+
+## Test des refus de preuves externes
+
+Un test autonome a ete ajoute pour verifier que l'intake refuse ou bloque les preuves invalides avant toute tentative de bridge.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/test-external-evidence-intake-rejections.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Fixtures negatives :
+
+- `reject-ui-source`
+  - source `ui-label`
+  - resultat : `rejected`
+  - blocker attendu : `source-kind-rejected`
+- `pending-wrong-asset`
+  - domaine `delta-1663210`, asset `1461593`
+  - blocker attendu : `domain-asset-mismatch`
+- `pending-wrong-claim`
+  - domaine `slots-1461593`, claim `sf33-trigger`, champ `SF_33`
+  - blockers attendus : `claim-type-not-valid-for-domain`, `claim-field-not-valid-for-domain`
+- `pending-missing-anchor`
+  - domaine `additive-buckets`, mapping sans `Bonus_Percent_Per_Power`
+  - blocker attendu : `claim-mapping-missing-domain-anchor`
+- `pending-manual-review`
+  - preuve syntaxiquement correcte mais `reviewer.status = pending`
+  - blocker attendu : `manual-review-required`
+
+Resultat :
+
+- acceptees : `0`
+- en attente : `4`
+- rejetees : `1`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `13` etapes
+
+Validation :
+
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- suite JSON : `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+
+Decision :
+
+Les preuves externes invalides sont maintenant couvertes par regression automatique. Cela protege le chemin de promotion avant meme le bridge parseur.
