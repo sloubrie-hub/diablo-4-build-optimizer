@@ -8,6 +8,7 @@ const ASPECT_SLOT_NEXT_SOURCE_PLAN_URL = "../outputs/diablo4-aspect-slot-next-so
 const BONUS_SELECTOR_SOURCE_PROOF_URL = "../outputs/diablo4-bonus-selector-source-proof/bonus-selector-source-proof.json";
 const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucket-source-conclusion/additive-bucket-source-conclusion.json";
 const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
+const EXTERNAL_DELTA_EVIDENCE_PLAN_URL = "../outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json";
 const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -35,6 +36,7 @@ const state = {
   bonusSelectorSourceProof: null,
   additiveBucketSourceConclusion: null,
   nextEvidenceRoadmap: null,
+  externalDeltaEvidencePlan: null,
   newBinaryFamilyPlan: null,
   newBinaryFamilyDeltaParentAudit: null,
   deltaParentConsumerCorpusScan: null,
@@ -97,6 +99,7 @@ async function boot() {
     await loadBonusSelectorSourceProof();
     await loadAdditiveBucketSourceConclusion();
     await loadNextEvidenceRoadmap();
+    await loadExternalDeltaEvidencePlan();
     await loadNewBinaryFamilyPlan();
     await loadNewBinaryFamilyDeltaParentAudit();
     await loadDeltaParentConsumerCorpusScan();
@@ -316,6 +319,10 @@ async function loadNextEvidenceRoadmap() {
   state.nextEvidenceRoadmap = await fetchOptionalJson(NEXT_EVIDENCE_ROADMAP_URL);
 }
 
+async function loadExternalDeltaEvidencePlan() {
+  state.externalDeltaEvidencePlan = await fetchOptionalJson(EXTERNAL_DELTA_EVIDENCE_PLAN_URL);
+}
+
 async function loadNewBinaryFamilyPlan() {
   state.newBinaryFamilyPlan = await fetchOptionalJson(NEW_BINARY_FAMILY_PLAN_URL);
 }
@@ -425,6 +432,7 @@ function renderTargetOptimizerPlan() {
     ${renderBonusSelectorSourceProof(state.bonusSelectorSourceProof)}
     ${renderAdditiveBucketSourceConclusion(state.additiveBucketSourceConclusion ?? plan.additiveBucketSourceConclusion)}
     ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
+    ${renderExternalDeltaEvidencePlan(state.externalDeltaEvidencePlan ?? plan.externalDeltaEvidencePlan)}
     ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
     ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
     ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
@@ -1271,6 +1279,47 @@ function renderNextEvidenceRoadmap(report) {
       </div>
       <p>${assessment.finding ?? ""}</p>
       <p>${assessment.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderExternalDeltaEvidencePlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const proofs = report.requiredProofs ?? [];
+  return `
+    <div class="bonus-selector-proof external-delta-evidence-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Preuves externes delta</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyProofs === summary.requiredProofs ? "positive" : "blocked"}">
+          ${summary.readyProofs === summary.requiredProofs ? "pret bridge" : "preuves manquantes"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Requises", summary.requiredProofs)}
+        ${targetMetric("Pretes", summary.readyProofs)}
+        ${targetMetric("Manquantes", summary.missingProofs)}
+        ${targetMetric("Focus", summary.recommendedNextFocus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Bridge ${summary.bridgeDeltaStatus ?? "n/a"}</span>
+        <span>Local epuise ${summary.allLocalEvidenceExhausted ? "oui" : "non"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${proofs.map((item) => `
+          <article>
+            <span>${item.priority} - ${item.status}</span>
+            <strong>${item.title}</strong>
+            <p>${item.acceptedClaim?.type ?? "claim"} / ${item.acceptedClaim?.field ?? "field"}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }

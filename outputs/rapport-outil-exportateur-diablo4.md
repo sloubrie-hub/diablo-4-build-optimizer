@@ -10510,3 +10510,53 @@ Validation :
 Decision :
 
 Le delta `48960` de `1663210` reste un what-if bloque. Les trois preuves locales obligatoires sont epuisees pour le DPS fiable. La suite utile n'est plus un audit local redondant : il faut soit une preuve externe acceptee, soit une nouvelle famille binaire source-backed, soit maintenir le contrat what-if utilisateur separe sans jamais toucher `reliableDps`.
+
+## Plan preuves externes delta
+
+Un plan cible a ete ajoute pour transformer le focus `external-delta-evidence` en checklist exploitable. Il definit les trois preuves minimales a fournir pour le delta `1663210`, avec les claims, champs, sources acceptees, rejets et parser bridges attendus.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-delta-evidence-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `inputs/external-evidence-candidates.example.json`
+- `outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- preuves externes delta requises : `3`
+- preuves pretes : `0`
+- preuves manquantes : `3`
+- preuves externes acceptees : `0`
+- bridge delta : `blocked-waiting-for-accepted-evidence`
+- local epuise : `true`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- prochaine priorite : `delta-proof-sf32-owner`
+- statut : `external-delta-evidence-missing-required-proofs`
+- suite optimiseur : `target-optimizer-suite-ok`, `26` etapes
+
+Preuves requises :
+
+- `delta-proof-sf32-owner` : `sf32-field-ownership` / `selector:949`
+- `delta-proof-sf33-trigger` : `sf33-trigger` / `Mod.SoilRuler_B`
+- `delta-proof-uptime` : `uptime` / `uptime`
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- JSON d'entree : `inputs/external-evidence-candidates.json` et exemple OK
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport plan preuves externes delta : genere dans `outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere avec `externalDeltaEvidencePlan`
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree avec `26` etapes
+
+Decision :
+
+La suite pratique du delta n'est plus un audit local, mais une collecte de preuves source-backed. Une preuve acceptee dans l'intake ne modifie toujours pas `reliableDps`; elle ne rend possible qu'un futur parser bridge cible avec invariants de promotion separes.

@@ -1014,3 +1014,16 @@ Build de reference :
   - statut : `delta-local-all-evidence-exhausted`, `canModifyReliableDps false`
   - plan optimiseur et site : panneau `Conclusion delta` enrichi avec les trois verrous
   - decision : le delta `48960` reste un what-if bloque; la suite utile est preuve externe acceptee, nouvelle famille binaire source-backed ou contrat what-if utilisateur
+- plan preuves externes delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-delta-evidence-plan.js`
+  - rapport genere : `outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json`
+  - suite optimiseur : `26` etapes, statut `target-optimizer-suite-ok`
+  - preuves externes delta requises : `3`
+  - preuves pretes : `0`
+  - preuves manquantes : `3`
+  - preuves externes acceptees : `0`
+  - prochaine priorite : `delta-proof-sf32-owner`
+  - statut : `external-delta-evidence-missing-required-proofs`, `canModifyReliableDps false`
+  - fichier exemple enrichi : `inputs/external-evidence-candidates.example.json`
+  - plan optimiseur et site : nouveau panneau `Preuves externes delta`
+  - decision : preparer la saisie source-backed pour SF32, SF33 et uptime; aucune preuve ne modifie le DPS fiable sans parser bridge et invariants dedies

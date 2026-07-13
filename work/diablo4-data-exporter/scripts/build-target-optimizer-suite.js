@@ -16,6 +16,7 @@ const generationSteps = [
   "test-external-evidence-intake-rejections.js",
   "build-external-evidence-bridge-plan.js",
   "test-external-evidence-bridge.js",
+  "build-external-delta-evidence-plan.js",
   "build-next-evidence-roadmap.js",
   "build-new-binary-family-plan.js",
   "audit-new-binary-family-delta-parent.js",
@@ -62,6 +63,7 @@ const reliableGates = readJson("outputs/diablo4-reliable-dps-gates/reliable-dps-
 const bucketEngineContract = readJson("outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json");
 const externalEvidenceIntake = readJson("outputs/diablo4-external-evidence-intake/external-evidence-intake.json");
 const externalEvidenceBridge = readJson("outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json");
+const externalDeltaEvidencePlan = readJson("outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json");
 const newBinaryFamilyPlan = readJson("outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json");
 const newBinaryFamilyDeltaParentAudit = readJson("outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json");
 const deltaParentConsumerCorpusScan = readJson("outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json");
@@ -88,6 +90,8 @@ assertInvariant(bucketEngineContract.summary.status === "bucket-engine-contract-
 assertInvariant(bucketEngineContract.summary.failed === 0, "bucket engine contract failed invariants");
 assertInvariant(externalEvidenceIntake.summary.canModifyReliableDps === false, "external evidence intake must not modify reliable DPS");
 assertInvariant(externalEvidenceBridge.summary.canModifyReliableDps === false, "external evidence bridge must not modify reliable DPS");
+assertInvariant(externalDeltaEvidencePlan.summary.canModifyReliableDps === false, "external delta evidence plan must not modify reliable DPS");
+assertInvariant(externalDeltaEvidencePlan.summary.requiredProofs === 3, "external delta evidence plan must require the three delta proofs");
 assertInvariant(newBinaryFamilyPlan.summary.canModifyReliableDps === false, "new binary family plan must not modify reliable DPS");
 assertInvariant(newBinaryFamilyPlan.summary.nextProbeId === "binary-family-delta-parent-1663210", "new binary family plan should prioritize the delta parent probe");
 assertInvariant(newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps === false, "new binary family delta parent audit must not modify reliable DPS");
@@ -155,6 +159,8 @@ const report = {
     { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
     { id: "external-evidence-intake-safe", status: "passed", value: externalEvidenceIntake.summary.canModifyReliableDps },
     { id: "external-evidence-bridge-safe", status: "passed", value: externalEvidenceBridge.summary.canModifyReliableDps },
+    { id: "external-delta-evidence-safe", status: "passed", value: externalDeltaEvidencePlan.summary.canModifyReliableDps },
+    { id: "external-delta-evidence-proof-count", status: "passed", value: externalDeltaEvidencePlan.summary.requiredProofs },
     { id: "new-binary-family-plan-safe", status: "passed", value: newBinaryFamilyPlan.summary.canModifyReliableDps },
     { id: "new-binary-family-priority-delta", status: "passed", value: newBinaryFamilyPlan.summary.nextProbeId },
     { id: "new-binary-family-delta-parent-safe", status: "passed", value: newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps },
@@ -202,6 +208,7 @@ assertInvariant(optimizerPlan.targetOptimizerSuite?.summary?.status === "target-
 assertInvariant(optimizerPlan.bucketEngineContract?.summary?.status === "bucket-engine-contract-ok", "optimizer plan must embed bucket engine contract");
 assertInvariant(optimizerPlan.externalEvidenceIntake?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence intake");
 assertInvariant(optimizerPlan.externalEvidenceBridgePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence bridge plan");
+assertInvariant(optimizerPlan.externalDeltaEvidencePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external delta evidence plan");
 assertInvariant(optimizerPlan.newBinaryFamilyPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe new binary family plan");
 assertInvariant(optimizerPlan.newBinaryFamilyDeltaParentAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent audit");
 assertInvariant(optimizerPlan.deltaParentConsumerCorpusScan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent corpus scan");

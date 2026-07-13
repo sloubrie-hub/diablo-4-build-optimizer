@@ -33,6 +33,58 @@
       }
     },
     {
+      "id": "example-delta-1663210-sf32-owner",
+      "domain": "delta-1663210",
+      "assetId": 1663210,
+      "entityId": "skill:1663210",
+      "source": {
+        "kind": "extracted-game-data",
+        "title": "Nom de la table ou du rapport qui nomme le champ",
+        "url": "",
+        "version": "build-or-dataset-version",
+        "capturedAt": "YYYY-MM-DD"
+      },
+      "claim": {
+        "type": "sf32-field-ownership",
+        "field": "selector:949",
+        "value": "SF_32 owner mapping",
+        "excerpt": "Extrait court montrant 1663210, selector:949 et SF_32.",
+        "mapping": "1663210 -> selector:949 -> SF_32"
+      },
+      "reviewer": {
+        "status": "pending",
+        "notes": [
+          "Ne pas approuver une analogie de layout, metadata 12337 seule ou scale 10 seul."
+        ]
+      }
+    },
+    {
+      "id": "example-delta-1663210-uptime",
+      "domain": "delta-1663210",
+      "assetId": 1663210,
+      "entityId": "skill:1663210",
+      "source": {
+        "kind": "documented-dataset",
+        "title": "Nom de la source qui donne l'uptime ou la condition quantifiable",
+        "url": "",
+        "version": "build-or-dataset-version",
+        "capturedAt": "YYYY-MM-DD"
+      },
+      "claim": {
+        "type": "uptime",
+        "field": "uptime",
+        "value": "valeur numerique ou condition explicite",
+        "excerpt": "Extrait court montrant 1663210 et l'uptime ou la condition quantifiable.",
+        "mapping": "1663210 -> uptime -> valeur numerique ou condition explicite"
+      },
+      "reviewer": {
+        "status": "pending",
+        "notes": [
+          "Ne pas approuver SF_28/SF_29 seuls sans lien explicite a SF_32/SF_33."
+        ]
+      }
+    },
+    {
       "id": "example-slots-1461593-allowed-slots",
       "domain": "slots-1461593",
       "assetId": 1461593,

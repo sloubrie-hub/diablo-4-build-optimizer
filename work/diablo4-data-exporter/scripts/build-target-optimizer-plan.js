@@ -15,6 +15,7 @@ const aspectSlotNextSourcePlanFile = "outputs/diablo4-aspect-slot-next-source-pl
 const nextEvidenceRoadmapFile = "outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const externalEvidenceIntakeFile = "outputs/diablo4-external-evidence-intake/external-evidence-intake.json";
 const externalEvidenceBridgePlanFile = "outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json";
+const externalDeltaEvidencePlanFile = "outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -468,6 +469,7 @@ const aspectSlotNextSourcePlan = readOptionalJson(aspectSlotNextSourcePlanFile);
 const nextEvidenceRoadmap = readOptionalJson(nextEvidenceRoadmapFile);
 const externalEvidenceIntake = readOptionalJson(externalEvidenceIntakeFile);
 const externalEvidenceBridgePlan = readOptionalJson(externalEvidenceBridgePlanFile);
+const externalDeltaEvidencePlan = readOptionalJson(externalDeltaEvidencePlanFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
@@ -544,6 +546,7 @@ const report = {
     nextEvidenceRoadmapFile: nextEvidenceRoadmap ? nextEvidenceRoadmapFile : null,
     externalEvidenceIntakeFile: externalEvidenceIntake ? externalEvidenceIntakeFile : null,
     externalEvidenceBridgePlanFile: externalEvidenceBridgePlan ? externalEvidenceBridgePlanFile : null,
+    externalDeltaEvidencePlanFile: externalDeltaEvidencePlan ? externalDeltaEvidencePlanFile : null,
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
     newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
@@ -644,6 +647,15 @@ const report = {
         summary: externalEvidenceBridgePlan.summary,
         steps: externalEvidenceBridgePlan.steps,
         safeguards: externalEvidenceBridgePlan.safeguards,
+      }
+    : null,
+  externalDeltaEvidencePlan: externalDeltaEvidencePlan
+    ? {
+        file: externalDeltaEvidencePlanFile,
+        summary: externalDeltaEvidencePlan.summary,
+        requiredProofs: externalDeltaEvidencePlan.requiredProofs,
+        exampleCandidates: externalDeltaEvidencePlan.exampleCandidates,
+        safeguards: externalDeltaEvidencePlan.safeguards,
       }
     : null,
   newBinaryFamilyPlan: newBinaryFamilyPlan
