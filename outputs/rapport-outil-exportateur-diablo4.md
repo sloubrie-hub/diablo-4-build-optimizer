@@ -10031,3 +10031,54 @@ Validation :
 Decision :
 
 Le contexte local autour de `Mod.SoilRuler_B` et du hash `Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate` est utile mais non promouvable. La prochaine avance doit etre un scan corpus-wide des parents/consommateurs binaires; aucun parseur de promotion ni changement de `reliableDps` ne doit etre ajoute avant cette preuve.
+
+## Scan corpus parent/consommateur delta
+
+Un scan corpus-wide a ete ajoute sur les payloads deja decodes dans `outputs`. Il cherche les occurrences de `Mod.SoilRuler_B`, du hash bonus cible, du hash PowerTag `2084621218`, des references d'offset directes, et des layouts selector/asset proches.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/scan-delta-parent-consumer-corpus.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Cibles surveillees :
+
+- asset : `1663210`
+- trigger : `Mod.SoilRuler_B`
+- hash bonus : `Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate`
+- hash PowerTag : `2084621218`
+- selector : `949`
+- metadata : `12337`
+
+Resultat :
+
+- fichiers decodes scannes : `123`
+- hits : `1`
+- hit local cible : `1`
+- candidat externe explicite : `0`
+- candidat hash-reference : `0`
+- candidat hash-only : `0`
+- parent/consommateur candidat : `0`
+- parent/consommateur exact prouve : `false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `16` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- site : `http://127.0.0.1:4173/site/` repond `200`
+- scan corpus delta : `/outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json` repond `200`
+- plan optimiseur : `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` repond `200`
+- suite JSON : `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` repond `200`
+
+Decision :
+
+Le corpus decode actuel ne contient pas de parent/consommateur externe pour `Mod.SoilRuler_B`. La prochaine piste utile n'est plus de reparser le local 1663210, mais d'elargir aux payloads non encore decodes ou aux tables binaires hors chaines.

@@ -869,3 +869,13 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Audit delta parent`
   - validation serveur : `/site/`, `delta-parent-audit.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
   - decision : ne pas coder de parseur de promotion tant que le scan corpus-wide n'a pas trouve un parent/consommateur source-backed
+- scan corpus parent/consommateur delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/scan-delta-parent-consumer-corpus.js`
+  - rapport genere : `outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json`
+  - suite optimiseur : `16` etapes, statut `target-optimizer-suite-ok`
+  - corpus decode scanne : `123` fichiers
+  - resultat : `1` hit local cible, `0` candidat externe explicite, `0` candidat hash-reference, `0` parent/consommateur prouve
+  - statut : `delta-parent-consumer-corpus-local-only`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Scan corpus delta`
+  - validation serveur : `/site/`, `delta-parent-consumer-corpus-scan.json`, `target-optimizer-plan.json` et `target-optimizer-suite.json` repondent `200`
+  - decision : elargir maintenant aux payloads non encore decodes ou aux tables binaires hors chaines

@@ -10,6 +10,7 @@ const ADDITIVE_BUCKET_SOURCE_CONCLUSION_URL = "../outputs/diablo4-additive-bucke
 const NEXT_EVIDENCE_ROADMAP_URL = "../outputs/diablo4-next-evidence-roadmap/next-evidence-roadmap.json";
 const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
+const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -27,6 +28,7 @@ const state = {
   nextEvidenceRoadmap: null,
   newBinaryFamilyPlan: null,
   newBinaryFamilyDeltaParentAudit: null,
+  deltaParentConsumerCorpusScan: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -79,6 +81,7 @@ async function boot() {
     await loadNextEvidenceRoadmap();
     await loadNewBinaryFamilyPlan();
     await loadNewBinaryFamilyDeltaParentAudit();
+    await loadDeltaParentConsumerCorpusScan();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -294,6 +297,10 @@ async function loadNewBinaryFamilyDeltaParentAudit() {
   state.newBinaryFamilyDeltaParentAudit = await fetchOptionalJson(NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL);
 }
 
+async function loadDeltaParentConsumerCorpusScan() {
+  state.deltaParentConsumerCorpusScan = await fetchOptionalJson(DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -357,6 +364,7 @@ function renderTargetOptimizerPlan() {
     ${renderNextEvidenceRoadmap(state.nextEvidenceRoadmap ?? plan.nextEvidenceRoadmap)}
     ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
     ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
+    ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -645,6 +653,55 @@ function renderNewBinaryFamilyDeltaParentAudit(report) {
           <strong>${nextSearch.id ?? "corpus-binary-parent-consumer-scan-1663210"}</strong>
           <p>${(nextSearch.targetAnchors ?? []).join(" - ")}</p>
         </article>
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentConsumerCorpusScan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const candidates = report.candidates ?? [];
+  const hashOnly = report.hashOnlyCandidates ?? [];
+  return `
+    <div class="bonus-selector-proof delta-parent-consumer-corpus-scan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Scan corpus delta</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.parentConsumerCandidates > 0 ? "positive" : "blocked"}">
+          ${summary.parentConsumerCandidates > 0 ? "a revoir" : "local only"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Fichiers", summary.filesScanned)}
+        ${targetMetric("Hits", summary.hits)}
+        ${targetMetric("Candidats", summary.parentConsumerCandidates)}
+        ${targetMetric("Hash seuls", summary.hashOnlyCandidates)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>Local ${formatNumber(summary.targetLocalHits)}</span>
+        <span>Layout seul ${formatNumber(summary.selectorLayoutOnly)}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${(candidates.length ? candidates : hashOnly).slice(0, 4).map((item) => `
+          <article>
+            <span>${item.kind}</span>
+            <strong>${item.assetId ?? "asset inconnu"}</strong>
+            <p>${Object.entries(item.counts ?? {}).filter(([, value]) => value).map(([key, value]) => `${key}:${value}`).join(" - ")}</p>
+          </article>
+        `).join("") || `
+          <article>
+            <span>scan</span>
+            <strong>Aucun candidat externe promouvable</strong>
+            <p>Elargir aux payloads non decodes ou aux tables binaires hors chaines.</p>
+          </article>
+        `}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
