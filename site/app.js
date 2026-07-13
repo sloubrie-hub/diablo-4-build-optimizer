@@ -19,6 +19,7 @@ const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-
 const DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL = "../outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
+const UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -45,6 +46,7 @@ const state = {
   deltaParentNontextTableSignals: null,
   deltaLocalExhaustionConclusion: null,
   sf32LocalExhaustionConclusion: null,
+  uptimeLocalExhaustionConclusion: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -106,6 +108,7 @@ async function boot() {
     await loadDeltaParentNontextTableSignals();
     await loadDeltaLocalExhaustionConclusion();
     await loadSf32LocalExhaustionConclusion();
+    await loadUptimeLocalExhaustionConclusion();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -357,6 +360,10 @@ async function loadSf32LocalExhaustionConclusion() {
   state.sf32LocalExhaustionConclusion = await fetchOptionalJson(SF32_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
 
+async function loadUptimeLocalExhaustionConclusion() {
+  state.uptimeLocalExhaustionConclusion = await fetchOptionalJson(UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -429,6 +436,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentNontextTableSignals(state.deltaParentNontextTableSignals ?? plan.deltaParentNontextTableSignals)}
     ${renderDeltaLocalExhaustionConclusion(state.deltaLocalExhaustionConclusion ?? plan.deltaLocalExhaustionConclusion)}
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
+    ${renderUptimeLocalExhaustionConclusion(state.uptimeLocalExhaustionConclusion ?? plan.uptimeLocalExhaustionConclusion)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -1111,6 +1119,54 @@ function renderSf32LocalExhaustionConclusion(report) {
       <div class="suite-invariant-list">
         ${checks.slice(0, 7).map((check) => `
           <span class="${check.status === "passed" || check.status === "ready" ? "passed" : "failed"}">${check.id}: ${check.status}</span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${requiredProofs.map((item) => `
+          <article>
+            <span>${item.priority}</span>
+            <strong>${item.id}</strong>
+            <p>${item.requiredEvidence}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderUptimeLocalExhaustionConclusion(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const checks = report.localEvidenceChecks ?? [];
+  const requiredProofs = report.requiredProofs ?? [];
+  return `
+    <div class="bonus-selector-proof uptime-local-exhaustion-conclusion">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Conclusion uptime</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.userScenarioSeparated ? "positive" : "blocked"}">
+          ${summary.userScenarioSeparated ? "what-if separe" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Checks", summary.localEvidenceChecks)}
+        ${targetMetric("Signaux fiables", summary.reliableReadySignals)}
+        ${targetMetric("Probabilites", summary.probabilityChains)}
+        ${targetMetric("Focus", summary.recommendedNextFocus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Uptime fiable ${summary.uptimeReliableProven ? "prouvee" : "absente"}</span>
+        <span>SF32/SF33 lies ${formatNumber(summary.chainsLinkedToBoost)}</span>
+        <span>Uptime numerique ${summary.hasNumericUptime ? "oui" : "non"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${checks.slice(0, 6).map((check) => `
+          <span class="${check.status === "ready" ? "passed" : "failed"}">${check.id}: ${check.status}</span>
         `).join("")}
       </div>
       <div class="next-evidence-actions">

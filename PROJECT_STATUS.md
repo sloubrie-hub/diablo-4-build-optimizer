@@ -985,3 +985,19 @@ Build de reference :
   - statut : `sf32-local-evidence-exhausted`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `Conclusion SF_32`
   - decision : ne plus relancer d'audit local SF32 sans nouvelle source; chercher une preuve externe acceptee ou un parseur binaire de champ
+- conclusion locale uptime ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-uptime-local-exhaustion-conclusion.js`
+  - rapport genere : `outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json`
+  - suite optimiseur : `25` etapes, statut `target-optimizer-suite-ok`
+  - checks locaux uptime : `5`
+  - signaux uptime fiables : `0`
+  - chaines de probabilite : `2`
+  - chaines liees a SF32/SF33 : `0`
+  - hints duree/uptime : `0`
+  - uptime explicite : `false`
+  - uptime numerique : `false`
+  - scenario utilisateur separe : `true`
+  - prochaine priorite : `user-uptime-scenario-contract`
+  - statut : `uptime-local-reliable-evidence-exhausted`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Conclusion uptime`
+  - decision : garder SF28/SF29 hors DPS fiable; conserver l'uptime comme what-if utilisateur separe ou exiger une preuve externe numerique

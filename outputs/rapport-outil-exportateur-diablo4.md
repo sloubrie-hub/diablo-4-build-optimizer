@@ -10421,3 +10421,50 @@ Validation :
 Decision :
 
 Les preuves locales `SF_32` ne ferment aucune porte de promotion : `selector 949` reste mixte, aucun second compact `949` n'existe, `metadata 12337 / scale 10` est transverse, et aucune table source nommee n'est disponible. Il ne faut plus relancer d'audit local SF32 sans nouvelle source. La prochaine preuve utile doit etre une source externe acceptee ou un parseur binaire de champ. Le delta reste hors `reliableDps`.
+
+## Conclusion locale uptime
+
+Une conclusion de cloture locale a ete ajoutee pour le verrou uptime. Elle consolide les audits `SF_28/SF_29`, chaines de probabilite, dependance locale au hash bonus, scenario utilisateur et garde-fous `reliableDps`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-uptime-local-exhaustion-conclusion.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- checks locaux uptime : `5`
+- signaux uptime fiables : `0`
+- chaines de probabilite : `2`
+- lignes de probabilite liees a SF32/SF33 : `0`
+- chaines liees a SF32/SF33 : `0`
+- hints duree/uptime : `0`
+- uptime explicite : `false`
+- uptime numerique : `false`
+- uptime fiable prouvee : `false`
+- scenario utilisateur separe : `true`
+- preuves externes acceptees : `0`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- prochaine priorite : `user-uptime-scenario-contract`
+- statut : `uptime-local-reliable-evidence-exhausted`
+- suite optimiseur : `target-optimizer-suite-ok`, `25` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport conclusion uptime : genere dans `outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere avec la conclusion uptime
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree avec `25` etapes
+
+Decision :
+
+Les preuves locales d'uptime ne prouvent pas le DPS fiable : `SF_28/SF_29` sont des probabilites/procs locaux non relies a `SF_32/SF_33` et sans valeur d'uptime explicite. Le site peut conserver l'uptime comme hypothese utilisateur separee, mais aucune valeur d'uptime ne doit entrer dans `reliableDps` sans preuve externe numerique ou mapping source-backed.
