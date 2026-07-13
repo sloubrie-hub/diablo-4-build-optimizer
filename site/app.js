@@ -16,6 +16,7 @@ const DELTA_PARENT_UPGRADE_STRUCTURE_AUDIT_URL = "../outputs/diablo4-delta-paren
 const DELTA_PARENT_OFFSET_REFERENCE_GRAPH_URL = "../outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json";
 const DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL = "../outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json";
 const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
+const DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL = "../outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -39,6 +40,7 @@ const state = {
   deltaParentOffsetReferenceGraph: null,
   deltaParentSystemsTuningContexts: null,
   deltaParentUndecodedSourcePlan: null,
+  deltaParentNontextTableSignals: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -97,6 +99,7 @@ async function boot() {
     await loadDeltaParentOffsetReferenceGraph();
     await loadDeltaParentSystemsTuningContexts();
     await loadDeltaParentUndecodedSourcePlan();
+    await loadDeltaParentNontextTableSignals();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -336,6 +339,10 @@ async function loadDeltaParentUndecodedSourcePlan() {
   state.deltaParentUndecodedSourcePlan = await fetchOptionalJson(DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL);
 }
 
+async function loadDeltaParentNontextTableSignals() {
+  state.deltaParentNontextTableSignals = await fetchOptionalJson(DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -405,6 +412,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentOffsetReferenceGraph(state.deltaParentOffsetReferenceGraph ?? plan.deltaParentOffsetReferenceGraph)}
     ${renderDeltaParentSystemsTuningContexts(state.deltaParentSystemsTuningContexts ?? plan.deltaParentSystemsTuningContexts)}
     ${renderDeltaParentUndecodedSourcePlan(state.deltaParentUndecodedSourcePlan ?? plan.deltaParentUndecodedSourcePlan)}
+    ${renderDeltaParentNontextTableSignals(state.deltaParentNontextTableSignals ?? plan.deltaParentNontextTableSignals)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -963,6 +971,48 @@ function renderDeltaParentUndecodedSourcePlan(report) {
             <span>${item.requiredAction}</span>
             <strong>${item.assetId} - ${item.fileName}</strong>
             <p>${(item.matchedTerms ?? []).slice(0, 2).join(" - ") || item.tags?.join(", ") || "n/a"}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaParentNontextTableSignals(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const linked = report.linkedTargetHashSignals ?? [];
+  const unlinked = report.targetHashNontextSignals ?? [];
+  return `
+    <div class="bonus-selector-proof delta-parent-nontext-table-signals">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Tables non texte</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.linkedTargetHashSignals > 0 ? "positive" : "blocked"}">
+          ${summary.linkedTargetHashSignals > 0 ? "candidat lie" : "non lie"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Payloads", summary.inspectedPayloads)}
+        ${targetMetric("Occurrences", summary.occurrences)}
+        ${targetMetric("Hash non texte", summary.targetHashNontextSignals)}
+        ${targetMetric("Lies", summary.linkedTargetHashSignals)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Parent exact ${summary.exactParentConsumerProven ? "prouve" : "absent"}</span>
+        <span>Layouts ${formatNumber(summary.selectorAssetLayoutSignals)}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${(linked.length ? linked : unlinked).slice(0, 4).map((item) => `
+          <article>
+            <span>${item.kind}</span>
+            <strong>${item.assetId} - ${item.valueName} @ ${item.offset}</strong>
+            <p>${(item.pointerLikeWords ?? []).slice(0, 3).map((word) => `${word.delta}:${word.u32}`).join(" - ") || "n/a"}</p>
           </article>
         `).join("")}
       </div>

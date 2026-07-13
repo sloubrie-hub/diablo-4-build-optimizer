@@ -947,3 +947,16 @@ Build de reference :
   - statut : `delta-parent-undecoded-source-plan-no-missing-targeted-decodes`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `Sources non decodees`
   - decision : il ne manque pas de decode cible dans les sources externes prioritaires; passer aux tables superieures non textuelles sur les payloads deja disponibles
+- audit tables superieures non textuelles delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-parent-nontext-table-signals.js`
+  - rapport genere : `outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json`
+  - suite optimiseur : `22` etapes, statut `target-optimizer-suite-ok`
+  - assets inspectes : `2`
+  - payloads inspectes : `2`
+  - occurrences numeriques : `12`
+  - signaux hash cible non textuels : `1`
+  - signaux hash cible lies localement : `0`
+  - signaux selector/asset layout : `2`
+  - statut : `delta-parent-nontext-target-hash-unlinked`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Tables non texte`
+  - decision : l'occurrence non textuelle du hash cible n'est pas reliee au trigger, au selector ou a l'asset cible; clore cette couche locale pour SF_33

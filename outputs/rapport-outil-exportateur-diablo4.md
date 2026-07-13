@@ -10295,3 +10295,45 @@ Validation :
 Decision :
 
 Il ne manque pas de decode cible dans les sources externes prioritaires pour SoilRuler/SF33 : les deux assets pertinents sont deja disponibles. La prochaine etape doit donc inspecter des tables superieures non textuelles dans les payloads deja decodes, pas decoder plus largement.
+
+## Audit tables superieures non textuelles delta
+
+Un audit a ete ajoute pour inspecter les signaux numeriques non textuels dans les payloads prioritaires deja decodes, notamment l'occurrence hash-only du hash `SystemsTuningGlobals` cible.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-parent-nontext-table-signals.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- assets inspectes : `2`
+- payloads inspectes : `2`
+- occurrences numeriques : `12`
+- signaux hash cible non textuels : `1`
+- signaux hash cible lies localement : `0`
+- signaux selector/asset layout : `2`
+- parent/consommateur exact prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- statut : `delta-parent-nontext-target-hash-unlinked`
+- suite optimiseur : `target-optimizer-suite-ok`, `22` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport tables non texte : genere dans `outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree
+
+Decision :
+
+Une occurrence non textuelle du hash cible existe, mais elle n'est pas reliee localement au trigger `Mod.SoilRuler_B`, au selector `949`, ni a l'asset `1663210`. Cette couche locale ne prouve donc pas SF_33. Le delta reste hors `reliableDps`.

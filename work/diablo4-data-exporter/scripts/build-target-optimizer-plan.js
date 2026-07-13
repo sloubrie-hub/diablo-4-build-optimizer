@@ -23,6 +23,7 @@ const deltaParentUpgradeStructureAuditFile = "outputs/diablo4-delta-parent-upgra
 const deltaParentOffsetReferenceGraphFile = "outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json";
 const deltaParentSystemsTuningContextsFile = "outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json";
 const deltaParentUndecodedSourcePlanFile = "outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
+const deltaParentNontextTableSignalsFile = "outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
@@ -472,6 +473,7 @@ const deltaParentUpgradeStructureAudit = readOptionalJson(deltaParentUpgradeStru
 const deltaParentOffsetReferenceGraph = readOptionalJson(deltaParentOffsetReferenceGraphFile);
 const deltaParentSystemsTuningContexts = readOptionalJson(deltaParentSystemsTuningContextsFile);
 const deltaParentUndecodedSourcePlan = readOptionalJson(deltaParentUndecodedSourcePlanFile);
+const deltaParentNontextTableSignals = readOptionalJson(deltaParentNontextTableSignalsFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
@@ -544,6 +546,7 @@ const report = {
     deltaParentOffsetReferenceGraphFile: deltaParentOffsetReferenceGraph ? deltaParentOffsetReferenceGraphFile : null,
     deltaParentSystemsTuningContextsFile: deltaParentSystemsTuningContexts ? deltaParentSystemsTuningContextsFile : null,
     deltaParentUndecodedSourcePlanFile: deltaParentUndecodedSourcePlan ? deltaParentUndecodedSourcePlanFile : null,
+    deltaParentNontextTableSignalsFile: deltaParentNontextTableSignals ? deltaParentNontextTableSignalsFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -709,6 +712,16 @@ const report = {
         nextDecodeQueue: deltaParentUndecodedSourcePlan.nextDecodeQueue,
         decodeScript: deltaParentUndecodedSourcePlan.decodeScript,
         safeguards: deltaParentUndecodedSourcePlan.safeguards,
+      }
+    : null,
+  deltaParentNontextTableSignals: deltaParentNontextTableSignals
+    ? {
+        file: deltaParentNontextTableSignalsFile,
+        summary: deltaParentNontextTableSignals.summary,
+        targetHashNontextSignals: deltaParentNontextTableSignals.targetHashNontextSignals,
+        linkedTargetHashSignals: deltaParentNontextTableSignals.linkedTargetHashSignals,
+        selectorAssetLayoutSignals: deltaParentNontextTableSignals.selectorAssetLayoutSignals,
+        safeguards: deltaParentNontextTableSignals.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

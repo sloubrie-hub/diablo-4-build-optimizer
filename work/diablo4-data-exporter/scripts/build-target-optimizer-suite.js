@@ -25,6 +25,7 @@ const generationSteps = [
   "audit-delta-parent-offset-reference-graph.js",
   "scan-delta-parent-systems-tuning-contexts.js",
   "build-delta-parent-undecoded-source-plan.js",
+  "audit-delta-parent-nontext-table-signals.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -66,6 +67,7 @@ const deltaParentUpgradeStructureAudit = readJson("outputs/diablo4-delta-parent-
 const deltaParentOffsetReferenceGraph = readJson("outputs/diablo4-delta-parent-offset-reference-graph/delta-parent-offset-reference-graph.json");
 const deltaParentSystemsTuningContexts = readJson("outputs/diablo4-delta-parent-systems-tuning-contexts/delta-parent-systems-tuning-contexts.json");
 const deltaParentUndecodedSourcePlan = readJson("outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json");
+const deltaParentNontextTableSignals = readJson("outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -100,6 +102,9 @@ assertInvariant(deltaParentSystemsTuningContexts.summary.targetContexts >= 1, "d
 assertInvariant(deltaParentUndecodedSourcePlan.summary.canModifyReliableDps === false, "delta parent undecoded source plan must not modify reliable DPS");
 assertInvariant(deltaParentUndecodedSourcePlan.summary.exactParentConsumerProven === false, "delta parent undecoded source plan must not prove exact parent automatically");
 assertInvariant(deltaParentUndecodedSourcePlan.summary.scoredAssets >= 1, "delta parent undecoded source plan must score assets");
+assertInvariant(deltaParentNontextTableSignals.summary.canModifyReliableDps === false, "delta parent nontext table signals must not modify reliable DPS");
+assertInvariant(deltaParentNontextTableSignals.summary.exactParentConsumerProven === false, "delta parent nontext table signals must not prove exact parent automatically");
+assertInvariant(deltaParentNontextTableSignals.summary.inspectedPayloads >= 1, "delta parent nontext table signals must inspect payloads");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -154,6 +159,9 @@ const report = {
     { id: "delta-parent-undecoded-source-safe", status: "passed", value: deltaParentUndecodedSourcePlan.summary.canModifyReliableDps },
     { id: "delta-parent-undecoded-source-not-auto-proven", status: "passed", value: deltaParentUndecodedSourcePlan.summary.exactParentConsumerProven },
     { id: "delta-parent-undecoded-source-assets-scored", status: "passed", value: deltaParentUndecodedSourcePlan.summary.scoredAssets },
+    { id: "delta-parent-nontext-table-safe", status: "passed", value: deltaParentNontextTableSignals.summary.canModifyReliableDps },
+    { id: "delta-parent-nontext-table-not-auto-proven", status: "passed", value: deltaParentNontextTableSignals.summary.exactParentConsumerProven },
+    { id: "delta-parent-nontext-table-payloads-inspected", status: "passed", value: deltaParentNontextTableSignals.summary.inspectedPayloads },
   ],
 };
 
@@ -176,6 +184,7 @@ assertInvariant(optimizerPlan.deltaParentUpgradeStructureAudit?.summary?.canModi
 assertInvariant(optimizerPlan.deltaParentOffsetReferenceGraph?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent offset reference graph");
 assertInvariant(optimizerPlan.deltaParentSystemsTuningContexts?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent systems tuning contexts");
 assertInvariant(optimizerPlan.deltaParentUndecodedSourcePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent undecoded source plan");
+assertInvariant(optimizerPlan.deltaParentNontextTableSignals?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent nontext table signals");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));
