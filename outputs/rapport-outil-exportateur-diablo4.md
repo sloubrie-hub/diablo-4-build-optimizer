@@ -10560,3 +10560,42 @@ Validation :
 Decision :
 
 La suite pratique du delta n'est plus un audit local, mais une collecte de preuves source-backed. Une preuve acceptee dans l'intake ne modifie toujours pas `reliableDps`; elle ne rend possible qu'un futur parser bridge cible avec invariants de promotion separes.
+
+## Test plan preuves externes delta
+
+Un test dedie a ete ajoute pour verifier le contrat du plan de preuves externes delta. Il simule trois preuves acceptees pour `1663210` (`SF_32`, `SF_33`, uptime), puis confirme que le systeme rend seulement le bridge parseur pret sans promouvoir le DPS fiable.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/test-external-delta-evidence-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat du test complet :
+
+- preuves externes acceptees : `3`
+- preuves delta pretes : `3 / 3`
+- bridge delta : `ready-for-parser-bridge`
+- `promotionReady false`
+- `canModifyReliableDps false`
+
+Resultat du test partiel :
+
+- preuves delta pretes : `1 / 3`
+- preuves manquantes : `2`
+- prochaine priorite : `delta-proof-sf33-trigger`
+- `canModifyReliableDps false`
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau test et la suite
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree avec `27` etapes
+- plan reel actuel : `3` preuves requises, `0` pretes, `3` manquantes
+
+Decision :
+
+Meme si les trois preuves delta sont acceptees dans un intake de test, elles ne modifient pas `reliableDps` et ne marquent pas la promotion comme prete. Elles ne permettent que l'etape suivante : construire un parser bridge cible, avec des invariants de promotion separes.

@@ -1027,3 +1027,14 @@ Build de reference :
   - fichier exemple enrichi : `inputs/external-evidence-candidates.example.json`
   - plan optimiseur et site : nouveau panneau `Preuves externes delta`
   - decision : preparer la saisie source-backed pour SF32, SF33 et uptime; aucune preuve ne modifie le DPS fiable sans parser bridge et invariants dedies
+- test bridge preuves externes delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/test-external-delta-evidence-plan.js`
+  - suite optimiseur : `27` etapes, statut `target-optimizer-suite-ok`
+  - scenario test accepte : `3` preuves delta approuvees
+  - bridge delta test : `ready-for-parser-bridge`
+  - preuves delta test pretes : `3 / 3`
+  - scenario test partiel : `1 / 3` preuve prete, prochaine priorite `delta-proof-sf33-trigger`
+  - promotion automatique : `false`
+  - reliableDps modifiable : `false`
+  - plan reel : `3` preuves requises, `0` pretes, `3` manquantes
+  - decision : une preuve externe acceptee ne suffit pas a promouvoir; elle ne debloque qu'un futur parser bridge avec invariants dedies

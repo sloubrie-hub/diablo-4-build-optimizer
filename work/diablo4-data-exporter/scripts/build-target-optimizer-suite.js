@@ -17,6 +17,7 @@ const generationSteps = [
   "build-external-evidence-bridge-plan.js",
   "test-external-evidence-bridge.js",
   "build-external-delta-evidence-plan.js",
+  "test-external-delta-evidence-plan.js",
   "build-next-evidence-roadmap.js",
   "build-new-binary-family-plan.js",
   "audit-new-binary-family-delta-parent.js",
