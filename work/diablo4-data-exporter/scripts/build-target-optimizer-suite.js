@@ -27,6 +27,7 @@ const generationSteps = [
   "build-delta-parent-undecoded-source-plan.js",
   "audit-delta-parent-nontext-table-signals.js",
   "build-delta-local-exhaustion-conclusion.js",
+  "build-sf32-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -70,6 +71,7 @@ const deltaParentSystemsTuningContexts = readJson("outputs/diablo4-delta-parent-
 const deltaParentUndecodedSourcePlan = readJson("outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json");
 const deltaParentNontextTableSignals = readJson("outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json");
 const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json");
+const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -110,6 +112,9 @@ assertInvariant(deltaParentNontextTableSignals.summary.inspectedPayloads >= 1, "
 assertInvariant(deltaLocalExhaustionConclusion.summary.canModifyReliableDps === false, "delta local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(deltaLocalExhaustionConclusion.summary.exactParentConsumerProven === false, "delta local exhaustion conclusion must not prove exact parent automatically");
 assertInvariant(deltaLocalExhaustionConclusion.summary.sf33LocalExhausted === true, "delta local exhaustion conclusion should close local SF_33 exploration");
+assertInvariant(sf32LocalExhaustionConclusion.summary.canModifyReliableDps === false, "SF_32 local exhaustion conclusion must not modify reliable DPS");
+assertInvariant(sf32LocalExhaustionConclusion.summary.fieldOwnershipProven === false, "SF_32 local exhaustion conclusion must not prove field ownership automatically");
+assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === true, "SF_32 local exhaustion conclusion should close local SF_32 exploration");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -170,6 +175,9 @@ const report = {
     { id: "delta-local-exhaustion-safe", status: "passed", value: deltaLocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "delta-local-sf33-exhausted", status: "passed", value: deltaLocalExhaustionConclusion.summary.sf33LocalExhausted },
     { id: "delta-local-next-focus", status: "passed", value: deltaLocalExhaustionConclusion.summary.recommendedNextFocus },
+    { id: "sf32-local-exhaustion-safe", status: "passed", value: sf32LocalExhaustionConclusion.summary.canModifyReliableDps },
+    { id: "sf32-local-field-not-proven", status: "passed", value: sf32LocalExhaustionConclusion.summary.fieldOwnershipProven },
+    { id: "sf32-local-next-focus", status: "passed", value: sf32LocalExhaustionConclusion.summary.recommendedNextFocus },
   ],
 };
 
@@ -194,6 +202,7 @@ assertInvariant(optimizerPlan.deltaParentSystemsTuningContexts?.summary?.canModi
 assertInvariant(optimizerPlan.deltaParentUndecodedSourcePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent undecoded source plan");
 assertInvariant(optimizerPlan.deltaParentNontextTableSignals?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent nontext table signals");
 assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta local exhaustion conclusion");
+assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

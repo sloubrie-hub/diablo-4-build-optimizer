@@ -18,6 +18,7 @@ const DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL = "../outputs/diablo4-delta-paren
 const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
 const DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL = "../outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
+const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const STORAGE_KEY = "d4-build-optimizer-state-v1";
@@ -43,6 +44,7 @@ const state = {
   deltaParentUndecodedSourcePlan: null,
   deltaParentNontextTableSignals: null,
   deltaLocalExhaustionConclusion: null,
+  sf32LocalExhaustionConclusion: null,
   userWhatIfScenarios: null,
   reliableDpsGates: null,
   userScenario: {
@@ -103,6 +105,7 @@ async function boot() {
     await loadDeltaParentUndecodedSourcePlan();
     await loadDeltaParentNontextTableSignals();
     await loadDeltaLocalExhaustionConclusion();
+    await loadSf32LocalExhaustionConclusion();
     await loadUserWhatIfScenarios();
     await loadReliableDpsGates();
     restoreState();
@@ -350,6 +353,10 @@ async function loadDeltaLocalExhaustionConclusion() {
   state.deltaLocalExhaustionConclusion = await fetchOptionalJson(DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
 
+async function loadSf32LocalExhaustionConclusion() {
+  state.sf32LocalExhaustionConclusion = await fetchOptionalJson(SF32_LOCAL_EXHAUSTION_CONCLUSION_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -421,6 +428,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentUndecodedSourcePlan(state.deltaParentUndecodedSourcePlan ?? plan.deltaParentUndecodedSourcePlan)}
     ${renderDeltaParentNontextTableSignals(state.deltaParentNontextTableSignals ?? plan.deltaParentNontextTableSignals)}
     ${renderDeltaLocalExhaustionConclusion(state.deltaLocalExhaustionConclusion ?? plan.deltaLocalExhaustionConclusion)}
+    ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
     ${renderTargetOptimizerActionQueue(plan.actionQueue ?? [])}
@@ -1063,6 +1071,54 @@ function renderDeltaLocalExhaustionConclusion(report) {
             <span>${item.priority ?? item.status ?? "audit"}</span>
             <strong>${item.id}</strong>
             <p>${item.nextAction ?? item.finding ?? item.reason ?? ""}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSf32LocalExhaustionConclusion(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const checks = report.localEvidenceChecks ?? [];
+  const requiredProofs = report.requiredProofs ?? [];
+  return `
+    <div class="bonus-selector-proof sf32-local-exhaustion-conclusion">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Conclusion SF_32</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.sf32LocalExhausted ? "blocked" : "positive"}">
+          ${summary.sf32LocalExhausted ? "local clos" : "a revoir"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Portes", `${formatNumber(summary.failedPromotionGates)}/${formatNumber(summary.promotionGates)}`)}
+        ${targetMetric("Checks", summary.localEvidenceChecks)}
+        ${targetMetric("Signaux", summary.readySignals)}
+        ${targetMetric("Focus", summary.recommendedNextFocus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Ownership ${summary.fieldOwnershipProven ? "prouve" : "absent"}</span>
+        <span>Preuve externe ${formatNumber(summary.acceptedExternalEvidence)}</span>
+        <span>Pont ${formatNumber(summary.bridgeReadySteps)}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${checks.slice(0, 7).map((check) => `
+          <span class="${check.status === "passed" || check.status === "ready" ? "passed" : "failed"}">${check.id}: ${check.status}</span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${requiredProofs.map((item) => `
+          <article>
+            <span>${item.priority}</span>
+            <strong>${item.id}</strong>
+            <p>${item.requiredEvidence}</p>
           </article>
         `).join("")}
       </div>

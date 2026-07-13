@@ -971,3 +971,17 @@ Build de reference :
   - statut : `delta-local-sf33-evidence-exhausted`, `canModifyReliableDps false`
   - plan optimiseur et site : nouveau panneau `Conclusion delta`
   - decision : ne plus prioriser SF33 en local; basculer vers SF32 ownership ou uptime utilisateur separee/source externe
+- conclusion locale SF32 ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-sf32-local-exhaustion-conclusion.js`
+  - rapport genere : `outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json`
+  - suite optimiseur : `24` etapes, statut `target-optimizer-suite-ok`
+  - portes promotion SF32 echouees : `5 / 5`
+  - bloqueurs SF32 : `7`
+  - checks locaux SF32 : `7`
+  - signaux SF32 prets : `0`
+  - preuves externes acceptees : `0`
+  - SF32 local epuise : `true`
+  - prochaine priorite : `external-source-mapping-selector-949`
+  - statut : `sf32-local-evidence-exhausted`, `canModifyReliableDps false`
+  - plan optimiseur et site : nouveau panneau `Conclusion SF_32`
+  - decision : ne plus relancer d'audit local SF32 sans nouvelle source; chercher une preuve externe acceptee ou un parseur binaire de champ

@@ -25,6 +25,7 @@ const deltaParentSystemsTuningContextsFile = "outputs/diablo4-delta-parent-syste
 const deltaParentUndecodedSourcePlanFile = "outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
 const deltaParentNontextTableSignalsFile = "outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const deltaLocalExhaustionConclusionFile = "outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
+const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
@@ -476,6 +477,7 @@ const deltaParentSystemsTuningContexts = readOptionalJson(deltaParentSystemsTuni
 const deltaParentUndecodedSourcePlan = readOptionalJson(deltaParentUndecodedSourcePlanFile);
 const deltaParentNontextTableSignals = readOptionalJson(deltaParentNontextTableSignalsFile);
 const deltaLocalExhaustionConclusion = readOptionalJson(deltaLocalExhaustionConclusionFile);
+const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclusionFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
@@ -550,6 +552,7 @@ const report = {
     deltaParentUndecodedSourcePlanFile: deltaParentUndecodedSourcePlan ? deltaParentUndecodedSourcePlanFile : null,
     deltaParentNontextTableSignalsFile: deltaParentNontextTableSignals ? deltaParentNontextTableSignalsFile : null,
     deltaLocalExhaustionConclusionFile: deltaLocalExhaustionConclusion ? deltaLocalExhaustionConclusionFile : null,
+    sf32LocalExhaustionConclusionFile: sf32LocalExhaustionConclusion ? sf32LocalExhaustionConclusionFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -735,6 +738,15 @@ const report = {
         sf33Evidence: deltaLocalExhaustionConclusion.sf33Evidence,
         nextFocus: deltaLocalExhaustionConclusion.nextFocus,
         safeguards: deltaLocalExhaustionConclusion.safeguards,
+      }
+    : null,
+  sf32LocalExhaustionConclusion: sf32LocalExhaustionConclusion
+    ? {
+        file: sf32LocalExhaustionConclusionFile,
+        summary: sf32LocalExhaustionConclusion.summary,
+        localEvidenceChecks: sf32LocalExhaustionConclusion.localEvidenceChecks,
+        requiredProofs: sf32LocalExhaustionConclusion.requiredProofs,
+        safeguards: sf32LocalExhaustionConclusion.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

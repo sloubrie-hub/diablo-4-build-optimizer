@@ -10377,3 +10377,47 @@ Validation :
 Decision :
 
 Les pistes locales SF_33 inspectees ne prouvent ni parent/consommateur, ni contexte externe, ni decode cible manquant. SF_33 est donc clos localement pour l'instant. La suite prioritaire devient `sf32-field-ownership`; l'uptime reste une hypothese utilisateur ou une preuve externe separee. Le delta reste hors `reliableDps`.
+
+## Conclusion locale SF32
+
+Une conclusion de cloture locale a ete ajoutee pour le verrou `SF_32`. Elle consolide les audits deja existants autour de `selector 949`, `metadata 12337 / scale 10`, tables locales, analogies compactes et liens record/header.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-local-exhaustion-conclusion.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- portes promotion SF32 echouees : `5 / 5`
+- bloqueurs SF32 : `7`
+- checks locaux SF32 : `7`
+- signaux SF32 prets : `0`
+- preuves externes acceptees : `0`
+- bridge externe pret : `0`
+- SF32 local epuise : `true`
+- ownership champ prouve : `false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- prochaine priorite : `external-source-mapping-selector-949`
+- statut : `sf32-local-evidence-exhausted`
+- suite optimiseur : `target-optimizer-suite-ok`, `24` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau script, la suite, le plan optimiseur et le site
+- suite optimiseur : `.\run-target-optimizer-suite.ps1` OK
+- rapport conclusion SF32 : genere dans `outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json`
+- plan optimiseur : `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json` regenere avec la conclusion SF32
+- suite JSON : `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json` regeneree avec `24` etapes
+
+Decision :
+
+Les preuves locales `SF_32` ne ferment aucune porte de promotion : `selector 949` reste mixte, aucun second compact `949` n'existe, `metadata 12337 / scale 10` est transverse, et aucune table source nommee n'est disponible. Il ne faut plus relancer d'audit local SF32 sans nouvelle source. La prochaine preuve utile doit etre une source externe acceptee ou un parseur binaire de champ. Le delta reste hors `reliableDps`.
