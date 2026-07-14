@@ -10774,3 +10774,48 @@ Validation :
 Decision :
 
 La prochaine avance SF32 doit venir d'une preuve source-backed ou d'un parser bridge capable de nommer le champ proprietaire. Le packet ne fabrique aucune preuve et garde tous les signaux locaux rejetes hors promotion; `reliableDps` reste strict-only.
+
+## Bridge parser SF32 owner
+
+Un bridge parser dedie a `delta-proof-sf32-owner` a ete ajoute. Il transforme uniquement des preuves acceptees en mapping normalise `selector:949 -> SF_32`, et conserve explicitement la promotion DPS hors de portee.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/test-sf32-owner-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`, `selector:949`, `SF_32`
+- bridge reel : bloque
+- preuves acceptees reelles : `0`
+- mappings reels : `0`
+- test synthetique : `selector:949 -> SF_32` OK avec `1` preuve acceptee
+- `bridgeReady false` sur les donnees reelles
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `33` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le nouveau bridge, le test, la suite, le plan optimiseur et le site
+- test bridge synthetique : `sf32-owner-parser-bridge-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `33` etapes
+- endpoints site verifies :
+  - `/site/`
+  - `/outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json`
+  - `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+  - `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- site : nouveau panneau `Bridge SF_32`
+
+Decision :
+
+Le bridge est pret cote mecanique mais bloque sur les donnees reelles faute de preuve acceptee. Une preuve externe acceptee peut produire le mapping `SF_32`, mais elle ne peut pas promouvoir `reliableDps`; les verrous `SF_33` et `uptime` restent necessaires avant toute sortie fiable.

@@ -1086,3 +1086,14 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Packet SF_32`
   - reliableDps modifiable : `false`
   - decision : cadrer la prochaine preuve SF32 avec les rejets locaux et le contrat de bridge sans creer de preuve artificielle
+- bridge parser SF32 owner ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-sf32-owner-parser-bridge.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-sf32-owner-parser-bridge.js`
+  - rapport genere : `outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json`
+  - suite optimiseur : `33` etapes, statut `target-optimizer-suite-ok`
+  - bridge reel : bloque, `0` preuve acceptee, `0` mapping
+  - test synthetique : mapping `selector:949 -> SF_32` OK
+  - gates DPS fiables : bloquees
+  - plan optimiseur et site : nouveau panneau `Bridge SF_32`
+  - reliableDps modifiable : `false`
+  - decision : preparer le bridge cible sans promotion; le mapping exige une preuve acceptee

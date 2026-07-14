@@ -29,6 +29,7 @@ const deltaParentNontextTableSignalsFile = "outputs/diablo4-delta-parent-nontext
 const deltaLocalExhaustionConclusionFile = "outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
 const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
+const sf32OwnerParserBridgeFile = "outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const uptimeLocalExhaustionConclusionFile = "outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
@@ -486,6 +487,7 @@ const deltaParentNontextTableSignals = readOptionalJson(deltaParentNontextTableS
 const deltaLocalExhaustionConclusion = readOptionalJson(deltaLocalExhaustionConclusionFile);
 const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclusionFile);
 const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
+const sf32OwnerParserBridge = readOptionalJson(sf32OwnerParserBridgeFile);
 const uptimeLocalExhaustionConclusion = readOptionalJson(uptimeLocalExhaustionConclusionFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
@@ -565,6 +567,7 @@ const report = {
     deltaLocalExhaustionConclusionFile: deltaLocalExhaustionConclusion ? deltaLocalExhaustionConclusionFile : null,
     sf32LocalExhaustionConclusionFile: sf32LocalExhaustionConclusion ? sf32LocalExhaustionConclusionFile : null,
     sf32OwnerSourcePacketFile: sf32OwnerSourcePacket ? sf32OwnerSourcePacketFile : null,
+    sf32OwnerParserBridgeFile: sf32OwnerParserBridge ? sf32OwnerParserBridgeFile : null,
     uptimeLocalExhaustionConclusionFile: uptimeLocalExhaustionConclusion ? uptimeLocalExhaustionConclusionFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
@@ -789,6 +792,15 @@ const report = {
         rejectedLocalSignals: sf32OwnerSourcePacket.rejectedLocalSignals,
         parserBridgeContract: sf32OwnerSourcePacket.parserBridgeContract,
         safeguards: sf32OwnerSourcePacket.safeguards,
+      }
+    : null,
+  sf32OwnerParserBridge: sf32OwnerParserBridge
+    ? {
+        file: sf32OwnerParserBridgeFile,
+        summary: sf32OwnerParserBridge.summary,
+        mappings: sf32OwnerParserBridge.mappings,
+        requiredInvariants: sf32OwnerParserBridge.requiredInvariants,
+        safeguards: sf32OwnerParserBridge.safeguards,
       }
     : null,
   uptimeLocalExhaustionConclusion: uptimeLocalExhaustionConclusion

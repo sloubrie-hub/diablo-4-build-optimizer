@@ -33,6 +33,8 @@ const generationSteps = [
   "audit-delta-parent-nontext-table-signals.js",
   "build-sf32-local-exhaustion-conclusion.js",
   "build-sf32-owner-source-packet.js",
+  "build-sf32-owner-parser-bridge.js",
+  "test-sf32-owner-parser-bridge.js",
   "build-uptime-local-exhaustion-conclusion.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
@@ -82,6 +84,7 @@ const deltaParentNontextTableSignals = readJson("outputs/diablo4-delta-parent-no
 const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json");
 const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
+const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json");
 const uptimeLocalExhaustionConclusion = readJson("outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
@@ -135,6 +138,9 @@ assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === tru
 assertInvariant(sf32OwnerSourcePacket.summary.canModifyReliableDps === false, "SF_32 owner source packet must not modify reliable DPS");
 assertInvariant(sf32OwnerSourcePacket.summary.parserBridgeRequired === true, "SF_32 owner source packet must require a parser bridge");
 assertInvariant(sf32OwnerSourcePacket.requiredClaim?.field === "selector:949", "SF_32 owner source packet must target selector:949");
+assertInvariant(sf32OwnerParserBridge.summary.canModifyReliableDps === false, "SF_32 owner parser bridge must not modify reliable DPS");
+assertInvariant(sf32OwnerParserBridge.summary.bridgeReady === false, "real SF_32 owner parser bridge should remain blocked without accepted evidence");
+assertInvariant(sf32OwnerParserBridge.summary.reliableDpsStillBlocked === true, "SF_32 owner parser bridge must keep reliable gates blocked");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.canModifyReliableDps === false, "uptime local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.uptimeReliableProven === false, "uptime local exhaustion conclusion must not prove reliable uptime automatically");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.userScenarioSeparated === true, "uptime local exhaustion conclusion should keep user what-if separated");
@@ -212,6 +218,9 @@ const report = {
     { id: "sf32-owner-source-packet-safe", status: "passed", value: sf32OwnerSourcePacket.summary.canModifyReliableDps },
     { id: "sf32-owner-source-packet-bridge-required", status: "passed", value: sf32OwnerSourcePacket.summary.parserBridgeRequired },
     { id: "sf32-owner-source-packet-field", status: "passed", value: sf32OwnerSourcePacket.requiredClaim?.field },
+    { id: "sf32-owner-parser-bridge-safe", status: "passed", value: sf32OwnerParserBridge.summary.canModifyReliableDps },
+    { id: "sf32-owner-parser-bridge-blocked-real", status: "passed", value: sf32OwnerParserBridge.summary.bridgeReady },
+    { id: "sf32-owner-parser-bridge-gates-blocked", status: "passed", value: sf32OwnerParserBridge.summary.reliableDpsStillBlocked },
     { id: "uptime-local-exhaustion-safe", status: "passed", value: uptimeLocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "uptime-local-reliable-not-proven", status: "passed", value: uptimeLocalExhaustionConclusion.summary.uptimeReliableProven },
     { id: "uptime-local-user-scenario-separated", status: "passed", value: uptimeLocalExhaustionConclusion.summary.userScenarioSeparated },
@@ -246,6 +255,7 @@ assertInvariant(optimizerPlan.deltaParentNontextTableSignals?.summary?.canModify
 assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
+assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner parser bridge");
 assertInvariant(optimizerPlan.uptimeLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime local exhaustion conclusion");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
