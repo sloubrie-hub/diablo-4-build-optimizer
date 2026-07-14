@@ -1270,3 +1270,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Audit patch`
   - reliableDps modifiable : `false`
   - decision : autoriser seulement une preview pending quand le brouillon patch est complet; la revue et la promotion restent separees
+- preview intake brouillon patch delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/preview-delta-evidence-filled-draft-intake.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-filled-draft-intake-preview.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-filled-draft-intake-preview/delta-evidence-filled-draft-intake-preview.json`
+  - preview generee : `outputs/diablo4-delta-evidence-filled-draft-intake-preview/external-evidence-candidates.filled-draft.preview.json`
+  - suite optimiseur : `63` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - preview reelle : `previewMergeReady false`, `previewCandidates 0`
+  - test synthetique : `previewMergeReady true`, `previewCandidates 1`, `reviewer.status pending`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Preview patch`
+  - reliableDps modifiable : `false`
+  - decision : produire une preview pending separee uniquement apres patch et audit complets; aucune copie, approbation ou promotion automatique

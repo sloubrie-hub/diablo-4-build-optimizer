@@ -11424,3 +11424,47 @@ Validation :
 Decision :
 
 L'audit patch separe clairement trois etats : incomplet, pret pour preview pending, et approuve. Le cas reel reste incomplet. Meme dans le cas synthetique complet, la sortie n'accepte pas de bridge, ne modifie pas `reliableDps`, et ne declenche aucune promotion.
+
+## Preview intake brouillon patch delta
+
+Une preview intake dediee au brouillon patch a ete ajoutee pour produire un fichier de merge separe quand le patch et son audit sont complets.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/preview-delta-evidence-filled-draft-intake.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-filled-draft-intake-preview.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-filled-draft-intake-preview/delta-evidence-filled-draft-intake-preview.json`
+- `outputs/diablo4-delta-evidence-filled-draft-intake-preview/external-evidence-candidates.filled-draft.preview.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- preview reelle : `previewMergeReady false`
+- candidats preview reels : `0`
+- doublons reels : `0`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `previewMergeReady true`, `previewCandidates 1`, `reviewer.status pending`, sans champ `draft` ni `templateId`
+- suite optimiseur : `target-optimizer-suite-ok`, `63` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la preview, le test, la suite, le plan optimiseur et le site
+- test preview : `delta-evidence-filled-draft-intake-preview-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `63` etapes
+- plan optimiseur : section `deltaEvidenceFilledDraftIntakePreview` presente
+- site : nouveau panneau `Preview patch`
+
+Decision :
+
+La preview du brouillon patch est une sortie non destructive. Elle force le candidat ajoute en `pending`, retire les marqueurs de brouillon, et ne modifie jamais l'intake reel. Elle ne vaut pas approbation, n'accepte aucun bridge et ne change pas `reliableDps`.
