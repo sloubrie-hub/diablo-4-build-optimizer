@@ -43,6 +43,7 @@ const deltaEvidenceDraftAuditFile = "outputs/diablo4-delta-evidence-draft-audit/
 const deltaEvidenceIntakeUpdatePreviewFile = "outputs/diablo4-delta-evidence-intake-update-preview/delta-evidence-intake-update-preview.json";
 const deltaManualPromotionGateFile = "outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json";
 const deltaHumanActionPlanFile = "outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json";
+const deltaEvidenceFillFormFile = "outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -513,6 +514,7 @@ const deltaEvidenceDraftAudit = readOptionalJson(deltaEvidenceDraftAuditFile);
 const deltaEvidenceIntakeUpdatePreview = readOptionalJson(deltaEvidenceIntakeUpdatePreviewFile);
 const deltaManualPromotionGate = readOptionalJson(deltaManualPromotionGateFile);
 const deltaHumanActionPlan = readOptionalJson(deltaHumanActionPlanFile);
+const deltaEvidenceFillForm = readOptionalJson(deltaEvidenceFillFormFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -605,6 +607,7 @@ const report = {
     deltaEvidenceIntakeUpdatePreviewFile: deltaEvidenceIntakeUpdatePreview ? deltaEvidenceIntakeUpdatePreviewFile : null,
     deltaManualPromotionGateFile: deltaManualPromotionGate ? deltaManualPromotionGateFile : null,
     deltaHumanActionPlanFile: deltaHumanActionPlan ? deltaHumanActionPlanFile : null,
+    deltaEvidenceFillFormFile: deltaEvidenceFillForm ? deltaEvidenceFillFormFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -963,6 +966,16 @@ const report = {
         fillTasks: deltaHumanActionPlan.fillTasks,
         orderedActions: deltaHumanActionPlan.orderedActions,
         safeguards: deltaHumanActionPlan.safeguards,
+      }
+    : null,
+  deltaEvidenceFillForm: deltaEvidenceFillForm
+    ? {
+        file: deltaEvidenceFillFormFile,
+        summary: deltaEvidenceFillForm.summary,
+        candidateContext: deltaEvidenceFillForm.candidateContext,
+        fields: deltaEvidenceFillForm.fields,
+        instructions: deltaEvidenceFillForm.instructions,
+        safeguards: deltaEvidenceFillForm.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

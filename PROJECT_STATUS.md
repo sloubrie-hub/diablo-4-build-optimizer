@@ -1224,3 +1224,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Actions manuelles`
   - reliableDps modifiable : `false`
   - decision : rendre la prochaine action humaine explicite sans ecrire dans l'intake reel ni ouvrir de promotion
+- formulaire remplissage preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-fill-form.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-fill-form.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.json`
+  - formulaire markdown : `outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.md`
+  - suite optimiseur : `57` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - claim : `sf32-field-ownership` / `selector:949`
+  - champs : `7`
+  - champs remplis : `0`
+  - premier champ : `source.title`
+  - plan optimiseur et site : nouveau panneau `Formulaire preuve`
+  - reliableDps modifiable : `false`
+  - decision : produire un formulaire a remplir hors intake reel; un formulaire rempli ne vaut pas preuve approuvee ni promotion

@@ -11288,3 +11288,47 @@ Validation :
 Decision :
 
 Le plan d'actions rend le blocage operationnel : la suite ne cherche plus une promotion, elle indique exactement quel champ remplir en premier. Le rapport reste non destructif, ne modifie pas l'intake reel, et garde `reliableDps`, le ranking et `promotionReady` bloques.
+
+## Formulaire remplissage preuve delta
+
+Un formulaire de remplissage a ete ajoute pour transformer le plan d'actions humaines en champs concrets a renseigner pour le brouillon SF_32.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-fill-form.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-fill-form.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.json`
+- `outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.md`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- claim : `sf32-field-ownership` / `selector:949`
+- champs : `7`
+- champs remplis : `0`
+- premier champ : `source.title`
+- `readyForDraftPatch false`
+- `writesRealIntake false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `57` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le formulaire, le test, la suite, le plan optimiseur et le site
+- test formulaire : `delta-evidence-fill-form-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `57` etapes
+- plan optimiseur : section `deltaEvidenceFillForm` presente
+- site : nouveau panneau `Formulaire preuve`
+
+Decision :
+
+Le formulaire reste separe de l'intake reel. Il sert a renseigner les valeurs manquantes du brouillon, sans ecriture automatique, sans approbation implicite, sans modification de `reliableDps`, et sans promotion vers le ranking.
