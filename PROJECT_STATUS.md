@@ -1184,3 +1184,16 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Audit brouillon`
   - reliableDps modifiable : `false`
   - decision : valider les preuves candidates en dry-run avant copie dans l'intake reel; copiable ne veut pas dire approuve ni promouvable
+- preview update intake delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/preview-delta-evidence-intake-update.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-intake-update-preview.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-intake-update-preview/delta-evidence-intake-update-preview.json`
+  - preview generee : `outputs/diablo4-delta-evidence-intake-update-preview/external-evidence-candidates.preview.json`
+  - suite optimiseur : `51` etapes, statut `target-optimizer-suite-ok`
+  - preview reelle : merge refuse, `0` candidat preview, `0` candidat intake reel, `1` brouillon
+  - test brouillon rempli : merge pret, `1` candidat preview, intake reel non modifie
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Preview intake`
+  - reliableDps modifiable : `false`
+  - decision : produire une preview mergable separee et verifier les doublons avant toute copie manuelle dans l'intake reel

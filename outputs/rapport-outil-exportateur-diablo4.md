@@ -11148,3 +11148,49 @@ Validation :
 Decision :
 
 L'audit separe clairement `copiable en pending` de `approved`. Un brouillon rempli sans placeholders ni bloqueurs structurels peut etre copie dans l'intake reel, mais il reste non accepte tant que la revue manuelle n'est pas faite. Meme une preuve acceptee reste intake-only et ne peut pas modifier `reliableDps` sans bridge et gates dedies.
+
+## Preview update intake delta
+
+Un previsualiseur de mise a jour d'intake a ete ajoute pour produire un fichier merge separe, sans ecrire dans `inputs/external-evidence-candidates.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/preview-delta-evidence-intake-update.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-intake-update-preview.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-intake-update-preview/delta-evidence-intake-update-preview.json`
+- `outputs/diablo4-delta-evidence-intake-update-preview/external-evidence-candidates.preview.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- intake reel : `0` candidat
+- brouillon reel : `1` candidat
+- preview reelle : `0` candidat
+- merge reel : refuse
+- doublons : `0`
+- `readyForIntake false`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test brouillon rempli : `previewMergeReady true`, `previewCandidates 1`, intake reel inchange
+- suite optimiseur : `target-optimizer-suite-ok`, `51` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la preview, le test, la suite, le plan optimiseur et le site
+- test preview : `delta-evidence-intake-update-preview-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `51` etapes
+- plan optimiseur : section `deltaEvidenceIntakeUpdatePreview` presente
+- site : nouveau panneau `Preview intake`
+- controle important : la preview n'ecrit jamais dans `inputs/external-evidence-candidates.json`
+
+Decision :
+
+La copie vers l'intake reel reste manuelle et visible. Le script refuse le brouillon actuel car il n'est pas pret, detecte les doublons, retire les marqueurs de brouillon dans la preview, et conserve `reviewer.status=pending`. Une preview prete ne vaut ni approbation, ni bridge, ni promotion fiable.
