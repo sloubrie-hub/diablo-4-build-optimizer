@@ -44,6 +44,7 @@ const deltaEvidenceIntakeUpdatePreviewFile = "outputs/diablo4-delta-evidence-int
 const deltaManualPromotionGateFile = "outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json";
 const deltaHumanActionPlanFile = "outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json";
 const deltaEvidenceFillFormFile = "outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.json";
+const deltaEvidenceFilledDraftFile = "outputs/diablo4-delta-evidence-filled-draft/delta-evidence-filled-draft.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -515,6 +516,7 @@ const deltaEvidenceIntakeUpdatePreview = readOptionalJson(deltaEvidenceIntakeUpd
 const deltaManualPromotionGate = readOptionalJson(deltaManualPromotionGateFile);
 const deltaHumanActionPlan = readOptionalJson(deltaHumanActionPlanFile);
 const deltaEvidenceFillForm = readOptionalJson(deltaEvidenceFillFormFile);
+const deltaEvidenceFilledDraft = readOptionalJson(deltaEvidenceFilledDraftFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -608,6 +610,7 @@ const report = {
     deltaManualPromotionGateFile: deltaManualPromotionGate ? deltaManualPromotionGateFile : null,
     deltaHumanActionPlanFile: deltaHumanActionPlan ? deltaHumanActionPlanFile : null,
     deltaEvidenceFillFormFile: deltaEvidenceFillForm ? deltaEvidenceFillFormFile : null,
+    deltaEvidenceFilledDraftFile: deltaEvidenceFilledDraft ? deltaEvidenceFilledDraftFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -976,6 +979,17 @@ const report = {
         fields: deltaEvidenceFillForm.fields,
         instructions: deltaEvidenceFillForm.instructions,
         safeguards: deltaEvidenceFillForm.safeguards,
+      }
+    : null,
+  deltaEvidenceFilledDraft: deltaEvidenceFilledDraft
+    ? {
+        file: deltaEvidenceFilledDraftFile,
+        summary: deltaEvidenceFilledDraft.summary,
+        completedFields: deltaEvidenceFilledDraft.completedFields,
+        missingFields: deltaEvidenceFilledDraft.missingFields,
+        remainingPlaceholderFields: deltaEvidenceFilledDraft.remainingPlaceholderFields,
+        patchedCandidate: deltaEvidenceFilledDraft.patchedCandidate,
+        safeguards: deltaEvidenceFilledDraft.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

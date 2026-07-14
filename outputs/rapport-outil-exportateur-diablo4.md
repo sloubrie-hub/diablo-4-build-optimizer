@@ -11332,3 +11332,48 @@ Validation :
 Decision :
 
 Le formulaire reste separe de l'intake reel. Il sert a renseigner les valeurs manquantes du brouillon, sans ecriture automatique, sans approbation implicite, sans modification de `reliableDps`, et sans promotion vers le ranking.
+
+## Patch dry-run brouillon preuve delta
+
+Un patcher de brouillon a ete ajoute pour appliquer un formulaire rempli sur le brouillon SF_32 sans ecrire dans l'intake reel.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/apply-delta-evidence-fill-form.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-filled-draft.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-filled-draft/delta-evidence-filled-draft.json`
+- `outputs/diablo4-delta-evidence-filled-draft/external-evidence-candidates.filled-draft.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- claim : `sf32-field-ownership` / `selector:949`
+- champs appliques reel : `0 / 7`
+- champs manquants reel : `7`
+- placeholders restants reel : `7`
+- `readyForDraftAudit false`
+- `writesRealIntake false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `7 / 7` champs appliques, `readyForDraftAudit true`, mais DPS fiable/ranking/promotion toujours `false`
+- suite optimiseur : `target-optimizer-suite-ok`, `59` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le patcher, le test, la suite, le plan optimiseur et le site
+- test patcher : `delta-evidence-filled-draft-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `59` etapes
+- plan optimiseur : section `deltaEvidenceFilledDraft` presente
+- site : nouveau panneau `Patch brouillon`
+
+Decision :
+
+Le patcher ferme la boucle formulaire -> brouillon auditable, mais uniquement en dry-run. Le cas reel reste bloque tant que le formulaire ne contient aucune source. Un brouillon complet pourra etre audite puis passe en preview, mais ne deviendra pas automatiquement une preuve approuvee ni une promotion de `reliableDps`.

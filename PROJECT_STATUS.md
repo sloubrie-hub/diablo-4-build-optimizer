@@ -1238,3 +1238,19 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Formulaire preuve`
   - reliableDps modifiable : `false`
   - decision : produire un formulaire a remplir hors intake reel; un formulaire rempli ne vaut pas preuve approuvee ni promotion
+- patch dry-run brouillon preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/apply-delta-evidence-fill-form.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-filled-draft.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-filled-draft/delta-evidence-filled-draft.json`
+  - brouillon patch genere : `outputs/diablo4-delta-evidence-filled-draft/external-evidence-candidates.filled-draft.json`
+  - suite optimiseur : `59` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - champs appliques reel : `0 / 7`
+  - champs manquants reel : `7`
+  - placeholders restants reel : `7`
+  - `readyForDraftAudit` reel : `false`
+  - test synthetique : `7 / 7` champs appliques, `readyForDraftAudit true`
+  - ecriture intake reel : `false`
+  - plan optimiseur et site : nouveau panneau `Patch brouillon`
+  - reliableDps modifiable : `false`
+  - decision : transformer le formulaire rempli en brouillon auditable seulement en dry-run; le formulaire vide bloque encore la chaine

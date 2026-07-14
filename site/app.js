@@ -37,6 +37,7 @@ const DELTA_EVIDENCE_INTAKE_UPDATE_PREVIEW_URL = "../outputs/diablo4-delta-evide
 const DELTA_MANUAL_PROMOTION_GATE_URL = "../outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json";
 const DELTA_HUMAN_ACTION_PLAN_URL = "../outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json";
 const DELTA_EVIDENCE_FILL_FORM_URL = "../outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.json";
+const DELTA_EVIDENCE_FILLED_DRAFT_URL = "../outputs/diablo4-delta-evidence-filled-draft/delta-evidence-filled-draft.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -82,6 +83,7 @@ const state = {
   deltaManualPromotionGate: null,
   deltaHumanActionPlan: null,
   deltaEvidenceFillForm: null,
+  deltaEvidenceFilledDraft: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -162,6 +164,7 @@ async function boot() {
     await loadDeltaManualPromotionGate();
     await loadDeltaHumanActionPlan();
     await loadDeltaEvidenceFillForm();
+    await loadDeltaEvidenceFilledDraft();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -486,6 +489,10 @@ async function loadDeltaEvidenceFillForm() {
   state.deltaEvidenceFillForm = await fetchOptionalJson(DELTA_EVIDENCE_FILL_FORM_URL);
 }
 
+async function loadDeltaEvidenceFilledDraft() {
+  state.deltaEvidenceFilledDraft = await fetchOptionalJson(DELTA_EVIDENCE_FILLED_DRAFT_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -580,6 +587,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaManualPromotionGate(state.deltaManualPromotionGate ?? plan.deltaManualPromotionGate)}
     ${renderDeltaHumanActionPlan(state.deltaHumanActionPlan ?? plan.deltaHumanActionPlan)}
     ${renderDeltaEvidenceFillForm(state.deltaEvidenceFillForm ?? plan.deltaEvidenceFillForm)}
+    ${renderDeltaEvidenceFilledDraft(state.deltaEvidenceFilledDraft ?? plan.deltaEvidenceFilledDraft)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -2006,6 +2014,44 @@ function renderDeltaEvidenceFillForm(report) {
       </div>
       <div class="suite-invariant-list">
         ${instructions.map((item) => `<span>${item}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaEvidenceFilledDraft(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const missing = report.missingFields ?? [];
+  const placeholders = report.remainingPlaceholderFields ?? [];
+  return `
+    <div class="bonus-selector-proof delta-evidence-filled-draft">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Patch brouillon</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForDraftAudit ? "positive" : "blocked"}">
+          ${summary.readyForDraftAudit ? "pret audit" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidat", summary.candidateId ?? "n/a")}
+        ${targetMetric("Champs", `${formatNumber(summary.completedFields)}/${formatNumber(summary.fields)}`)}
+        ${targetMetric("Manquants", summary.missingFields)}
+        ${targetMetric("Placeholders", summary.remainingPlaceholderFields)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ecriture intake ${summary.writesRealIntake ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Ranking ${summary.canUseForRanking ? "oui" : "non"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${missing.map((field) => `<span class="blocked">${field}</span>`).join("") || `<span class="positive">Aucun champ manquant</span>`}
+        ${placeholders.map((field) => `<span class="blocked">${field}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
