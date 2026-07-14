@@ -26,6 +26,8 @@ const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridg
 const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
 const UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
+const UPTIME_SOURCE_PACKET_URL = "../outputs/diablo4-uptime-source-packet/uptime-source-packet.json";
+const UPTIME_PARSER_BRIDGE_URL = "../outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -60,6 +62,8 @@ const state = {
   sf33TriggerSourcePacket: null,
   sf33TriggerParserBridge: null,
   uptimeLocalExhaustionConclusion: null,
+  uptimeSourcePacket: null,
+  uptimeParserBridge: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -129,6 +133,8 @@ async function boot() {
     await loadSf33TriggerSourcePacket();
     await loadSf33TriggerParserBridge();
     await loadUptimeLocalExhaustionConclusion();
+    await loadUptimeSourcePacket();
+    await loadUptimeParserBridge();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -409,6 +415,14 @@ async function loadUptimeLocalExhaustionConclusion() {
   state.uptimeLocalExhaustionConclusion = await fetchOptionalJson(UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
 
+async function loadUptimeSourcePacket() {
+  state.uptimeSourcePacket = await fetchOptionalJson(UPTIME_SOURCE_PACKET_URL);
+}
+
+async function loadUptimeParserBridge() {
+  state.uptimeParserBridge = await fetchOptionalJson(UPTIME_PARSER_BRIDGE_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -492,6 +506,8 @@ function renderTargetOptimizerPlan() {
     ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
     ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
     ${renderUptimeLocalExhaustionConclusion(state.uptimeLocalExhaustionConclusion ?? plan.uptimeLocalExhaustionConclusion)}
+    ${renderUptimeSourcePacket(state.uptimeSourcePacket ?? plan.uptimeSourcePacket)}
+    ${renderUptimeParserBridge(state.uptimeParserBridge ?? plan.uptimeParserBridge)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -1413,6 +1429,94 @@ function renderUptimeLocalExhaustionConclusion(report) {
             <span>${item.priority}</span>
             <strong>${item.id}</strong>
             <p>${item.requiredEvidence}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderUptimeSourcePacket(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const claim = report.requiredClaim ?? {};
+  const bridge = report.parserBridgeContract ?? {};
+  const rejected = report.rejectedLocalSignals ?? [];
+  return `
+    <div class="bonus-selector-proof uptime-source-packet">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Packet uptime</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.acceptedEvidence > 0 ? "positive" : "blocked"}">
+          ${summary.acceptedEvidence > 0 ? "preuve acceptee" : "source requise"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Asset", summary.assetId)}
+        ${targetMetric("Champ", summary.targetField ?? "n/a")}
+        ${targetMetric("Rejets locaux", summary.rejectedLocalSignals)}
+        ${targetMetric("What-if", summary.userScenarioSeparated ? "separe" : "bloque")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Bridge ${bridge.status ?? "n/a"}</span>
+        <span>Claim ${claim.type ?? "n/a"} / ${claim.field ?? "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${rejected.slice(0, 4).map((item) => `
+          <article>
+            <span>${item.sourceAssessment ?? item.id}</span>
+            <strong>${item.id}</strong>
+            <p>${item.reasonRejectedForReliableUptime}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderUptimeParserBridge(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const mappings = report.mappings ?? [];
+  const invariants = report.requiredInvariants ?? [];
+  return `
+    <div class="bonus-selector-proof uptime-parser-bridge">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Bridge uptime</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.bridgeReady ? "positive" : "blocked"}">
+          ${summary.bridgeReady ? "mapping pret" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Preuves", summary.acceptedEvidence)}
+        ${targetMetric("Mappings", summary.mappings)}
+        ${targetMetric("Champ", summary.targetField ?? "n/a")}
+        ${targetMetric("What-if", summary.canUseForUserWhatIf ? "oui" : "non")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Gates ${summary.reliableDpsStillBlocked ? "bloquees" : "ouvertes"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${invariants.map((item) => `<span class="blocked">${item}</span>`).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${mappings.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.targetField} ${formatPercent(Number(item.uptime ?? 0) * 100)}</strong>
+            <p>${item.sourceEvidenceId}</p>
           </article>
         `).join("")}
       </div>

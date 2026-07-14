@@ -33,6 +33,8 @@ const sf32OwnerParserBridgeFile = "outputs/diablo4-sf32-owner-parser-bridge/sf32
 const sf33TriggerSourcePacketFile = "outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const sf33TriggerParserBridgeFile = "outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
 const uptimeLocalExhaustionConclusionFile = "outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
+const uptimeSourcePacketFile = "outputs/diablo4-uptime-source-packet/uptime-source-packet.json";
+const uptimeParserBridgeFile = "outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -493,6 +495,8 @@ const sf32OwnerParserBridge = readOptionalJson(sf32OwnerParserBridgeFile);
 const sf33TriggerSourcePacket = readOptionalJson(sf33TriggerSourcePacketFile);
 const sf33TriggerParserBridge = readOptionalJson(sf33TriggerParserBridgeFile);
 const uptimeLocalExhaustionConclusion = readOptionalJson(uptimeLocalExhaustionConclusionFile);
+const uptimeSourcePacket = readOptionalJson(uptimeSourcePacketFile);
+const uptimeParserBridge = readOptionalJson(uptimeParserBridgeFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -575,6 +579,8 @@ const report = {
     sf33TriggerSourcePacketFile: sf33TriggerSourcePacket ? sf33TriggerSourcePacketFile : null,
     sf33TriggerParserBridgeFile: sf33TriggerParserBridge ? sf33TriggerParserBridgeFile : null,
     uptimeLocalExhaustionConclusionFile: uptimeLocalExhaustionConclusion ? uptimeLocalExhaustionConclusionFile : null,
+    uptimeSourcePacketFile: uptimeSourcePacket ? uptimeSourcePacketFile : null,
+    uptimeParserBridgeFile: uptimeParserBridge ? uptimeParserBridgeFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -836,6 +842,25 @@ const report = {
         localEvidenceChecks: uptimeLocalExhaustionConclusion.localEvidenceChecks,
         requiredProofs: uptimeLocalExhaustionConclusion.requiredProofs,
         safeguards: uptimeLocalExhaustionConclusion.safeguards,
+      }
+    : null,
+  uptimeSourcePacket: uptimeSourcePacket
+    ? {
+        file: uptimeSourcePacketFile,
+        summary: uptimeSourcePacket.summary,
+        requiredClaim: uptimeSourcePacket.requiredClaim,
+        rejectedLocalSignals: uptimeSourcePacket.rejectedLocalSignals,
+        parserBridgeContract: uptimeSourcePacket.parserBridgeContract,
+        safeguards: uptimeSourcePacket.safeguards,
+      }
+    : null,
+  uptimeParserBridge: uptimeParserBridge
+    ? {
+        file: uptimeParserBridgeFile,
+        summary: uptimeParserBridge.summary,
+        mappings: uptimeParserBridge.mappings,
+        requiredInvariants: uptimeParserBridge.requiredInvariants,
+        safeguards: uptimeParserBridge.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

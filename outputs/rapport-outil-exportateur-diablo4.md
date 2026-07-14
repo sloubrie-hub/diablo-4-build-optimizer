@@ -10869,3 +10869,54 @@ Validation :
 Decision :
 
 Le bridge `SF_33` est pret cote mecanique mais bloque sur les donnees reelles faute de preuve acceptee. Les preuves locales gardent seulement une valeur de contexte/rejet; elles ne prouvent pas l'activation de `Mod.SoilRuler_B`. Le DPS fiable reste strict-only tant que `SF_32`, `SF_33` et l'uptime ne sont pas tous prouves.
+
+## Packet et bridge parser uptime
+
+Un packet source et un bridge parser dedies a `delta-proof-uptime` ont ete ajoutes. Ils cadrent l'uptime comme valeur numerique source-backed, bornee entre `0` et `1`, et separee du DPS fiable.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-uptime-source-packet.js`
+- `work/diablo4-data-exporter/scripts/build-uptime-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/test-uptime-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-uptime-source-packet/uptime-source-packet.json`
+- `outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`, `uptime`
+- packet reel : bloque
+- preuves acceptees reelles : `0`
+- signaux locaux rejetes : `5`
+- bridge reel : bloque
+- mappings reels : `0`
+- test synthetique : uptime `0.5` OK avec `1` preuve acceptee
+- test de rejet : uptime `1.75` refusee, `0` mapping
+- `bridgeReady false` sur les donnees reelles
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `39` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le packet, le bridge, le test, la suite, le plan optimiseur et le site
+- test bridge synthetique : `uptime-parser-bridge-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `39` etapes
+- endpoints site verifies :
+  - `/site/`
+  - `/outputs/diablo4-uptime-source-packet/uptime-source-packet.json`
+  - `/outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json`
+  - `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+  - `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- site : nouveaux panneaux `Packet uptime` et `Bridge uptime`
+
+Decision :
+
+Une uptime source-backed doit etre numerique, bornee et revue avant mapping. Meme validee, elle reste insuffisante pour promouvoir le delta `48960` tant que `SF_32` et `SF_33` ne sont pas aussi prouves. Elle peut seulement alimenter un what-if controle; `reliableDps` reste strict-only.

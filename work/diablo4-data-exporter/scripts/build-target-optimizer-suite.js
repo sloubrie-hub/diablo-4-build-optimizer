@@ -39,6 +39,9 @@ const generationSteps = [
   "build-sf33-trigger-parser-bridge.js",
   "test-sf33-trigger-parser-bridge.js",
   "build-uptime-local-exhaustion-conclusion.js",
+  "build-uptime-source-packet.js",
+  "build-uptime-parser-bridge.js",
+  "test-uptime-parser-bridge.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -91,6 +94,8 @@ const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge
 const sf33TriggerSourcePacket = readJson("outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json");
 const sf33TriggerParserBridge = readJson("outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json");
 const uptimeLocalExhaustionConclusion = readJson("outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json");
+const uptimeSourcePacket = readJson("outputs/diablo4-uptime-source-packet/uptime-source-packet.json");
+const uptimeParserBridge = readJson("outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
@@ -155,6 +160,12 @@ assertInvariant(sf33TriggerParserBridge.summary.reliableDpsStillBlocked === true
 assertInvariant(uptimeLocalExhaustionConclusion.summary.canModifyReliableDps === false, "uptime local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.uptimeReliableProven === false, "uptime local exhaustion conclusion must not prove reliable uptime automatically");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.userScenarioSeparated === true, "uptime local exhaustion conclusion should keep user what-if separated");
+assertInvariant(uptimeSourcePacket.summary.canModifyReliableDps === false, "uptime source packet must not modify reliable DPS");
+assertInvariant(uptimeSourcePacket.summary.parserBridgeRequired === true, "uptime source packet must require a parser bridge");
+assertInvariant(uptimeSourcePacket.requiredClaim?.field === "uptime", "uptime source packet must target uptime");
+assertInvariant(uptimeParserBridge.summary.canModifyReliableDps === false, "uptime parser bridge must not modify reliable DPS");
+assertInvariant(uptimeParserBridge.summary.bridgeReady === false, "real uptime parser bridge should remain blocked without accepted evidence");
+assertInvariant(uptimeParserBridge.summary.reliableDpsStillBlocked === true, "uptime parser bridge must keep reliable gates blocked");
 assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
 assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
 assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
@@ -241,6 +252,12 @@ const report = {
     { id: "uptime-local-exhaustion-safe", status: "passed", value: uptimeLocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "uptime-local-reliable-not-proven", status: "passed", value: uptimeLocalExhaustionConclusion.summary.uptimeReliableProven },
     { id: "uptime-local-user-scenario-separated", status: "passed", value: uptimeLocalExhaustionConclusion.summary.userScenarioSeparated },
+    { id: "uptime-source-packet-safe", status: "passed", value: uptimeSourcePacket.summary.canModifyReliableDps },
+    { id: "uptime-source-packet-bridge-required", status: "passed", value: uptimeSourcePacket.summary.parserBridgeRequired },
+    { id: "uptime-source-packet-field", status: "passed", value: uptimeSourcePacket.requiredClaim?.field },
+    { id: "uptime-parser-bridge-safe", status: "passed", value: uptimeParserBridge.summary.canModifyReliableDps },
+    { id: "uptime-parser-bridge-blocked-real", status: "passed", value: uptimeParserBridge.summary.bridgeReady },
+    { id: "uptime-parser-bridge-gates-blocked", status: "passed", value: uptimeParserBridge.summary.reliableDpsStillBlocked },
     { id: "user-whatif-contract-safe", status: "passed", value: userWhatIfContract.summary.canModifyReliableDps },
     { id: "user-whatif-contract-checks", status: "passed", value: userWhatIfContract.summary.failedChecks },
     { id: "user-whatif-contract-50pct", status: "passed", value: userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps },
@@ -276,6 +293,8 @@ assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableD
 assertInvariant(optimizerPlan.sf33TriggerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger source packet");
 assertInvariant(optimizerPlan.sf33TriggerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger parser bridge");
 assertInvariant(optimizerPlan.uptimeLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime local exhaustion conclusion");
+assertInvariant(optimizerPlan.uptimeSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime source packet");
+assertInvariant(optimizerPlan.uptimeParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime parser bridge");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 

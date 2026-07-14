@@ -1110,3 +1110,16 @@ Build de reference :
   - plan optimiseur et site : nouveaux panneaux `Packet SF_33` et `Bridge SF_33`
   - reliableDps modifiable : `false`
   - decision : cadrer le trigger SF33 comme preuve source-backed obligatoire; aucune activation SF33 fiable sans preuve acceptee
+- packet et bridge parser uptime ajoutes
+  - script packet : `work/diablo4-data-exporter/scripts/build-uptime-source-packet.js`
+  - script bridge : `work/diablo4-data-exporter/scripts/build-uptime-parser-bridge.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-uptime-parser-bridge.js`
+  - rapports generes : `outputs/diablo4-uptime-source-packet/uptime-source-packet.json`, `outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json`
+  - suite optimiseur : `39` etapes, statut `target-optimizer-suite-ok`
+  - packet reel : bloque, `0` preuve acceptee, `5` signaux locaux rejetes
+  - bridge reel : bloque, `0` mapping
+  - test synthetique : uptime `0.5` OK, uptime `1.75` rejetee
+  - gates DPS fiables : bloquees
+  - plan optimiseur et site : nouveaux panneaux `Packet uptime` et `Bridge uptime`
+  - reliableDps modifiable : `false`
+  - decision : exiger une uptime numerique source-backed et bornee `0..1`; une uptime seule peut alimenter le what-if controle mais pas le ranking fiable
