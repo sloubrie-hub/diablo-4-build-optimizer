@@ -10966,3 +10966,52 @@ Validation :
 Decision :
 
 La readiness combinee rend le statut du delta lisible en un seul endroit. Elle ne remplace pas les gates fiables : meme si les trois bridges deviennent prets, la promotion du DPS fiable devra passer par une etape de revue/recalcul separee. Sur les donnees reelles actuelles, le delta reste bloque.
+
+## Revue promotion delta
+
+Une revue de promotion explicite a ete ajoutee apres la readiness combinee. Elle formalise la derniere barriere avant toute modification future de `reliableDps`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-promotion-review.js`
+- `work/diablo4-data-exporter/scripts/test-delta-promotion-review.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-promotion-review/delta-promotion-review.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- delta bloque : `48960`
+- revue reelle : bloquee
+- checks : `4`
+- checks echoues : `1` (`all-bridges-ready`)
+- `readyForManualReview false`
+- `canUseForUserWhatIf false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `readyForManualReview true`, `canUseForUserWhatIf true`, mais `canUseForReliableDps false`, `canUseForRanking false`, `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `43` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le rapport, le test, la suite, le plan optimiseur et le site
+- test revue synthetique : `delta-promotion-review-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `43` etapes
+- endpoints site verifies :
+  - `/site/`
+  - `/outputs/diablo4-delta-promotion-review/delta-promotion-review.json`
+  - `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+  - `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- site : nouveau panneau `Revue promotion`
+
+Decision :
+
+La revue de promotion verrouille la frontiere entre readiness et promotion. Meme avec trois bridges synthetiques prets, la sortie reste `promotionReady false` et `reliableDps` ne peut pas etre modifie. Une future promotion devra etre une etape separee, source-backed, avec recalcul explicite des gates.

@@ -36,6 +36,7 @@ const uptimeLocalExhaustionConclusionFile = "outputs/diablo4-uptime-local-exhaus
 const uptimeSourcePacketFile = "outputs/diablo4-uptime-source-packet/uptime-source-packet.json";
 const uptimeParserBridgeFile = "outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json";
 const deltaBridgeReadinessFile = "outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json";
+const deltaPromotionReviewFile = "outputs/diablo4-delta-promotion-review/delta-promotion-review.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -499,6 +500,7 @@ const uptimeLocalExhaustionConclusion = readOptionalJson(uptimeLocalExhaustionCo
 const uptimeSourcePacket = readOptionalJson(uptimeSourcePacketFile);
 const uptimeParserBridge = readOptionalJson(uptimeParserBridgeFile);
 const deltaBridgeReadiness = readOptionalJson(deltaBridgeReadinessFile);
+const deltaPromotionReview = readOptionalJson(deltaPromotionReviewFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -584,6 +586,7 @@ const report = {
     uptimeSourcePacketFile: uptimeSourcePacket ? uptimeSourcePacketFile : null,
     uptimeParserBridgeFile: uptimeParserBridge ? uptimeParserBridgeFile : null,
     deltaBridgeReadinessFile: deltaBridgeReadiness ? deltaBridgeReadinessFile : null,
+    deltaPromotionReviewFile: deltaPromotionReview ? deltaPromotionReviewFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -874,6 +877,15 @@ const report = {
         blockedGateIds: deltaBridgeReadiness.blockedGateIds,
         requiredInvariants: deltaBridgeReadiness.requiredInvariants,
         safeguards: deltaBridgeReadiness.safeguards,
+      }
+    : null,
+  deltaPromotionReview: deltaPromotionReview
+    ? {
+        file: deltaPromotionReviewFile,
+        summary: deltaPromotionReview.summary,
+        reviewChecks: deltaPromotionReview.reviewChecks,
+        promotionPolicy: deltaPromotionReview.promotionPolicy,
+        safeguards: deltaPromotionReview.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

@@ -1134,3 +1134,13 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Readiness delta`
   - reliableDps modifiable : `false`
   - decision : unifier la lecture des trois bridges; meme un ensemble complet ouvre seulement une revue manuelle separee, pas une promotion automatique
+- revue promotion delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-promotion-review.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-promotion-review.js`
+  - rapport genere : `outputs/diablo4-delta-promotion-review/delta-promotion-review.json`
+  - suite optimiseur : `43` etapes, statut `target-optimizer-suite-ok`
+  - revue reelle : bloquee, `1` check echoue (`all-bridges-ready`)
+  - test synthetique : revue manuelle ouverte, what-if autorisable, reliable DPS/ranking/promotion toujours `false`
+  - plan optimiseur et site : nouveau panneau `Revue promotion`
+  - reliableDps modifiable : `false`
+  - decision : formaliser la derniere barriere avant promotion; aucune readiness ne peut modifier `reliableDps` sans future etape source-backed de recalcul des gates

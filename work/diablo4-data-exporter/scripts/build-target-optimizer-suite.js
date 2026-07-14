@@ -44,6 +44,8 @@ const generationSteps = [
   "test-uptime-parser-bridge.js",
   "build-delta-bridge-readiness.js",
   "test-delta-bridge-readiness.js",
+  "build-delta-promotion-review.js",
+  "test-delta-promotion-review.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -99,6 +101,7 @@ const uptimeLocalExhaustionConclusion = readJson("outputs/diablo4-uptime-local-e
 const uptimeSourcePacket = readJson("outputs/diablo4-uptime-source-packet/uptime-source-packet.json");
 const uptimeParserBridge = readJson("outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json");
 const deltaBridgeReadiness = readJson("outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json");
+const deltaPromotionReview = readJson("outputs/diablo4-delta-promotion-review/delta-promotion-review.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
@@ -173,6 +176,10 @@ assertInvariant(deltaBridgeReadiness.summary.canModifyReliableDps === false, "de
 assertInvariant(deltaBridgeReadiness.summary.allBridgeReady === false, "real delta bridge readiness should remain blocked without all evidence");
 assertInvariant(deltaBridgeReadiness.summary.blockedGates === 3, "real delta bridge readiness should keep the three gates blocked");
 assertInvariant(deltaBridgeReadiness.summary.reliableDpsStillBlocked === true, "delta bridge readiness must keep reliable gates blocked");
+assertInvariant(deltaPromotionReview.summary.canModifyReliableDps === false, "delta promotion review must not modify reliable DPS");
+assertInvariant(deltaPromotionReview.summary.readyForManualReview === false, "real delta promotion review should remain blocked");
+assertInvariant(deltaPromotionReview.summary.canUseForReliableDps === false, "delta promotion review must not allow reliable DPS");
+assertInvariant(deltaPromotionReview.summary.promotionReady === false, "delta promotion review must not auto-promote");
 assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
 assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
 assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
@@ -269,6 +276,10 @@ const report = {
     { id: "delta-bridge-readiness-blocked-real", status: "passed", value: deltaBridgeReadiness.summary.allBridgeReady },
     { id: "delta-bridge-readiness-blocked-gates", status: "passed", value: deltaBridgeReadiness.summary.blockedGates },
     { id: "delta-bridge-readiness-gates-blocked", status: "passed", value: deltaBridgeReadiness.summary.reliableDpsStillBlocked },
+    { id: "delta-promotion-review-safe", status: "passed", value: deltaPromotionReview.summary.canModifyReliableDps },
+    { id: "delta-promotion-review-blocked-real", status: "passed", value: deltaPromotionReview.summary.readyForManualReview },
+    { id: "delta-promotion-review-reliable-blocked", status: "passed", value: deltaPromotionReview.summary.canUseForReliableDps },
+    { id: "delta-promotion-review-not-auto-promoted", status: "passed", value: deltaPromotionReview.summary.promotionReady },
     { id: "user-whatif-contract-safe", status: "passed", value: userWhatIfContract.summary.canModifyReliableDps },
     { id: "user-whatif-contract-checks", status: "passed", value: userWhatIfContract.summary.failedChecks },
     { id: "user-whatif-contract-50pct", status: "passed", value: userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps },
@@ -307,6 +318,7 @@ assertInvariant(optimizerPlan.uptimeLocalExhaustionConclusion?.summary?.canModif
 assertInvariant(optimizerPlan.uptimeSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime source packet");
 assertInvariant(optimizerPlan.uptimeParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime parser bridge");
 assertInvariant(optimizerPlan.deltaBridgeReadiness?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta bridge readiness");
+assertInvariant(optimizerPlan.deltaPromotionReview?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta promotion review");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
