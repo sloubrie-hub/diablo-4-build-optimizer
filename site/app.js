@@ -28,6 +28,7 @@ const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-b
 const UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const UPTIME_SOURCE_PACKET_URL = "../outputs/diablo4-uptime-source-packet/uptime-source-packet.json";
 const UPTIME_PARSER_BRIDGE_URL = "../outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json";
+const DELTA_BRIDGE_READINESS_URL = "../outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -64,6 +65,7 @@ const state = {
   uptimeLocalExhaustionConclusion: null,
   uptimeSourcePacket: null,
   uptimeParserBridge: null,
+  deltaBridgeReadiness: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -135,6 +137,7 @@ async function boot() {
     await loadUptimeLocalExhaustionConclusion();
     await loadUptimeSourcePacket();
     await loadUptimeParserBridge();
+    await loadDeltaBridgeReadiness();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -423,6 +426,10 @@ async function loadUptimeParserBridge() {
   state.uptimeParserBridge = await fetchOptionalJson(UPTIME_PARSER_BRIDGE_URL);
 }
 
+async function loadDeltaBridgeReadiness() {
+  state.deltaBridgeReadiness = await fetchOptionalJson(DELTA_BRIDGE_READINESS_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -508,6 +515,7 @@ function renderTargetOptimizerPlan() {
     ${renderUptimeLocalExhaustionConclusion(state.uptimeLocalExhaustionConclusion ?? plan.uptimeLocalExhaustionConclusion)}
     ${renderUptimeSourcePacket(state.uptimeSourcePacket ?? plan.uptimeSourcePacket)}
     ${renderUptimeParserBridge(state.uptimeParserBridge ?? plan.uptimeParserBridge)}
+    ${renderDeltaBridgeReadiness(state.deltaBridgeReadiness ?? plan.deltaBridgeReadiness)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -1519,6 +1527,51 @@ function renderUptimeParserBridge(report) {
             <p>${item.sourceEvidenceId}</p>
           </article>
         `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaBridgeReadiness(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const gates = report.gates ?? [];
+  const invariants = report.requiredInvariants ?? [];
+  return `
+    <div class="bonus-selector-proof delta-bridge-readiness">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Readiness delta</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.allBridgeReady ? "positive" : "blocked"}">
+          ${summary.allBridgeReady ? "revue requise" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Strict", formatNumber(summary.strictDps))}
+        ${targetMetric("Delta", `+${formatNumber(summary.blockedDeltaDps)}`)}
+        ${targetMetric("Gates pretes", `${formatNumber(summary.readyGates)}/${formatNumber(summary.gates)}`)}
+        ${targetMetric("Bloquees", summary.blockedGates)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>What-if ${summary.canUseForUserWhatIf ? "possible" : "bloque"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "manuelle/interdite"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${gates.map((gate) => `
+          <article>
+            <span>${gate.status}</span>
+            <strong>${gate.title}</strong>
+            <p>${gate.requiredMapping} - ${gate.assessment ?? "n/a"}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${invariants.map((item) => `<span class="blocked">${item}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

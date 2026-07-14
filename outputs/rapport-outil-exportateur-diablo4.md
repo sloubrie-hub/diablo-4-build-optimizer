@@ -10920,3 +10920,49 @@ Validation :
 Decision :
 
 Une uptime source-backed doit etre numerique, bornee et revue avant mapping. Meme validee, elle reste insuffisante pour promouvoir le delta `48960` tant que `SF_32` et `SF_33` ne sont pas aussi prouves. Elle peut seulement alimenter un what-if controle; `reliableDps` reste strict-only.
+
+## Readiness bridge delta
+
+Un rapport de consolidation des trois bridges delta a ete ajoute. Il agrège `SF_32`, `SF_33` et `uptime` pour savoir si le delta `48960` est pret pour une revue de promotion separee.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-bridge-readiness.js`
+- `work/diablo4-data-exporter/scripts/test-delta-bridge-readiness.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- delta bloque : `48960`
+- bridges reels prets : `0 / 3`
+- gates bloquees : `sf32-owner`, `sf33-trigger`, `uptime`
+- `allBridgeReady false`
+- `canUseForUserWhatIf false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `3 / 3` bridges prets, `canUseForUserWhatIf true`, `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `41` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le rapport, le test, la suite, le plan optimiseur et le site
+- test bridge synthetique : `delta-bridge-readiness-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `41` etapes
+- endpoints site verifies :
+  - `/site/`
+  - `/outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json`
+  - `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+  - `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- site : nouveau panneau `Readiness delta`
+
+Decision :
+
+La readiness combinee rend le statut du delta lisible en un seul endroit. Elle ne remplace pas les gates fiables : meme si les trois bridges deviennent prets, la promotion du DPS fiable devra passer par une etape de revue/recalcul separee. Sur les donnees reelles actuelles, le delta reste bloque.

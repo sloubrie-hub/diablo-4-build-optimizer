@@ -1123,3 +1123,14 @@ Build de reference :
   - plan optimiseur et site : nouveaux panneaux `Packet uptime` et `Bridge uptime`
   - reliableDps modifiable : `false`
   - decision : exiger une uptime numerique source-backed et bornee `0..1`; une uptime seule peut alimenter le what-if controle mais pas le ranking fiable
+- readiness bridge delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-bridge-readiness.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-bridge-readiness.js`
+  - rapport genere : `outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json`
+  - suite optimiseur : `41` etapes, statut `target-optimizer-suite-ok`
+  - bridges reels prets : `0 / 3`
+  - gates bloquees : `sf32-owner`, `sf33-trigger`, `uptime`
+  - test synthetique : `3 / 3` bridges prets, what-if autorisable, promotion fiable toujours `false`
+  - plan optimiseur et site : nouveau panneau `Readiness delta`
+  - reliableDps modifiable : `false`
+  - decision : unifier la lecture des trois bridges; meme un ensemble complet ouvre seulement une revue manuelle separee, pas une promotion automatique

@@ -35,6 +35,7 @@ const sf33TriggerParserBridgeFile = "outputs/diablo4-sf33-trigger-parser-bridge/
 const uptimeLocalExhaustionConclusionFile = "outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const uptimeSourcePacketFile = "outputs/diablo4-uptime-source-packet/uptime-source-packet.json";
 const uptimeParserBridgeFile = "outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json";
+const deltaBridgeReadinessFile = "outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -497,6 +498,7 @@ const sf33TriggerParserBridge = readOptionalJson(sf33TriggerParserBridgeFile);
 const uptimeLocalExhaustionConclusion = readOptionalJson(uptimeLocalExhaustionConclusionFile);
 const uptimeSourcePacket = readOptionalJson(uptimeSourcePacketFile);
 const uptimeParserBridge = readOptionalJson(uptimeParserBridgeFile);
+const deltaBridgeReadiness = readOptionalJson(deltaBridgeReadinessFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -581,6 +583,7 @@ const report = {
     uptimeLocalExhaustionConclusionFile: uptimeLocalExhaustionConclusion ? uptimeLocalExhaustionConclusionFile : null,
     uptimeSourcePacketFile: uptimeSourcePacket ? uptimeSourcePacketFile : null,
     uptimeParserBridgeFile: uptimeParserBridge ? uptimeParserBridgeFile : null,
+    deltaBridgeReadinessFile: deltaBridgeReadiness ? deltaBridgeReadinessFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -861,6 +864,16 @@ const report = {
         mappings: uptimeParserBridge.mappings,
         requiredInvariants: uptimeParserBridge.requiredInvariants,
         safeguards: uptimeParserBridge.safeguards,
+      }
+    : null,
+  deltaBridgeReadiness: deltaBridgeReadiness
+    ? {
+        file: deltaBridgeReadinessFile,
+        summary: deltaBridgeReadiness.summary,
+        gates: deltaBridgeReadiness.gates,
+        blockedGateIds: deltaBridgeReadiness.blockedGateIds,
+        requiredInvariants: deltaBridgeReadiness.requiredInvariants,
+        safeguards: deltaBridgeReadiness.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios
