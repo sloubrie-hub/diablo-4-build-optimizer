@@ -1144,3 +1144,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Revue promotion`
   - reliableDps modifiable : `false`
   - decision : formaliser la derniere barriere avant promotion; aucune readiness ne peut modifier `reliableDps` sans future etape source-backed de recalcul des gates
+- package intake preuves delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-intake-package.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-intake-package.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-intake-package/delta-evidence-intake-package.json`
+  - suite optimiseur : `45` etapes, statut `target-optimizer-suite-ok`
+  - templates : `3 / 3`
+  - taches ouvertes : `3`
+  - preuves acceptees : `0`
+  - target intake : `inputs/external-evidence-candidates.json`
+  - bridges reels prets : `0 / 3`
+  - review promotion : `1` check echoue (`all-bridges-ready`)
+  - plan optimiseur et site : nouveau panneau `Package intake`
+  - reliableDps modifiable : `false`
+  - decision : centraliser la collecte/revue des preuves SF32, SF33 et uptime; les templates restent `pending` et ne sont pas des preuves

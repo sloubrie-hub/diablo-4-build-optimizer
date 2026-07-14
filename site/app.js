@@ -30,6 +30,7 @@ const UPTIME_SOURCE_PACKET_URL = "../outputs/diablo4-uptime-source-packet/uptime
 const UPTIME_PARSER_BRIDGE_URL = "../outputs/diablo4-uptime-parser-bridge/uptime-parser-bridge.json";
 const DELTA_BRIDGE_READINESS_URL = "../outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json";
 const DELTA_PROMOTION_REVIEW_URL = "../outputs/diablo4-delta-promotion-review/delta-promotion-review.json";
+const DELTA_EVIDENCE_INTAKE_PACKAGE_URL = "../outputs/diablo4-delta-evidence-intake-package/delta-evidence-intake-package.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -68,6 +69,7 @@ const state = {
   uptimeParserBridge: null,
   deltaBridgeReadiness: null,
   deltaPromotionReview: null,
+  deltaEvidenceIntakePackage: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -141,6 +143,7 @@ async function boot() {
     await loadUptimeParserBridge();
     await loadDeltaBridgeReadiness();
     await loadDeltaPromotionReview();
+    await loadDeltaEvidenceIntakePackage();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -437,6 +440,10 @@ async function loadDeltaPromotionReview() {
   state.deltaPromotionReview = await fetchOptionalJson(DELTA_PROMOTION_REVIEW_URL);
 }
 
+async function loadDeltaEvidenceIntakePackage() {
+  state.deltaEvidenceIntakePackage = await fetchOptionalJson(DELTA_EVIDENCE_INTAKE_PACKAGE_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -524,6 +531,7 @@ function renderTargetOptimizerPlan() {
     ${renderUptimeParserBridge(state.uptimeParserBridge ?? plan.uptimeParserBridge)}
     ${renderDeltaBridgeReadiness(state.deltaBridgeReadiness ?? plan.deltaBridgeReadiness)}
     ${renderDeltaPromotionReview(state.deltaPromotionReview ?? plan.deltaPromotionReview)}
+    ${renderDeltaEvidenceIntakePackage(state.deltaEvidenceIntakePackage ?? plan.deltaEvidenceIntakePackage)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -1623,6 +1631,51 @@ function renderDeltaPromotionReview(report) {
         <span>Reliable avant revue ${formatNumber(policy.reliableDpsBeforeReview)}</span>
         <span>What-if seul ${formatNumber(policy.whatIfOnlyDps)}</span>
         <span>Etape future ${policy.requiredFutureStep ?? "n/a"}</span>
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaEvidenceIntakePackage(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const rows = report.reviewRows ?? [];
+  const usage = report.usage ?? [];
+  return `
+    <div class="bonus-selector-proof delta-evidence-intake-package">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Package intake</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.packageReady ? "positive" : "blocked"}">
+          ${summary.packageReady ? "templates prets" : "incomplet"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Templates", `${formatNumber(summary.templates)}/${formatNumber(summary.tasks)}`)}
+        ${targetMetric("Ouvertes", summary.openTasks)}
+        ${targetMetric("Preuves acceptees", summary.acceptedExternalEvidence)}
+        ${targetMetric("Fichier", summary.targetFile ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+        <span>Bridges ${formatNumber(summary.bridgeReadyGates)}/${formatNumber(summary.bridgeReadyGates + summary.bridgeBlockedGates)}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${rows.map((row) => `
+          <article>
+            <span>${row.status}</span>
+            <strong>${row.title}</strong>
+            <p>${(row.mustContain ?? []).join(" + ")} | rejeter: ${(row.rejects ?? []).join(", ")}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${usage.map((item) => `<span class="blocked">${item}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

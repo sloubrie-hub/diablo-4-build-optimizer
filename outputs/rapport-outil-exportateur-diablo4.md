@@ -11015,3 +11015,47 @@ Validation :
 Decision :
 
 La revue de promotion verrouille la frontiere entre readiness et promotion. Meme avec trois bridges synthetiques prets, la sortie reste `promotionReady false` et `reliableDps` ne peut pas etre modifie. Une future promotion devra etre une etape separee, source-backed, avec recalcul explicite des gates.
+
+## Package intake preuves delta
+
+Un package de collecte/revue a ete ajoute pour transformer les trois taches delta ouvertes en templates utilisables dans `inputs/external-evidence-candidates.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-intake-package.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-intake-package.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-intake-package/delta-evidence-intake-package.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- delta bloque : `48960`
+- templates : `3`
+- taches ouvertes : `3`
+- preuves acceptees : `0`
+- bridges reels prets : `0 / 3`
+- gates bloquees : `sf32-owner`, `sf33-trigger`, `uptime`
+- target intake : `inputs/external-evidence-candidates.json`
+- `packageReady true`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `45` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le package, le test, la suite, le plan optimiseur et le site
+- test package : `delta-evidence-intake-package-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `45` etapes
+- plan optimiseur : section `deltaEvidenceIntakePackage` presente
+- site : nouveau panneau `Package intake`
+
+Decision :
+
+Le package centralise la collecte des preuves SF32, SF33 et uptime. Les templates sont volontairement en statut `pending` et ne sont pas des preuves. Une entree ne pourra aider un bridge qu'apres source exacte, revue explicite et acceptation; elle ne peut pas modifier `reliableDps` directement.
