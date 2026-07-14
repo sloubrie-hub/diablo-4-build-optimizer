@@ -1254,3 +1254,19 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Patch brouillon`
   - reliableDps modifiable : `false`
   - decision : transformer le formulaire rempli en brouillon auditable seulement en dry-run; le formulaire vide bloque encore la chaine
+- audit patch brouillon preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-evidence-filled-draft.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-filled-draft-audit.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-filled-draft-audit/delta-evidence-filled-draft-audit.json`
+  - suite optimiseur : `61` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - audit reel : `readyForPreview false`, `auditReadyForIntake false`
+  - champs manquants reel : `7`
+  - placeholders restants reel : `7`
+  - bloqueurs structurels reel : `0`
+  - bloqueurs revue reel : `1`
+  - test synthetique : `readyForPreview true`, `reviewBlockers 1`, `acceptedForBridge false`
+  - ecriture intake reel : `false`
+  - plan optimiseur et site : nouveau panneau `Audit patch`
+  - reliableDps modifiable : `false`
+  - decision : autoriser seulement une preview pending quand le brouillon patch est complet; la revue et la promotion restent separees

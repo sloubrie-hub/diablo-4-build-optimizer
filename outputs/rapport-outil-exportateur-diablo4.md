@@ -11377,3 +11377,50 @@ Validation :
 Decision :
 
 Le patcher ferme la boucle formulaire -> brouillon auditable, mais uniquement en dry-run. Le cas reel reste bloque tant que le formulaire ne contient aucune source. Un brouillon complet pourra etre audite puis passe en preview, mais ne deviendra pas automatiquement une preuve approuvee ni une promotion de `reliableDps`.
+
+## Audit patch brouillon preuve delta
+
+Un audit dedie du brouillon patch a ete ajoute pour verifier la transition vers une preview intake sans copier dans l'intake reel.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-evidence-filled-draft.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-filled-draft-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-filled-draft-audit/delta-evidence-filled-draft-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- claim : `sf32-field-ownership` / `selector:949`
+- audit reel : `readyForPreview false`
+- audit intake reel : `auditReadyForIntake false`
+- champs manquants reel : `7`
+- placeholders restants reel : `7`
+- bloqueurs structurels reel : `0`
+- bloqueurs revue reel : `1`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `readyForPreview true`, `reviewBlockers 1`, mais bridge/DPS fiable/ranking/promotion restent `false`
+- suite optimiseur : `target-optimizer-suite-ok`, `61` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit, le test, la suite, le plan optimiseur et le site
+- test audit : `delta-evidence-filled-draft-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `61` etapes
+- plan optimiseur : section `deltaEvidenceFilledDraftAudit` presente
+- site : nouveau panneau `Audit patch`
+
+Decision :
+
+L'audit patch separe clairement trois etats : incomplet, pret pour preview pending, et approuve. Le cas reel reste incomplet. Meme dans le cas synthetique complet, la sortie n'accepte pas de bridge, ne modifie pas `reliableDps`, et ne declenche aucune promotion.

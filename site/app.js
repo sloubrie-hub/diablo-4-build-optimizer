@@ -38,6 +38,7 @@ const DELTA_MANUAL_PROMOTION_GATE_URL = "../outputs/diablo4-delta-manual-promoti
 const DELTA_HUMAN_ACTION_PLAN_URL = "../outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json";
 const DELTA_EVIDENCE_FILL_FORM_URL = "../outputs/diablo4-delta-evidence-fill-form/delta-evidence-fill-form.json";
 const DELTA_EVIDENCE_FILLED_DRAFT_URL = "../outputs/diablo4-delta-evidence-filled-draft/delta-evidence-filled-draft.json";
+const DELTA_EVIDENCE_FILLED_DRAFT_AUDIT_URL = "../outputs/diablo4-delta-evidence-filled-draft-audit/delta-evidence-filled-draft-audit.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -84,6 +85,7 @@ const state = {
   deltaHumanActionPlan: null,
   deltaEvidenceFillForm: null,
   deltaEvidenceFilledDraft: null,
+  deltaEvidenceFilledDraftAudit: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -165,6 +167,7 @@ async function boot() {
     await loadDeltaHumanActionPlan();
     await loadDeltaEvidenceFillForm();
     await loadDeltaEvidenceFilledDraft();
+    await loadDeltaEvidenceFilledDraftAudit();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -493,6 +496,10 @@ async function loadDeltaEvidenceFilledDraft() {
   state.deltaEvidenceFilledDraft = await fetchOptionalJson(DELTA_EVIDENCE_FILLED_DRAFT_URL);
 }
 
+async function loadDeltaEvidenceFilledDraftAudit() {
+  state.deltaEvidenceFilledDraftAudit = await fetchOptionalJson(DELTA_EVIDENCE_FILLED_DRAFT_AUDIT_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -588,6 +595,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaHumanActionPlan(state.deltaHumanActionPlan ?? plan.deltaHumanActionPlan)}
     ${renderDeltaEvidenceFillForm(state.deltaEvidenceFillForm ?? plan.deltaEvidenceFillForm)}
     ${renderDeltaEvidenceFilledDraft(state.deltaEvidenceFilledDraft ?? plan.deltaEvidenceFilledDraft)}
+    ${renderDeltaEvidenceFilledDraftAudit(state.deltaEvidenceFilledDraftAudit ?? plan.deltaEvidenceFilledDraftAudit)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -2052,6 +2060,50 @@ function renderDeltaEvidenceFilledDraft(report) {
       <div class="suite-invariant-list">
         ${missing.map((field) => `<span class="blocked">${field}</span>`).join("") || `<span class="positive">Aucun champ manquant</span>`}
         ${placeholders.map((field) => `<span class="blocked">${field}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaEvidenceFilledDraftAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const blockers = report.blockers ?? {};
+  const missing = blockers.missingFields ?? [];
+  const placeholders = blockers.placeholderFields ?? blockers.remainingPlaceholderFields ?? [];
+  const structural = blockers.structuralBlockers ?? [];
+  const review = blockers.reviewBlockers ?? [];
+  return `
+    <div class="bonus-selector-proof delta-evidence-filled-draft-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Audit patch</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForPreview ? "positive" : "blocked"}">
+          ${summary.readyForPreview ? "pret preview" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidat", summary.candidateId ?? "n/a")}
+        ${targetMetric("Audit intake", summary.auditReadyForIntake ? "pret" : "bloque")}
+        ${targetMetric("Structure", summary.structuralBlockers)}
+        ${targetMetric("Revue", summary.reviewBlockers)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ecriture intake ${summary.writesRealIntake ? "oui" : "non"}</span>
+        <span>Accepted bridge ${summary.acceptedForBridge ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${missing.map((field) => `<span class="blocked">${field}</span>`).join("")}
+        ${placeholders.map((field) => `<span class="blocked">${field}</span>`).join("")}
+        ${structural.map((field) => `<span class="blocked">${field}</span>`).join("")}
+        ${review.map((field) => `<span>${field}</span>`).join("")}
+        ${missing.length + placeholders.length + structural.length + review.length === 0 ? `<span class="positive">Aucun bloqueur</span>` : ""}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
