@@ -11242,3 +11242,49 @@ Validation :
 Decision :
 
 La porte manuelle evite de confondre action humaine et promotion fiable. Meme quand toutes les preconditions synthetiques sont reunies, la sortie conserve `promotionReady false`, `canUseForReliableDps false`, `canUseForRanking false` et `canModifyReliableDps false`. Une future promotion devra passer par une etape dediee de recalcul source-backed des gates.
+
+## Plan actions humaines delta
+
+Un plan d'actions humaines a ete ajoute pour rendre la prochaine action concrete : remplir le brouillon SF_32 avant toute copie ou revue.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-human-action-plan.js`
+- `work/diablo4-data-exporter/scripts/test-delta-human-action-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- claim : `sf32-field-ownership` / `selector:949`
+- placeholders : `7`
+- premiere action : remplir `source.title`
+- gates bloquees : `preview-merge-ready`, `draft-ready-for-intake`, `promotion-review-manual-ready`
+- actions : `5`
+- actions pretes : `0`
+- `previewMergeReady false`
+- `readyForHumanAction false`
+- `writesRealIntake false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `55` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le plan, le test, la suite, le plan optimiseur et le site
+- test plan : `delta-human-action-plan-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `55` etapes
+- plan optimiseur : section `deltaHumanActionPlan` presente
+- site : nouveau panneau `Actions manuelles`
+
+Decision :
+
+Le plan d'actions rend le blocage operationnel : la suite ne cherche plus une promotion, elle indique exactement quel champ remplir en premier. Le rapport reste non destructif, ne modifie pas l'intake reel, et garde `reliableDps`, le ranking et `promotionReady` bloques.

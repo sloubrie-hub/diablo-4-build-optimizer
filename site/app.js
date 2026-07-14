@@ -35,6 +35,7 @@ const DELTA_EVIDENCE_DRAFT_URL = "../outputs/diablo4-delta-evidence-draft/delta-
 const DELTA_EVIDENCE_DRAFT_AUDIT_URL = "../outputs/diablo4-delta-evidence-draft-audit/delta-evidence-draft-audit.json";
 const DELTA_EVIDENCE_INTAKE_UPDATE_PREVIEW_URL = "../outputs/diablo4-delta-evidence-intake-update-preview/delta-evidence-intake-update-preview.json";
 const DELTA_MANUAL_PROMOTION_GATE_URL = "../outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json";
+const DELTA_HUMAN_ACTION_PLAN_URL = "../outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -78,6 +79,7 @@ const state = {
   deltaEvidenceDraftAudit: null,
   deltaEvidenceIntakeUpdatePreview: null,
   deltaManualPromotionGate: null,
+  deltaHumanActionPlan: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -156,6 +158,7 @@ async function boot() {
     await loadDeltaEvidenceDraftAudit();
     await loadDeltaEvidenceIntakeUpdatePreview();
     await loadDeltaManualPromotionGate();
+    await loadDeltaHumanActionPlan();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -472,6 +475,10 @@ async function loadDeltaManualPromotionGate() {
   state.deltaManualPromotionGate = await fetchOptionalJson(DELTA_MANUAL_PROMOTION_GATE_URL);
 }
 
+async function loadDeltaHumanActionPlan() {
+  state.deltaHumanActionPlan = await fetchOptionalJson(DELTA_HUMAN_ACTION_PLAN_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -564,6 +571,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaEvidenceDraftAudit(state.deltaEvidenceDraftAudit ?? plan.deltaEvidenceDraftAudit)}
     ${renderDeltaEvidenceIntakeUpdatePreview(state.deltaEvidenceIntakeUpdatePreview ?? plan.deltaEvidenceIntakeUpdatePreview)}
     ${renderDeltaManualPromotionGate(state.deltaManualPromotionGate ?? plan.deltaManualPromotionGate)}
+    ${renderDeltaHumanActionPlan(state.deltaHumanActionPlan ?? plan.deltaHumanActionPlan)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -1898,6 +1906,52 @@ function renderDeltaManualPromotionGate(report) {
       </div>
       <div class="suite-invariant-list">
         ${nextSteps.map((step) => `<span>${step}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaHumanActionPlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const fillTasks = report.fillTasks ?? [];
+  const actions = report.orderedActions ?? [];
+  return `
+    <div class="bonus-selector-proof delta-human-action-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Actions manuelles</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForHumanAction ? "positive" : "blocked"}">
+          ${summary.readyForHumanAction ? "pret" : "a remplir"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidat", summary.candidateId ?? "n/a")}
+        ${targetMetric("Claim", `${summary.claimType ?? "n/a"} / ${summary.claimField ?? "n/a"}`)}
+        ${targetMetric("Placeholders", summary.placeholderFields)}
+        ${targetMetric("Actions", `${formatNumber(summary.readyActions)}/${formatNumber(summary.actions)}`)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ecriture intake ${summary.writesRealIntake ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Ranking ${summary.canUseForRanking ? "oui" : "non"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${fillTasks.map((task) => `
+          <article>
+            <span>${task.field}</span>
+            <strong>${task.hint}</strong>
+            <p>Obligatoire: ${task.required ? "oui" : "non"}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${actions.map((action) => `<span class="${action.status === "ready" ? "positive" : "blocked"}">${action.id}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

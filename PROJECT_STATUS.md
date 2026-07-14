@@ -1210,3 +1210,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Porte manuelle`
   - reliableDps modifiable : `false`
   - decision : centraliser l'etat d'action humaine sans jamais transformer readiness, preview ou revue en promotion fiable automatique
+- plan actions humaines delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-human-action-plan.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-human-action-plan.js`
+  - rapport genere : `outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json`
+  - suite optimiseur : `55` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - claim : `sf32-field-ownership` / `selector:949`
+  - placeholders : `7`
+  - premiere action : remplir `source.title`
+  - gates bloquees : `preview-merge-ready`, `draft-ready-for-intake`, `promotion-review-manual-ready`
+  - actions pretes : `0 / 5`
+  - plan optimiseur et site : nouveau panneau `Actions manuelles`
+  - reliableDps modifiable : `false`
+  - decision : rendre la prochaine action humaine explicite sans ecrire dans l'intake reel ni ouvrir de promotion
