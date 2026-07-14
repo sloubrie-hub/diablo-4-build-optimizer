@@ -1172,3 +1172,15 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Brouillon preuve`
   - reliableDps modifiable : `false`
   - decision : fournir un point de depart copiable pour la prochaine preuve sans ecrire dans l'intake reel ni ouvrir de promotion
+- audit brouillon preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-evidence-draft.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-draft-audit.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-draft-audit/delta-evidence-draft-audit.json`
+  - suite optimiseur : `49` etapes, statut `target-optimizer-suite-ok`
+  - brouillon reel : bloque, `7` placeholders, `0` bloqueur structurel, `1` bloqueur revue
+  - brouillon rempli test : copiable en `pending`, `0` placeholder, `0` bloqueur structurel, non accepte pour bridge
+  - `readyForIntake` reel : `false`
+  - `acceptedForBridge` reel : `false`
+  - plan optimiseur et site : nouveau panneau `Audit brouillon`
+  - reliableDps modifiable : `false`
+  - decision : valider les preuves candidates en dry-run avant copie dans l'intake reel; copiable ne veut pas dire approuve ni promouvable

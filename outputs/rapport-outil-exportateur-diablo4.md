@@ -11105,3 +11105,46 @@ Validation :
 Decision :
 
 Le brouillon rend la prochaine action explicite sans affaiblir les gates. Il produit un candidat copiable et un fichier dry-run, mais tant que les placeholders ne sont pas remplaces par une source exacte et que la revue reste `pending`, aucune preuve n'est acceptee et `reliableDps` reste intouchable.
+
+## Audit brouillon preuve delta
+
+Un audit dry-run du brouillon a ete ajoute pour verifier une preuve candidate avant toute copie dans `inputs/external-evidence-candidates.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-evidence-draft.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-draft-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-draft-audit/delta-evidence-draft-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- brouillon reel : `1` candidat, `0` accepte, `1` pending
+- placeholders reel : `7`
+- bloqueurs structurels reel : `0`
+- bloqueurs revue reel : `1`
+- `readyForIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test brouillon rempli : `readyForIntake true`, `acceptedForBridge false`
+- suite optimiseur : `target-optimizer-suite-ok`, `49` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit, le test, la suite, le plan optimiseur et le site
+- test audit : `delta-evidence-draft-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `49` etapes
+- plan optimiseur : section `deltaEvidenceDraftAudit` presente
+- site : nouveau panneau `Audit brouillon`
+- controle important : l'audit ne modifie pas `inputs/external-evidence-candidates.json`
+
+Decision :
+
+L'audit separe clairement `copiable en pending` de `approved`. Un brouillon rempli sans placeholders ni bloqueurs structurels peut etre copie dans l'intake reel, mais il reste non accepte tant que la revue manuelle n'est pas faite. Meme une preuve acceptee reste intake-only et ne peut pas modifier `reliableDps` sans bridge et gates dedies.
