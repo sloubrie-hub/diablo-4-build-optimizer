@@ -34,6 +34,7 @@ const DELTA_EVIDENCE_INTAKE_PACKAGE_URL = "../outputs/diablo4-delta-evidence-int
 const DELTA_EVIDENCE_DRAFT_URL = "../outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json";
 const DELTA_EVIDENCE_DRAFT_AUDIT_URL = "../outputs/diablo4-delta-evidence-draft-audit/delta-evidence-draft-audit.json";
 const DELTA_EVIDENCE_INTAKE_UPDATE_PREVIEW_URL = "../outputs/diablo4-delta-evidence-intake-update-preview/delta-evidence-intake-update-preview.json";
+const DELTA_MANUAL_PROMOTION_GATE_URL = "../outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -76,6 +77,7 @@ const state = {
   deltaEvidenceDraft: null,
   deltaEvidenceDraftAudit: null,
   deltaEvidenceIntakeUpdatePreview: null,
+  deltaManualPromotionGate: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -153,6 +155,7 @@ async function boot() {
     await loadDeltaEvidenceDraft();
     await loadDeltaEvidenceDraftAudit();
     await loadDeltaEvidenceIntakeUpdatePreview();
+    await loadDeltaManualPromotionGate();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -465,6 +468,10 @@ async function loadDeltaEvidenceIntakeUpdatePreview() {
   state.deltaEvidenceIntakeUpdatePreview = await fetchOptionalJson(DELTA_EVIDENCE_INTAKE_UPDATE_PREVIEW_URL);
 }
 
+async function loadDeltaManualPromotionGate() {
+  state.deltaManualPromotionGate = await fetchOptionalJson(DELTA_MANUAL_PROMOTION_GATE_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -556,6 +563,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaEvidenceDraft(state.deltaEvidenceDraft ?? plan.deltaEvidenceDraft)}
     ${renderDeltaEvidenceDraftAudit(state.deltaEvidenceDraftAudit ?? plan.deltaEvidenceDraftAudit)}
     ${renderDeltaEvidenceIntakeUpdatePreview(state.deltaEvidenceIntakeUpdatePreview ?? plan.deltaEvidenceIntakeUpdatePreview)}
+    ${renderDeltaManualPromotionGate(state.deltaManualPromotionGate ?? plan.deltaManualPromotionGate)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -1845,6 +1853,51 @@ function renderDeltaEvidenceIntakeUpdatePreview(report) {
         ${(blockers.placeholderFields ?? []).slice(0, 5).map((field) => `<span class="blocked">${field}</span>`).join("")}
         ${(blockers.structuralBlockers ?? []).map((blocker) => `<span class="blocked">${blocker}</span>`).join("")}
         ${(blockers.reviewBlockers ?? []).map((blocker) => `<span>${blocker}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaManualPromotionGate(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const checks = report.gateChecks ?? [];
+  const nextSteps = report.nextManualSteps ?? [];
+  return `
+    <div class="bonus-selector-proof delta-manual-promotion-gate">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Porte manuelle</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForHumanAction ? "positive" : "blocked"}">
+          ${summary.readyForHumanAction ? "action humaine" : "bloquee"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Checks", `${formatNumber((summary.checks ?? 0) - (summary.failedChecks ?? 0))}/${formatNumber(summary.checks)}`)}
+        ${targetMetric("Preview", summary.previewMergeReady ? "prete" : "bloquee")}
+        ${targetMetric("Draft", summary.draftReadyForIntake ? "copiable" : "bloque")}
+        ${targetMetric("Revue", summary.promotionReviewReady ? "ouverte" : "bloquee")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Ranking ${summary.canUseForRanking ? "oui" : "non"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${checks.map((check) => `
+          <article>
+            <span>${check.status}</span>
+            <strong>${check.id}</strong>
+            <p>${check.finding}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${nextSteps.map((step) => `<span>${step}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

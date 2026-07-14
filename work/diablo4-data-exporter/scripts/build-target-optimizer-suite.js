@@ -54,6 +54,8 @@ const generationSteps = [
   "test-delta-evidence-draft-audit.js",
   "preview-delta-evidence-intake-update.js",
   "test-delta-evidence-intake-update-preview.js",
+  "build-delta-manual-promotion-gate.js",
+  "test-delta-manual-promotion-gate.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -114,6 +116,7 @@ const deltaEvidenceIntakePackage = readJson("outputs/diablo4-delta-evidence-inta
 const deltaEvidenceDraft = readJson("outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json");
 const deltaEvidenceDraftAudit = readJson("outputs/diablo4-delta-evidence-draft-audit/delta-evidence-draft-audit.json");
 const deltaEvidenceIntakeUpdatePreview = readJson("outputs/diablo4-delta-evidence-intake-update-preview/delta-evidence-intake-update-preview.json");
+const deltaManualPromotionGate = readJson("outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
@@ -208,6 +211,10 @@ assertInvariant(deltaEvidenceIntakeUpdatePreview.summary.canModifyReliableDps ==
 assertInvariant(deltaEvidenceIntakeUpdatePreview.summary.previewMergeReady === false, "real delta evidence intake update preview should remain blocked with placeholders");
 assertInvariant(deltaEvidenceIntakeUpdatePreview.summary.writesRealIntake === false, "delta evidence intake update preview must never write real intake");
 assertInvariant(deltaEvidenceIntakeUpdatePreview.summary.promotionReady === false, "delta evidence intake update preview must not auto-promote");
+assertInvariant(deltaManualPromotionGate.summary.canModifyReliableDps === false, "delta manual promotion gate must not modify reliable DPS");
+assertInvariant(deltaManualPromotionGate.summary.readyForHumanAction === false, "real delta manual promotion gate should remain blocked");
+assertInvariant(deltaManualPromotionGate.summary.canUseForReliableDps === false, "delta manual promotion gate must not allow reliable DPS");
+assertInvariant(deltaManualPromotionGate.summary.promotionReady === false, "delta manual promotion gate must not auto-promote");
 assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
 assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
 assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
@@ -324,6 +331,10 @@ const report = {
     { id: "delta-evidence-intake-update-preview-blocked-real", status: "passed", value: deltaEvidenceIntakeUpdatePreview.summary.previewMergeReady },
     { id: "delta-evidence-intake-update-preview-no-write", status: "passed", value: deltaEvidenceIntakeUpdatePreview.summary.writesRealIntake },
     { id: "delta-evidence-intake-update-preview-not-auto-promoted", status: "passed", value: deltaEvidenceIntakeUpdatePreview.summary.promotionReady },
+    { id: "delta-manual-promotion-gate-safe", status: "passed", value: deltaManualPromotionGate.summary.canModifyReliableDps },
+    { id: "delta-manual-promotion-gate-blocked-real", status: "passed", value: deltaManualPromotionGate.summary.readyForHumanAction },
+    { id: "delta-manual-promotion-gate-reliable-blocked", status: "passed", value: deltaManualPromotionGate.summary.canUseForReliableDps },
+    { id: "delta-manual-promotion-gate-not-auto-promoted", status: "passed", value: deltaManualPromotionGate.summary.promotionReady },
     { id: "user-whatif-contract-safe", status: "passed", value: userWhatIfContract.summary.canModifyReliableDps },
     { id: "user-whatif-contract-checks", status: "passed", value: userWhatIfContract.summary.failedChecks },
     { id: "user-whatif-contract-50pct", status: "passed", value: userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps },
@@ -367,6 +378,7 @@ assertInvariant(optimizerPlan.deltaEvidenceIntakePackage?.summary?.canModifyReli
 assertInvariant(optimizerPlan.deltaEvidenceDraft?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence draft");
 assertInvariant(optimizerPlan.deltaEvidenceDraftAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence draft audit");
 assertInvariant(optimizerPlan.deltaEvidenceIntakeUpdatePreview?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence intake update preview");
+assertInvariant(optimizerPlan.deltaManualPromotionGate?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta manual promotion gate");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 

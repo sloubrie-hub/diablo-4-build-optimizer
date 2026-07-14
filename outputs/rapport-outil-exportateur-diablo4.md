@@ -11194,3 +11194,51 @@ Validation :
 Decision :
 
 La copie vers l'intake reel reste manuelle et visible. Le script refuse le brouillon actuel car il n'est pas pret, detecte les doublons, retire les marqueurs de brouillon dans la preview, et conserve `reviewer.status=pending`. Une preview prete ne vaut ni approbation, ni bridge, ni promotion fiable.
+
+## Porte promotion manuelle delta
+
+Une porte de promotion manuelle a ete ajoutee pour reunir l'etat preview, audit de brouillon et revue de promotion dans un seul rapport.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-manual-promotion-gate.js`
+- `work/diablo4-data-exporter/scripts/test-delta-manual-promotion-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- checks : `5`
+- checks echoues reel : `3`
+- checks echoues : `preview-merge-ready`, `draft-ready-for-intake`, `promotion-review-manual-ready`
+- `readyForHumanAction false`
+- `previewMergeReady false`
+- `draftReadyForIntake false`
+- `promotionReviewReady false`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `readyForHumanAction true`, mais DPS fiable/ranking/promotion toujours `false`
+- suite optimiseur : `target-optimizer-suite-ok`, `53` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la porte, le test, la suite, le plan optimiseur et le site
+- test porte : `delta-manual-promotion-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `53` etapes
+- plan optimiseur : section `deltaManualPromotionGate` presente
+- site : nouveau panneau `Porte manuelle`
+
+Decision :
+
+La porte manuelle evite de confondre action humaine et promotion fiable. Meme quand toutes les preconditions synthetiques sont reunies, la sortie conserve `promotionReady false`, `canUseForReliableDps false`, `canUseForRanking false` et `canModifyReliableDps false`. Une future promotion devra passer par une etape dediee de recalcul source-backed des gates.

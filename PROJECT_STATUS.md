@@ -1197,3 +1197,16 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Preview intake`
   - reliableDps modifiable : `false`
   - decision : produire une preview mergable separee et verifier les doublons avant toute copie manuelle dans l'intake reel
+- porte promotion manuelle delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-manual-promotion-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-manual-promotion-gate.js`
+  - rapport genere : `outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json`
+  - suite optimiseur : `53` etapes, statut `target-optimizer-suite-ok`
+  - porte reelle : bloquee, `3 / 5` checks echoues
+  - checks echoues : `preview-merge-ready`, `draft-ready-for-intake`, `promotion-review-manual-ready`
+  - test synthetique : action humaine ouverte, mais reliable DPS/ranking/promotion toujours `false`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Porte manuelle`
+  - reliableDps modifiable : `false`
+  - decision : centraliser l'etat d'action humaine sans jamais transformer readiness, preview ou revue en promotion fiable automatique
