@@ -31,6 +31,7 @@ const UPTIME_PARSER_BRIDGE_URL = "../outputs/diablo4-uptime-parser-bridge/uptime
 const DELTA_BRIDGE_READINESS_URL = "../outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json";
 const DELTA_PROMOTION_REVIEW_URL = "../outputs/diablo4-delta-promotion-review/delta-promotion-review.json";
 const DELTA_EVIDENCE_INTAKE_PACKAGE_URL = "../outputs/diablo4-delta-evidence-intake-package/delta-evidence-intake-package.json";
+const DELTA_EVIDENCE_DRAFT_URL = "../outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -70,6 +71,7 @@ const state = {
   deltaBridgeReadiness: null,
   deltaPromotionReview: null,
   deltaEvidenceIntakePackage: null,
+  deltaEvidenceDraft: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -144,6 +146,7 @@ async function boot() {
     await loadDeltaBridgeReadiness();
     await loadDeltaPromotionReview();
     await loadDeltaEvidenceIntakePackage();
+    await loadDeltaEvidenceDraft();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -444,6 +447,10 @@ async function loadDeltaEvidenceIntakePackage() {
   state.deltaEvidenceIntakePackage = await fetchOptionalJson(DELTA_EVIDENCE_INTAKE_PACKAGE_URL);
 }
 
+async function loadDeltaEvidenceDraft() {
+  state.deltaEvidenceDraft = await fetchOptionalJson(DELTA_EVIDENCE_DRAFT_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -532,6 +539,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaBridgeReadiness(state.deltaBridgeReadiness ?? plan.deltaBridgeReadiness)}
     ${renderDeltaPromotionReview(state.deltaPromotionReview ?? plan.deltaPromotionReview)}
     ${renderDeltaEvidenceIntakePackage(state.deltaEvidenceIntakePackage ?? plan.deltaEvidenceIntakePackage)}
+    ${renderDeltaEvidenceDraft(state.deltaEvidenceDraft ?? plan.deltaEvidenceDraft)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -1676,6 +1684,53 @@ function renderDeltaEvidenceIntakePackage(report) {
       </div>
       <div class="suite-invariant-list">
         ${usage.map((item) => `<span class="blocked">${item}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaEvidenceDraft(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const candidate = report.candidate ?? {};
+  const usage = report.usage ?? [];
+  const placeholderFields = report.placeholderFields ?? [];
+  return `
+    <div class="bonus-selector-proof delta-evidence-draft">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Brouillon preuve</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.draftReadyForCopy ? "positive" : "blocked"}">
+          ${summary.draftReadyForCopy ? "copiable" : "a remplir"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Template", summary.templateId ?? "n/a")}
+        ${targetMetric("Claim", `${summary.claimType ?? "n/a"} / ${summary.claimField ?? "n/a"}`)}
+        ${targetMetric("Placeholders", summary.placeholderFields)}
+        ${targetMetric("Statut revue", summary.reviewerStatus ?? "pending")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+        <span>Cible ${summary.targetFile ?? "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        <article>
+          <span>${candidate.id ?? "draft"}</span>
+          <strong>${candidate.source?.title ?? "source a renseigner"}</strong>
+          <p>${candidate.claim?.mapping ?? "mapping a renseigner"}</p>
+        </article>
+      </div>
+      <div class="suite-invariant-list">
+        ${placeholderFields.slice(0, 8).map((field) => `<span class="blocked">${field}</span>`).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${usage.map((item) => `<span>${item}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

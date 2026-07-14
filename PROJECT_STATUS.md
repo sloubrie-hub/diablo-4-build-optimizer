@@ -1158,3 +1158,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Package intake`
   - reliableDps modifiable : `false`
   - decision : centraliser la collecte/revue des preuves SF32, SF33 et uptime; les templates restent `pending` et ne sont pas des preuves
+- brouillon preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-draft.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-draft.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json`
+  - dry-run genere : `outputs/diablo4-delta-evidence-draft/external-evidence-candidates.draft.json`
+  - suite optimiseur : `47` etapes, statut `target-optimizer-suite-ok`
+  - template par defaut : `template-delta-proof-sf32-owner`
+  - candidat brouillon : `draft-delta-proof-sf32-owner`
+  - claim : `sf32-field-ownership` / `selector:949`
+  - placeholders restants : `7`
+  - intake reel : `0` candidat
+  - plan optimiseur et site : nouveau panneau `Brouillon preuve`
+  - reliableDps modifiable : `false`
+  - decision : fournir un point de depart copiable pour la prochaine preuve sans ecrire dans l'intake reel ni ouvrir de promotion

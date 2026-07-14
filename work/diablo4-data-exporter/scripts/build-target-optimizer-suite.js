@@ -48,6 +48,8 @@ const generationSteps = [
   "test-delta-promotion-review.js",
   "build-delta-evidence-intake-package.js",
   "test-delta-evidence-intake-package.js",
+  "build-delta-evidence-draft.js",
+  "test-delta-evidence-draft.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -105,6 +107,7 @@ const uptimeParserBridge = readJson("outputs/diablo4-uptime-parser-bridge/uptime
 const deltaBridgeReadiness = readJson("outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json");
 const deltaPromotionReview = readJson("outputs/diablo4-delta-promotion-review/delta-promotion-review.json");
 const deltaEvidenceIntakePackage = readJson("outputs/diablo4-delta-evidence-intake-package/delta-evidence-intake-package.json");
+const deltaEvidenceDraft = readJson("outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
@@ -187,6 +190,10 @@ assertInvariant(deltaEvidenceIntakePackage.summary.canModifyReliableDps === fals
 assertInvariant(deltaEvidenceIntakePackage.summary.templates === 3, "delta evidence intake package must include the three templates");
 assertInvariant(deltaEvidenceIntakePackage.summary.packageReady === true, "delta evidence intake package should be ready for collection");
 assertInvariant(deltaEvidenceIntakePackage.summary.promotionReady === false, "delta evidence intake package must not auto-promote");
+assertInvariant(deltaEvidenceDraft.summary.canModifyReliableDps === false, "delta evidence draft must not modify reliable DPS");
+assertInvariant(deltaEvidenceDraft.summary.draftReadyForCopy === false, "delta evidence draft should require source filling");
+assertInvariant(deltaEvidenceDraft.summary.placeholderFields > 0, "delta evidence draft must expose placeholders");
+assertInvariant(deltaEvidenceDraft.summary.promotionReady === false, "delta evidence draft must not auto-promote");
 assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
 assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
 assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
@@ -291,6 +298,10 @@ const report = {
     { id: "delta-evidence-intake-package-templates", status: "passed", value: deltaEvidenceIntakePackage.summary.templates },
     { id: "delta-evidence-intake-package-ready", status: "passed", value: deltaEvidenceIntakePackage.summary.packageReady },
     { id: "delta-evidence-intake-package-not-auto-promoted", status: "passed", value: deltaEvidenceIntakePackage.summary.promotionReady },
+    { id: "delta-evidence-draft-safe", status: "passed", value: deltaEvidenceDraft.summary.canModifyReliableDps },
+    { id: "delta-evidence-draft-needs-source", status: "passed", value: deltaEvidenceDraft.summary.draftReadyForCopy },
+    { id: "delta-evidence-draft-placeholders", status: "passed", value: deltaEvidenceDraft.summary.placeholderFields },
+    { id: "delta-evidence-draft-not-auto-promoted", status: "passed", value: deltaEvidenceDraft.summary.promotionReady },
     { id: "user-whatif-contract-safe", status: "passed", value: userWhatIfContract.summary.canModifyReliableDps },
     { id: "user-whatif-contract-checks", status: "passed", value: userWhatIfContract.summary.failedChecks },
     { id: "user-whatif-contract-50pct", status: "passed", value: userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps },
@@ -331,6 +342,7 @@ assertInvariant(optimizerPlan.uptimeParserBridge?.summary?.canModifyReliableDps 
 assertInvariant(optimizerPlan.deltaBridgeReadiness?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta bridge readiness");
 assertInvariant(optimizerPlan.deltaPromotionReview?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta promotion review");
 assertInvariant(optimizerPlan.deltaEvidenceIntakePackage?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence intake package");
+assertInvariant(optimizerPlan.deltaEvidenceDraft?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence draft");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 

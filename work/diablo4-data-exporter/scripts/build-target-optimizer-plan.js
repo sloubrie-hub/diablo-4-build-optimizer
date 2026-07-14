@@ -38,6 +38,7 @@ const uptimeParserBridgeFile = "outputs/diablo4-uptime-parser-bridge/uptime-pars
 const deltaBridgeReadinessFile = "outputs/diablo4-delta-bridge-readiness/delta-bridge-readiness.json";
 const deltaPromotionReviewFile = "outputs/diablo4-delta-promotion-review/delta-promotion-review.json";
 const deltaEvidenceIntakePackageFile = "outputs/diablo4-delta-evidence-intake-package/delta-evidence-intake-package.json";
+const deltaEvidenceDraftFile = "outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -503,6 +504,7 @@ const uptimeParserBridge = readOptionalJson(uptimeParserBridgeFile);
 const deltaBridgeReadiness = readOptionalJson(deltaBridgeReadinessFile);
 const deltaPromotionReview = readOptionalJson(deltaPromotionReviewFile);
 const deltaEvidenceIntakePackage = readOptionalJson(deltaEvidenceIntakePackageFile);
+const deltaEvidenceDraft = readOptionalJson(deltaEvidenceDraftFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -590,6 +592,7 @@ const report = {
     deltaBridgeReadinessFile: deltaBridgeReadiness ? deltaBridgeReadinessFile : null,
     deltaPromotionReviewFile: deltaPromotionReview ? deltaPromotionReviewFile : null,
     deltaEvidenceIntakePackageFile: deltaEvidenceIntakePackage ? deltaEvidenceIntakePackageFile : null,
+    deltaEvidenceDraftFile: deltaEvidenceDraft ? deltaEvidenceDraftFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -900,6 +903,16 @@ const report = {
         templates: deltaEvidenceIntakePackage.templates,
         usage: deltaEvidenceIntakePackage.usage,
         safeguards: deltaEvidenceIntakePackage.safeguards,
+      }
+    : null,
+  deltaEvidenceDraft: deltaEvidenceDraft
+    ? {
+        file: deltaEvidenceDraftFile,
+        summary: deltaEvidenceDraft.summary,
+        placeholderFields: deltaEvidenceDraft.placeholderFields,
+        candidate: deltaEvidenceDraft.candidate,
+        usage: deltaEvidenceDraft.usage,
+        safeguards: deltaEvidenceDraft.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

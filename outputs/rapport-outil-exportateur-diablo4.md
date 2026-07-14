@@ -11059,3 +11059,49 @@ Validation :
 Decision :
 
 Le package centralise la collecte des preuves SF32, SF33 et uptime. Les templates sont volontairement en statut `pending` et ne sont pas des preuves. Une entree ne pourra aider un bridge qu'apres source exacte, revue explicite et acceptation; elle ne peut pas modifier `reliableDps` directement.
+
+## Brouillon preuve delta
+
+Un generateur de brouillon a ete ajoute pour sortir le prochain candidat de preuve a remplir depuis le package intake, sans modifier `inputs/external-evidence-candidates.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-draft.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-draft.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json`
+- `outputs/diablo4-delta-evidence-draft/external-evidence-candidates.draft.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- template par defaut : `template-delta-proof-sf32-owner`
+- candidat brouillon : `draft-delta-proof-sf32-owner`
+- claim : `sf32-field-ownership` / `selector:949`
+- placeholders restants : `7`
+- target intake : `inputs/external-evidence-candidates.json`
+- intake reel : `0` candidat
+- `draftReadyForCopy false`
+- `reviewerStatus pending`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `47` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le brouillon, le test, la suite, le plan optimiseur et le site
+- test brouillon : `delta-evidence-draft-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `47` etapes
+- plan optimiseur : section `deltaEvidenceDraft` presente
+- site : nouveau panneau `Brouillon preuve`
+- controle important : le generateur n'ecrit pas dans `inputs/external-evidence-candidates.json`
+
+Decision :
+
+Le brouillon rend la prochaine action explicite sans affaiblir les gates. Il produit un candidat copiable et un fichier dry-run, mais tant que les placeholders ne sont pas remplaces par une source exacte et que la revue reste `pending`, aucune preuve n'est acceptee et `reliableDps` reste intouchable.
