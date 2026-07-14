@@ -10819,3 +10819,53 @@ Validation :
 Decision :
 
 Le bridge est pret cote mecanique mais bloque sur les donnees reelles faute de preuve acceptee. Une preuve externe acceptee peut produire le mapping `SF_32`, mais elle ne peut pas promouvoir `reliableDps`; les verrous `SF_33` et `uptime` restent necessaires avant toute sortie fiable.
+
+## Packet et bridge parser SF33 trigger
+
+Un packet source et un bridge parser dedies a `delta-proof-sf33-trigger` ont ete ajoutes. Ils cadrent le mapping attendu `Mod.SoilRuler_B -> SF_33` sans assimiler les signaux locaux a une activation gameplay fiable.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf33-trigger-source-packet.js`
+- `work/diablo4-data-exporter/scripts/build-sf33-trigger-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/test-sf33-trigger-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json`
+- `outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`, `Mod.SoilRuler_B`, `SF_33`
+- packet reel : bloque
+- preuves acceptees reelles : `0`
+- signaux locaux rejetes : `5`
+- bridge reel : bloque
+- mappings reels : `0`
+- test synthetique : `Mod.SoilRuler_B -> SF_33` OK avec `1` preuve acceptee
+- `bridgeReady false` sur les donnees reelles
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `36` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le packet, le bridge, le test, la suite, le plan optimiseur et le site
+- test bridge synthetique : `sf33-trigger-parser-bridge-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `36` etapes
+- endpoints site verifies :
+  - `/site/`
+  - `/outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json`
+  - `/outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json`
+  - `/outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+  - `/outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- site : nouveaux panneaux `Packet SF_33` et `Bridge SF_33`
+
+Decision :
+
+Le bridge `SF_33` est pret cote mecanique mais bloque sur les donnees reelles faute de preuve acceptee. Les preuves locales gardent seulement une valeur de contexte/rejet; elles ne prouvent pas l'activation de `Mod.SoilRuler_B`. Le DPS fiable reste strict-only tant que `SF_32`, `SF_33` et l'uptime ne sont pas tous prouves.

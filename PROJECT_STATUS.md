@@ -1097,3 +1097,16 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Bridge SF_32`
   - reliableDps modifiable : `false`
   - decision : preparer le bridge cible sans promotion; le mapping exige une preuve acceptee
+- packet et bridge parser SF33 trigger ajoutes
+  - script packet : `work/diablo4-data-exporter/scripts/build-sf33-trigger-source-packet.js`
+  - script bridge : `work/diablo4-data-exporter/scripts/build-sf33-trigger-parser-bridge.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-sf33-trigger-parser-bridge.js`
+  - rapports generes : `outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json`, `outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json`
+  - suite optimiseur : `36` etapes, statut `target-optimizer-suite-ok`
+  - packet reel : bloque, `0` preuve acceptee, `5` signaux locaux rejetes
+  - bridge reel : bloque, `0` mapping
+  - test synthetique : mapping `Mod.SoilRuler_B -> SF_33` OK
+  - gates DPS fiables : bloquees
+  - plan optimiseur et site : nouveaux panneaux `Packet SF_33` et `Bridge SF_33`
+  - reliableDps modifiable : `false`
+  - decision : cadrer le trigger SF33 comme preuve source-backed obligatoire; aucune activation SF33 fiable sans preuve acceptee

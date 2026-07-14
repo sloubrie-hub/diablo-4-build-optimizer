@@ -35,6 +35,9 @@ const generationSteps = [
   "build-sf32-owner-source-packet.js",
   "build-sf32-owner-parser-bridge.js",
   "test-sf32-owner-parser-bridge.js",
+  "build-sf33-trigger-source-packet.js",
+  "build-sf33-trigger-parser-bridge.js",
+  "test-sf33-trigger-parser-bridge.js",
   "build-uptime-local-exhaustion-conclusion.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
@@ -85,6 +88,8 @@ const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exh
 const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
 const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json");
+const sf33TriggerSourcePacket = readJson("outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json");
+const sf33TriggerParserBridge = readJson("outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json");
 const uptimeLocalExhaustionConclusion = readJson("outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
@@ -141,6 +146,12 @@ assertInvariant(sf32OwnerSourcePacket.requiredClaim?.field === "selector:949", "
 assertInvariant(sf32OwnerParserBridge.summary.canModifyReliableDps === false, "SF_32 owner parser bridge must not modify reliable DPS");
 assertInvariant(sf32OwnerParserBridge.summary.bridgeReady === false, "real SF_32 owner parser bridge should remain blocked without accepted evidence");
 assertInvariant(sf32OwnerParserBridge.summary.reliableDpsStillBlocked === true, "SF_32 owner parser bridge must keep reliable gates blocked");
+assertInvariant(sf33TriggerSourcePacket.summary.canModifyReliableDps === false, "SF_33 trigger source packet must not modify reliable DPS");
+assertInvariant(sf33TriggerSourcePacket.summary.parserBridgeRequired === true, "SF_33 trigger source packet must require a parser bridge");
+assertInvariant(sf33TriggerSourcePacket.requiredClaim?.field === "Mod.SoilRuler_B", "SF_33 trigger source packet must target Mod.SoilRuler_B");
+assertInvariant(sf33TriggerParserBridge.summary.canModifyReliableDps === false, "SF_33 trigger parser bridge must not modify reliable DPS");
+assertInvariant(sf33TriggerParserBridge.summary.bridgeReady === false, "real SF_33 trigger parser bridge should remain blocked without accepted evidence");
+assertInvariant(sf33TriggerParserBridge.summary.reliableDpsStillBlocked === true, "SF_33 trigger parser bridge must keep reliable gates blocked");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.canModifyReliableDps === false, "uptime local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.uptimeReliableProven === false, "uptime local exhaustion conclusion must not prove reliable uptime automatically");
 assertInvariant(uptimeLocalExhaustionConclusion.summary.userScenarioSeparated === true, "uptime local exhaustion conclusion should keep user what-if separated");
@@ -221,6 +232,12 @@ const report = {
     { id: "sf32-owner-parser-bridge-safe", status: "passed", value: sf32OwnerParserBridge.summary.canModifyReliableDps },
     { id: "sf32-owner-parser-bridge-blocked-real", status: "passed", value: sf32OwnerParserBridge.summary.bridgeReady },
     { id: "sf32-owner-parser-bridge-gates-blocked", status: "passed", value: sf32OwnerParserBridge.summary.reliableDpsStillBlocked },
+    { id: "sf33-trigger-source-packet-safe", status: "passed", value: sf33TriggerSourcePacket.summary.canModifyReliableDps },
+    { id: "sf33-trigger-source-packet-bridge-required", status: "passed", value: sf33TriggerSourcePacket.summary.parserBridgeRequired },
+    { id: "sf33-trigger-source-packet-field", status: "passed", value: sf33TriggerSourcePacket.requiredClaim?.field },
+    { id: "sf33-trigger-parser-bridge-safe", status: "passed", value: sf33TriggerParserBridge.summary.canModifyReliableDps },
+    { id: "sf33-trigger-parser-bridge-blocked-real", status: "passed", value: sf33TriggerParserBridge.summary.bridgeReady },
+    { id: "sf33-trigger-parser-bridge-gates-blocked", status: "passed", value: sf33TriggerParserBridge.summary.reliableDpsStillBlocked },
     { id: "uptime-local-exhaustion-safe", status: "passed", value: uptimeLocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "uptime-local-reliable-not-proven", status: "passed", value: uptimeLocalExhaustionConclusion.summary.uptimeReliableProven },
     { id: "uptime-local-user-scenario-separated", status: "passed", value: uptimeLocalExhaustionConclusion.summary.userScenarioSeparated },
@@ -256,6 +273,8 @@ assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModify
 assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
 assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner parser bridge");
+assertInvariant(optimizerPlan.sf33TriggerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger source packet");
+assertInvariant(optimizerPlan.sf33TriggerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger parser bridge");
 assertInvariant(optimizerPlan.uptimeLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe uptime local exhaustion conclusion");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");

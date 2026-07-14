@@ -23,6 +23,8 @@ const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-ex
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
+const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
+const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
 const UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-uptime-local-exhaustion-conclusion/uptime-local-exhaustion-conclusion.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
@@ -55,6 +57,8 @@ const state = {
   sf32LocalExhaustionConclusion: null,
   sf32OwnerSourcePacket: null,
   sf32OwnerParserBridge: null,
+  sf33TriggerSourcePacket: null,
+  sf33TriggerParserBridge: null,
   uptimeLocalExhaustionConclusion: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
@@ -122,6 +126,8 @@ async function boot() {
     await loadSf32LocalExhaustionConclusion();
     await loadSf32OwnerSourcePacket();
     await loadSf32OwnerParserBridge();
+    await loadSf33TriggerSourcePacket();
+    await loadSf33TriggerParserBridge();
     await loadUptimeLocalExhaustionConclusion();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
@@ -391,6 +397,14 @@ async function loadSf32OwnerParserBridge() {
   state.sf32OwnerParserBridge = await fetchOptionalJson(SF32_OWNER_PARSER_BRIDGE_URL);
 }
 
+async function loadSf33TriggerSourcePacket() {
+  state.sf33TriggerSourcePacket = await fetchOptionalJson(SF33_TRIGGER_SOURCE_PACKET_URL);
+}
+
+async function loadSf33TriggerParserBridge() {
+  state.sf33TriggerParserBridge = await fetchOptionalJson(SF33_TRIGGER_PARSER_BRIDGE_URL);
+}
+
 async function loadUptimeLocalExhaustionConclusion() {
   state.uptimeLocalExhaustionConclusion = await fetchOptionalJson(UPTIME_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
@@ -475,6 +489,8 @@ function renderTargetOptimizerPlan() {
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
     ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
+    ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
+    ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
     ${renderUptimeLocalExhaustionConclusion(state.uptimeLocalExhaustionConclusion ?? plan.uptimeLocalExhaustionConclusion)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
@@ -1260,6 +1276,94 @@ function renderSf32OwnerParserBridge(report) {
           <article>
             <span>${item.status}</span>
             <strong>${item.selector} -> ${item.ownerField}</strong>
+            <p>${item.sourceEvidenceId}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSf33TriggerSourcePacket(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const claim = report.requiredClaim ?? {};
+  const bridge = report.parserBridgeContract ?? {};
+  const rejected = report.rejectedLocalSignals ?? [];
+  return `
+    <div class="bonus-selector-proof sf33-trigger-source-packet">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Packet SF_33</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.acceptedEvidence > 0 ? "positive" : "blocked"}">
+          ${summary.acceptedEvidence > 0 ? "preuve acceptee" : "source requise"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Asset", summary.assetId)}
+        ${targetMetric("Champ", summary.targetField ?? "n/a")}
+        ${targetMetric("Trigger", summary.targetTrigger ?? "n/a")}
+        ${targetMetric("Rejets locaux", summary.rejectedLocalSignals)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Bridge ${bridge.status ?? "n/a"}</span>
+        <span>Claim ${claim.type ?? "n/a"} / ${claim.field ?? "n/a"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${rejected.slice(0, 4).map((item) => `
+          <article>
+            <span>${item.status ?? item.id}</span>
+            <strong>${item.id}</strong>
+            <p>${item.reasonRejectedForTrigger}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSf33TriggerParserBridge(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const mappings = report.mappings ?? [];
+  const invariants = report.requiredInvariants ?? [];
+  return `
+    <div class="bonus-selector-proof sf33-trigger-parser-bridge">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Bridge SF_33</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.bridgeReady ? "positive" : "blocked"}">
+          ${summary.bridgeReady ? "mapping pret" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Preuves", summary.acceptedEvidence)}
+        ${targetMetric("Mappings", summary.mappings)}
+        ${targetMetric("Trigger", summary.trigger ?? "n/a")}
+        ${targetMetric("Champ", summary.targetField ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Gates ${summary.reliableDpsStillBlocked ? "bloquees" : "ouvertes"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${invariants.map((item) => `<span class="blocked">${item}</span>`).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${mappings.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.trigger} -> ${item.targetField}</strong>
             <p>${item.sourceEvidenceId}</p>
           </article>
         `).join("")}
