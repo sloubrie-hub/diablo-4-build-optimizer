@@ -1501,3 +1501,18 @@ Build de reference :
   - plan optimiseur et site : nouveaux panneaux `Decision soumission` et `Audit decision soumission`
   - reliableDps modifiable : `false`
   - decision : une decision humaine valide n'est pas une promotion; elle ouvre au mieux un audit de promotion separe
+- audit promotion soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-promotion-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-promotion-audit.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-promotion-audit/external-evidence-submission-promotion-audit.json`
+  - suite optimiseur : `97` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - audit reel : `readyForPromotionImplementation false`, checks echoues `external-review-decision-approved`, `promotion-review-ready`, `reliable-gates-recomputed-passed`
+  - gates fiables encore bloquees : `sf32-field`, `sf33-trigger`, `uptime`
+  - test synthetique : `readyForPromotionImplementation true`, `proposedReliableDps 212160`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Audit promotion externe`
+  - reliableDps modifiable : `false`
+  - decision : une preuve externe approuvee ouvre seulement une implementation separee; aucun score fiable n'est modifie ici

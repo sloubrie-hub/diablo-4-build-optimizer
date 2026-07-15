@@ -24,6 +24,7 @@ const externalEvidenceSubmissionPostCopyIntakeFile = "outputs/diablo4-external-e
 const externalEvidenceSubmissionManualReviewGateFile = "outputs/diablo4-external-evidence-submission-manual-review-gate/external-evidence-submission-manual-review-gate.json";
 const externalEvidenceSubmissionReviewDecisionPackageFile = "outputs/diablo4-external-evidence-submission-review-decision-package/external-evidence-submission-review-decision-package.json";
 const externalEvidenceSubmissionReviewDecisionAuditFile = "outputs/diablo4-external-evidence-submission-review-decision-audit/external-evidence-submission-review-decision-audit.json";
+const externalEvidenceSubmissionPromotionAuditFile = "outputs/diablo4-external-evidence-submission-promotion-audit/external-evidence-submission-promotion-audit.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -514,6 +515,7 @@ const externalEvidenceSubmissionPostCopyIntake = readOptionalJson(externalEviden
 const externalEvidenceSubmissionManualReviewGate = readOptionalJson(externalEvidenceSubmissionManualReviewGateFile);
 const externalEvidenceSubmissionReviewDecisionPackage = readOptionalJson(externalEvidenceSubmissionReviewDecisionPackageFile);
 const externalEvidenceSubmissionReviewDecisionAudit = readOptionalJson(externalEvidenceSubmissionReviewDecisionAuditFile);
+const externalEvidenceSubmissionPromotionAudit = readOptionalJson(externalEvidenceSubmissionPromotionAuditFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
@@ -627,6 +629,7 @@ const report = {
     externalEvidenceSubmissionManualReviewGateFile: externalEvidenceSubmissionManualReviewGate ? externalEvidenceSubmissionManualReviewGateFile : null,
     externalEvidenceSubmissionReviewDecisionPackageFile: externalEvidenceSubmissionReviewDecisionPackage ? externalEvidenceSubmissionReviewDecisionPackageFile : null,
     externalEvidenceSubmissionReviewDecisionAuditFile: externalEvidenceSubmissionReviewDecisionAudit ? externalEvidenceSubmissionReviewDecisionAuditFile : null,
+    externalEvidenceSubmissionPromotionAuditFile: externalEvidenceSubmissionPromotionAudit ? externalEvidenceSubmissionPromotionAuditFile : null,
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
     newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
@@ -842,6 +845,16 @@ const report = {
         decisionInput: externalEvidenceSubmissionReviewDecisionAudit.decisionInput,
         template: externalEvidenceSubmissionReviewDecisionAudit.template,
         safeguards: externalEvidenceSubmissionReviewDecisionAudit.safeguards,
+      }
+    : null,
+  externalEvidenceSubmissionPromotionAudit: externalEvidenceSubmissionPromotionAudit
+    ? {
+        file: externalEvidenceSubmissionPromotionAuditFile,
+        summary: externalEvidenceSubmissionPromotionAudit.summary,
+        auditChecks: externalEvidenceSubmissionPromotionAudit.auditChecks,
+        gateRows: externalEvidenceSubmissionPromotionAudit.gateRows,
+        implementationContract: externalEvidenceSubmissionPromotionAudit.implementationContract,
+        safeguards: externalEvidenceSubmissionPromotionAudit.safeguards,
       }
     : null,
   newBinaryFamilyPlan: newBinaryFamilyPlan

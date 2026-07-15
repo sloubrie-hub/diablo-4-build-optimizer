@@ -17,6 +17,7 @@ const EXTERNAL_EVIDENCE_SUBMISSION_POST_COPY_INTAKE_URL = "../outputs/diablo4-ex
 const EXTERNAL_EVIDENCE_SUBMISSION_MANUAL_REVIEW_GATE_URL = "../outputs/diablo4-external-evidence-submission-manual-review-gate/external-evidence-submission-manual-review-gate.json";
 const EXTERNAL_EVIDENCE_SUBMISSION_REVIEW_DECISION_PACKAGE_URL = "../outputs/diablo4-external-evidence-submission-review-decision-package/external-evidence-submission-review-decision-package.json";
 const EXTERNAL_EVIDENCE_SUBMISSION_REVIEW_DECISION_AUDIT_URL = "../outputs/diablo4-external-evidence-submission-review-decision-audit/external-evidence-submission-review-decision-audit.json";
+const EXTERNAL_EVIDENCE_SUBMISSION_PROMOTION_AUDIT_URL = "../outputs/diablo4-external-evidence-submission-promotion-audit/external-evidence-submission-promotion-audit.json";
 const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -81,6 +82,7 @@ const state = {
   externalEvidenceSubmissionManualReviewGate: null,
   externalEvidenceSubmissionReviewDecisionPackage: null,
   externalEvidenceSubmissionReviewDecisionAudit: null,
+  externalEvidenceSubmissionPromotionAudit: null,
   newBinaryFamilyPlan: null,
   newBinaryFamilyDeltaParentAudit: null,
   deltaParentConsumerCorpusScan: null,
@@ -180,6 +182,7 @@ async function boot() {
     await loadExternalEvidenceSubmissionManualReviewGate();
     await loadExternalEvidenceSubmissionReviewDecisionPackage();
     await loadExternalEvidenceSubmissionReviewDecisionAudit();
+    await loadExternalEvidenceSubmissionPromotionAudit();
     await loadNewBinaryFamilyPlan();
     await loadNewBinaryFamilyDeltaParentAudit();
     await loadDeltaParentConsumerCorpusScan();
@@ -463,6 +466,10 @@ async function loadExternalEvidenceSubmissionReviewDecisionAudit() {
   state.externalEvidenceSubmissionReviewDecisionAudit = await fetchOptionalJson(EXTERNAL_EVIDENCE_SUBMISSION_REVIEW_DECISION_AUDIT_URL);
 }
 
+async function loadExternalEvidenceSubmissionPromotionAudit() {
+  state.externalEvidenceSubmissionPromotionAudit = await fetchOptionalJson(EXTERNAL_EVIDENCE_SUBMISSION_PROMOTION_AUDIT_URL);
+}
+
 async function loadNewBinaryFamilyPlan() {
   state.newBinaryFamilyPlan = await fetchOptionalJson(NEW_BINARY_FAMILY_PLAN_URL);
 }
@@ -693,6 +700,7 @@ function renderTargetOptimizerPlan() {
     ${renderExternalEvidenceSubmissionManualReviewGate(state.externalEvidenceSubmissionManualReviewGate ?? plan.externalEvidenceSubmissionManualReviewGate)}
     ${renderExternalEvidenceSubmissionReviewDecisionPackage(state.externalEvidenceSubmissionReviewDecisionPackage ?? plan.externalEvidenceSubmissionReviewDecisionPackage)}
     ${renderExternalEvidenceSubmissionReviewDecisionAudit(state.externalEvidenceSubmissionReviewDecisionAudit ?? plan.externalEvidenceSubmissionReviewDecisionAudit)}
+    ${renderExternalEvidenceSubmissionPromotionAudit(state.externalEvidenceSubmissionPromotionAudit ?? plan.externalEvidenceSubmissionPromotionAudit)}
     ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
     ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
     ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
@@ -3196,6 +3204,51 @@ function renderExternalEvidenceSubmissionReviewDecisionAudit(report) {
           <article>
             <span>template</span>
             <strong>reviewer.${field}</strong>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderExternalEvidenceSubmissionPromotionAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const checks = report.auditChecks ?? [];
+  const required = report.implementationContract?.requiredBeforeWrite ?? [];
+  return `
+    <div class="bonus-selector-proof external-evidence-submission-promotion-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Audit promotion externe</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForPromotionImplementation ? "positive" : "blocked"}">
+          ${summary.readyForPromotionImplementation ? "pret implementation" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidat", summary.candidateId ?? "n/a")}
+        ${targetMetric("Strict", summary.strictDps)}
+        ${targetMetric("Delta", summary.blockedDeltaDps)}
+        ${targetMetric("Propose", summary.proposedReliableDps)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Decision approved ${summary.decisionAcceptedForPromotionReview ? "oui" : "non"}</span>
+        <span>Ecriture intake ${summary.writesRealIntake ? "oui" : "non"}</span>
+        <span>Accepted bridge ${summary.acceptedForBridge ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${checks.map((check) => `<span class="${check.status === "passed" ? "passed" : "failed"}">${check.id}: ${check.status}</span>`).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${required.map((item) => `
+          <article>
+            <span>requis avant ecriture</span>
+            <strong>${item}</strong>
           </article>
         `).join("")}
       </div>
