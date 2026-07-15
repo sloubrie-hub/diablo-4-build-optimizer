@@ -1313,3 +1313,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Post-copie`
   - reliableDps modifiable : `false`
   - decision : verifier la copie comme simulation seulement; pending ouvre une revue humaine, pas une approbation ni une promotion
+- porte revue humaine preuve delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-manual-review-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-manual-review-gate.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-manual-review-gate/delta-evidence-manual-review-gate.json`
+  - suite optimiseur : `69` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - porte reelle : `readyForReviewerDecision false`, `3 / 6` checks echoues
+  - checks echoues : `post-copy-ready-for-review`, `candidate-pending`, `manual-review-required`
+  - test synthetique : `readyForReviewerDecision true`, `targetCandidateStatus pending`, bloqueur `manual-review-required`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Revue preuve`
+  - reliableDps modifiable : `false`
+  - decision : ouvrir seulement une decision humaine separee; pending ne devient jamais approved automatiquement

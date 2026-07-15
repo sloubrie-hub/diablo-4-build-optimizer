@@ -11557,3 +11557,47 @@ Validation :
 Decision :
 
 L'audit post-copie prouve que la copie manuelle attendue ne doit produire qu'un candidat `pending`. Le passage a `approved`, l'acceptation bridge et toute modification de `reliableDps` restent separes et bloques.
+
+## Porte revue humaine preuve delta
+
+Une porte de revue humaine a ete ajoutee apres l'audit post-copie pour transformer un candidat `pending` en decision relisible, sans approbation automatique.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-manual-review-gate.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-manual-review-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-manual-review-gate/delta-evidence-manual-review-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- porte reelle : `readyForReviewerDecision false`
+- checks : `6`
+- checks echoues reel : `3`
+- checks echoues : `post-copy-ready-for-review`, `candidate-pending`, `manual-review-required`
+- test synthetique : `readyForReviewerDecision true`, `targetCandidateStatus pending`, bloqueur `manual-review-required`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `69` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la porte, le test, la suite, le plan optimiseur et le site
+- test porte revue : `delta-evidence-manual-review-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `69` etapes
+- plan optimiseur : section `deltaEvidenceManualReviewGate` presente
+- site : nouveau panneau `Revue preuve`
+
+Decision :
+
+La porte de revue humaine ouvre uniquement une decision humaine separee quand le candidat est `pending`. Elle n'ecrit pas dans l'intake reel, n'accepte aucun bridge, ne promeut aucun delta et ne modifie jamais `reliableDps`.
