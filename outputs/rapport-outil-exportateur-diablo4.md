@@ -12849,3 +12849,64 @@ Validation :
 Decision :
 
 `DiabloTools/d4data` est maintenant exploitable comme reference d'implementation pour emettre des records read-only : `selector`, `assetRef`, `layoutId`, payload fields et `evidence`. Le parser pourra etiqueter `994` comme ancre `Bonus_Percent_Per_Power` et conserver `949` comme role local/payload non resolu. Aucune semantique `SF_32`, `SF_33` ou uptime ne doit etre promue sans preuve source-backed separee.
+
+## Parser read-only selector-asset-record
+
+Le premier parser `selector-asset-record` a ete ajoute. Il emet des records structurels a partir des layouts deja audites et du contrat parser, avec evidence et garde-fous par record. Il ne lit pas encore directement les octets bas niveau; cette version transforme les layouts valides en sortie normalisee, testable et consultable dans le site.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-selector-asset-record-parser.js`
+- `work/diablo4-data-exporter/scripts/test-selector-asset-record-parser.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-selector-asset-record-parser/selector-asset-record-parser.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- parser root : `selector-asset-record`
+- cible : `asset 1663210`, `skill:1663210`
+- records emis : `5`
+- record cible : `1`
+- anchors source-backed : `3`
+- payloads non resolus : `2`
+- groupes ignores : `2`
+- layouts utilises : `3`
+- invariants echoues : `0`
+- reference d4data prete : `true`
+- contrat parser pret : `true`
+- parser read-only pret : `true`
+- `semanticBridgeReady false`
+- `acceptedForBridge false`
+- `writesTargetDataset false`
+- `writesRealIntake false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `123` etapes
+
+Record cible `1663210` :
+
+- selector : `949`
+- layout : `compact-metadata-scale-layout`
+- payload : `payload-unresolved`
+- champs lus : `selector=949`, `assetRef=1663210`, `postAssetA=0`, `postAssetB=0`, `metadataId=12337`, `opcode=6`, `scale=10`
+- preuve : exemple `outputs\diablo4-source-asset-1663210-payload\data.007.8265002.decoded.bin` a l'offset `19012`
+
+Validation :
+
+- controles syntaxe Node : OK
+- test parser read-only : `selector-asset-record-parser-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `123` etapes
+- plan optimiseur : section `selectorAssetRecordParser` presente
+- site : nouveau panneau `Parser selector-asset`
+
+Decision :
+
+La sortie est maintenant exploitable pour inspecter les records `selector -> asset` sans rien promouvoir. Le payload `949` de `1663210` reste non resolu; `metadataId=12337`, `opcode=6` et `scale=10` sont des champs structurels, pas une preuve `SF_32`. La prochaine etape doit soit brancher une lecture binaire bas niveau sur ces offsets, soit fournir une preuve source-backed pour `SF_32`, `SF_33` et l'uptime avant tout bridge DPS.

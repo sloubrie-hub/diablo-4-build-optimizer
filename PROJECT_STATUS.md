@@ -1717,3 +1717,19 @@ Build de reference :
   - reliableDps modifiable : `false`
   - plan optimiseur et site : nouveau panneau `d4data parser reference`
   - decision : prochaine etape = emettre des records `selector/asset/layout/payload/evidence` read-only; aucune promotion DPS sans preuve `SF_32`, `SF_33`, uptime
+- parser read-only `selector-asset-record` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-selector-asset-record-parser.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-selector-asset-record-parser.js`
+  - rapport genere : `outputs/diablo4-selector-asset-record-parser/selector-asset-record-parser.json`
+  - suite optimiseur : `123` etapes, statut `target-optimizer-suite-ok`
+  - records emis : `5`
+  - record cible `1663210` : `1`
+  - anchors source-backed `994` : `3`
+  - payloads non resolus `949` : `2`
+  - groupes ignores : `2`
+  - invariants echoues : `0`
+  - parser read-only pret : `true`
+  - bridge semantique : `false`
+  - reliableDps modifiable : `false`
+  - plan optimiseur et site : nouveau panneau `Parser selector-asset`
+  - decision : sortie structurelle exploitable avec `selector`, `assetRef`, `layoutId`, payload fields et `evidence`; prochaine etape = lecture binaire bas niveau ou preuve source-backed avant bridge

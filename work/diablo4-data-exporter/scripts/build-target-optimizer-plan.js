@@ -45,6 +45,7 @@ const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan
 const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const communitySourceTriageAuditFile = "outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const d4dataParserReferenceAuditFile = "outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
+const selectorAssetRecordParserFile = "outputs/diablo4-selector-asset-record-parser/selector-asset-record-parser.json";
 const selector949ReconciliationAuditFile = "outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const selector949WindowReparseAuditFile = "outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const local949RoleDecodeAuditFile = "outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -548,6 +549,7 @@ const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
 const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
 const communitySourceTriageAudit = readOptionalJson(communitySourceTriageAuditFile);
 const d4dataParserReferenceAudit = readOptionalJson(d4dataParserReferenceAuditFile);
+const selectorAssetRecordParser = readOptionalJson(selectorAssetRecordParserFile);
 const selector949ReconciliationAudit = readOptionalJson(selector949ReconciliationAuditFile);
 const selector949WindowReparseAudit = readOptionalJson(selector949WindowReparseAuditFile);
 const local949RoleDecodeAudit = readOptionalJson(local949RoleDecodeAuditFile);
@@ -674,6 +676,7 @@ const report = {
     diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
     communitySourceTriageAuditFile: communitySourceTriageAudit ? communitySourceTriageAuditFile : null,
     d4dataParserReferenceAuditFile: d4dataParserReferenceAudit ? d4dataParserReferenceAuditFile : null,
+    selectorAssetRecordParserFile: selectorAssetRecordParser ? selectorAssetRecordParserFile : null,
     selector949ReconciliationAuditFile: selector949ReconciliationAudit ? selector949ReconciliationAuditFile : null,
     selector949WindowReparseAuditFile: selector949WindowReparseAudit ? selector949WindowReparseAuditFile : null,
     local949RoleDecodeAuditFile: local949RoleDecodeAudit ? local949RoleDecodeAuditFile : null,
@@ -1090,6 +1093,16 @@ const report = {
         checks: d4dataParserReferenceAudit.checks,
         parserImplementationPlan: d4dataParserReferenceAudit.parserImplementationPlan,
         safeguards: d4dataParserReferenceAudit.safeguards,
+      }
+    : null,
+  selectorAssetRecordParser: selectorAssetRecordParser
+    ? {
+        file: selectorAssetRecordParserFile,
+        summary: selectorAssetRecordParser.summary,
+        records: selectorAssetRecordParser.records,
+        skippedGroups: selectorAssetRecordParser.skippedGroups,
+        failedInvariants: selectorAssetRecordParser.failedInvariants,
+        safeguards: selectorAssetRecordParser.safeguards,
       }
     : null,
   selector949ReconciliationAudit: selector949ReconciliationAudit

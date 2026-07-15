@@ -38,6 +38,7 @@ const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hu
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const COMMUNITY_SOURCE_TRIAGE_AUDIT_URL = "../outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const D4DATA_PARSER_REFERENCE_AUDIT_URL = "../outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
+const SELECTOR_ASSET_RECORD_PARSER_URL = "../outputs/diablo4-selector-asset-record-parser/selector-asset-record-parser.json";
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const LOCAL_949_ROLE_DECODE_AUDIT_URL = "../outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -115,6 +116,7 @@ const state = {
   diabloToolsAttributeSourceAudit: null,
   communitySourceTriageAudit: null,
   d4dataParserReferenceAudit: null,
+  selectorAssetRecordParser: null,
   selector949ReconciliationAudit: null,
   selector949WindowReparseAudit: null,
   local949RoleDecodeAudit: null,
@@ -227,6 +229,7 @@ async function boot() {
     await loadDiabloToolsAttributeSourceAudit();
     await loadCommunitySourceTriageAudit();
     await loadD4dataParserReferenceAudit();
+    await loadSelectorAssetRecordParser();
     await loadSelector949ReconciliationAudit();
     await loadSelector949WindowReparseAudit();
     await loadLocal949RoleDecodeAudit();
@@ -586,6 +589,10 @@ async function loadD4dataParserReferenceAudit() {
   state.d4dataParserReferenceAudit = await fetchOptionalJson(D4DATA_PARSER_REFERENCE_AUDIT_URL);
 }
 
+async function loadSelectorAssetRecordParser() {
+  state.selectorAssetRecordParser = await fetchOptionalJson(SELECTOR_ASSET_RECORD_PARSER_URL);
+}
+
 async function loadSelector949ReconciliationAudit() {
   state.selector949ReconciliationAudit = await fetchOptionalJson(SELECTOR_949_RECONCILIATION_AUDIT_URL);
 }
@@ -805,6 +812,7 @@ function renderTargetOptimizerPlan() {
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
     ${renderCommunitySourceTriageAudit(state.communitySourceTriageAudit ?? plan.communitySourceTriageAudit)}
     ${renderD4dataParserReferenceAudit(state.d4dataParserReferenceAudit ?? plan.d4dataParserReferenceAudit)}
+    ${renderSelectorAssetRecordParser(state.selectorAssetRecordParser ?? plan.selectorAssetRecordParser)}
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
     ${renderLocal949RoleDecodeAudit(state.local949RoleDecodeAudit ?? plan.local949RoleDecodeAudit)}
@@ -1816,6 +1824,53 @@ function renderD4dataParserReferenceAudit(report) {
       </div>
       <div class="suite-invariant-list">
         ${referenceFiles.map((item) => `<span class="neutral">${item.path}: ${item.role}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSelectorAssetRecordParser(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const records = report.records ?? [];
+  const targetRecords = records.filter((record) => Number(record.assetRef) === 1663210);
+  const previewRecords = [...targetRecords, ...records.filter((record) => Number(record.assetRef) !== 1663210)].slice(0, 5);
+  return `
+    <div class="bonus-selector-proof selector-asset-record-parser">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Parser selector-asset</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readOnlyParserReady ? "positive" : "blocked"}">
+          ${summary.readOnlyParserReady ? "read-only pret" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Records", summary.records ?? 0)}
+        ${targetMetric("Cible", summary.targetRecords ?? 0)}
+        ${targetMetric("Anchors", summary.sourceBackedAnchorRecords ?? 0)}
+        ${targetMetric("Payloads", summary.unresolvedPayloadRecords ?? 0)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Bridge ${summary.semanticBridgeReady ? "ouvert" : "ferme"}</span>
+        <span>Dataset ${summary.writesTargetDataset ? "modifiable" : "protege"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Invariants ${summary.failedInvariants ?? 0}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${previewRecords.map((record) => `
+          <article>
+            <span>${record.payloadStatus} - selector ${record.selector}</span>
+            <strong>${record.assetRef} / ${record.layoutId}</strong>
+            <p>${record.labels?.assetLabel ?? record.sourceFile ?? ""}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${(report.skippedGroups ?? []).map((item) => `<span class="neutral">${item.reason}: ${item.selector}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
