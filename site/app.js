@@ -2205,7 +2205,8 @@ function renderSf32OwnerParserBridge(report) {
       <div class="bonus-selector-proof-metrics">
         ${targetMetric("Preuves", summary.acceptedEvidence)}
         ${targetMetric("Mappings", summary.mappings)}
-        ${targetMetric("Selecteur", summary.selector ?? "n/a")}
+        ${targetMetric("Ancre", summary.sourceAnchor ?? "n/a")}
+        ${targetMetric("Role", summary.localRole ?? "n/a")}
         ${targetMetric("Champ", summary.ownerField ?? "n/a")}
       </div>
       <div class="bonus-selector-signals">
@@ -2220,7 +2221,7 @@ function renderSf32OwnerParserBridge(report) {
         ${mappings.map((item) => `
           <article>
             <span>${item.status}</span>
-            <strong>${item.selector} -> ${item.ownerField}</strong>
+            <strong>${item.sourceAnchor ?? "n/a"} + ${item.localRole ?? "n/a"} -> ${item.ownerField}</strong>
             <p>${item.sourceEvidenceId}</p>
           </article>
         `).join("")}

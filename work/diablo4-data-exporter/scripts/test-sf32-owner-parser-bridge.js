@@ -40,10 +40,10 @@ packet.acceptedEvidence = [
     },
     claim: {
       type: "sf32-field-ownership",
-      field: "selector:949",
+      field: "eAttrib:994 + local-role:949",
       value: "SF_32 owner mapping",
-      excerpt: "1663210 selector:949 SF_32",
-      mapping: "1663210 -> selector:949 -> SF_32",
+      excerpt: "1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 SF_32",
+      mapping: "1663210 -> eAttrib:994 + local-role:949 -> SF_32",
     },
     reviewer: { status: "approved" },
   },
@@ -63,7 +63,8 @@ assertInvariant(report.summary.mappings === 1, "bridge should emit one mapping")
 assertInvariant(report.summary.canModifyReliableDps === false, "bridge must not modify reliable DPS");
 assertInvariant(report.summary.promotionReady === false, "bridge must not mark promotion ready");
 assertInvariant(report.summary.reliableDpsStillBlocked === true, "reliable DPS gates should remain blocked");
-assertInvariant(report.mappings[0]?.selector === "selector:949", "mapping selector drifted");
+assertInvariant(report.mappings[0]?.sourceAnchor === "eAttrib:994", "mapping source anchor drifted");
+assertInvariant(report.mappings[0]?.localRole === "local-role:949", "mapping local role drifted");
 assertInvariant(report.mappings[0]?.ownerField === "SF_32", "mapping owner field drifted");
 assertInvariant(report.mappings[0]?.canModifyReliableDps === false, "mapping must not modify reliable DPS");
 

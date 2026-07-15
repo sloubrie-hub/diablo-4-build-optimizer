@@ -13031,3 +13031,51 @@ Validation :
 Decision :
 
 La structure `949 -> 1663210 -> metadata 12337 -> opcode 6 -> scale 10` est maintenant acceptee comme preuve binaire structurelle. Elle ne prouve pas encore que le payload possede `SF_32`, que `949` est nomme, que `12337` est une table/champ connu, ou que `10` exprime la semantique gameplay. Aucune promotion DPS n'est autorisee.
+
+## Revision du contrat source SF_32
+
+Le paquet de collecte `SF_32` a ete corrige pour suivre l'etat le plus recent des preuves : `selector:949` ne doit plus etre demande comme preuve directe. La collecte doit partir de l'ancre source `eAttrib:994` (`Bonus_Percent_Per_Power`) et relier explicitement le role local `949`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-source-packet.js`
+- `work/diablo4-data-exporter/scripts/test-sf32-owner-source-packet.js`
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/test-sf32-owner-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json`
+- `outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- ancien claim direct : `selector:949 -> SF_32`
+- statut ancien claim : suspendu
+- nouveau claim requis : `eAttrib:994 + local-role:949`
+- termes requis : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+- rejet explicite : `selector:949 direct seul`
+- packet `SF_32` : `templateNeedsRevision true`
+- bridge `SF_32` : ancre `eAttrib:994`, role local `local-role:949`
+- preuves acceptees reelles : `0`
+- bridge reel pret : `false`
+- `canModifyReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `128` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test packet `SF_32` : `sf32-owner-source-packet-test-ok`
+- test bridge `SF_32` : `sf32-owner-parser-bridge-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `128` etapes
+- plan optimiseur : packet `SF_32` avec claim `eAttrib:994 + local-role:949`
+- site : packet/bridge `SF_32` affichent l'ancre et le role local revises
+- serveur local : `http://127.0.0.1:4173/site/` OK
+
+Decision :
+
+Le pipeline n'accepte plus une preuve qui mappe seulement `selector:949` vers `SF_32`. Une preuve recevable doit relier `1663210`, l'ancre `eAttrib:994`, `Bonus_Percent_Per_Power`, le role local `949` et `SF_32`. Meme avec une preuve acceptee, le bridge ne modifiera pas `reliableDps`; `SF_33` et l'uptime devront rester prouves separement.

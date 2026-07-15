@@ -19,7 +19,19 @@ const acceptedEvidence = (intake.candidates ?? []).filter((candidate) =>
   candidate.status === "accepted"
   && candidate.domain === "delta-1663210"
   && candidate.claim?.type === "sf32-field-ownership"
-  && candidate.claim?.field === "selector:949");
+  && candidate.claim?.field === "eAttrib:994 + local-role:949");
+
+const revisedClaim = {
+  field: "eAttrib:994 + local-role:949",
+  mustContain: ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"],
+  rejects: [
+    "selector:949 direct seul",
+    "layout-analogy",
+    "metadata 12337 seule",
+    "scale 10 seul",
+    "label UI",
+  ],
+};
 
 const rejectedLocalSignals = (sf32.localEvidenceChecks ?? []).map((check) => ({
   id: check.id,
@@ -51,13 +63,15 @@ const sourcePacket = {
     assetId: 1663210,
     entityId: "skill:1663210",
     targetField: "SF_32",
-    targetSelector: "selector:949",
+    targetSelector: "eAttrib:994 + local-role:949",
     acceptedEvidence: acceptedEvidence.length,
     rejectedLocalSignals: rejectedLocalSignals.length,
     localEvidenceExhausted: sf32.summary?.sf32LocalExhausted === true,
     nextTaskId: sf32Task?.id ?? "delta-proof-sf32-owner",
     nextAcceptedClaimType: sf32Task?.claim?.type ?? "sf32-field-ownership",
-    nextAcceptedClaimField: sf32Task?.claim?.field ?? "selector:949",
+    nextAcceptedClaimField: revisedClaim.field,
+    priorSelector949DirectClaimSuspended: true,
+    templateNeedsRevision: true,
     parserBridgeRequired: true,
     canModifyReliableDps: false,
     promotionReady: false,
@@ -69,10 +83,10 @@ const sourcePacket = {
       promotionReady: false,
       finding: acceptedEvidence.length
         ? "Une preuve externe SF_32 est acceptee pour revue bridge, mais aucun DPS fiable n'est modifie."
-        : "Aucune preuve source-backed ne prouve encore selector:949 -> SF_32; les signaux locaux restent rejetes.",
+        : "Aucune preuve source-backed ne relie encore eAttrib:994, local-role:949 et SF_32; les signaux locaux restent rejetes.",
       nextAction: acceptedEvidence.length
         ? "Construire un parser bridge cible avec invariants de promotion separes."
-        : "Fournir une source officielle, extracted-game-data ou documented-dataset contenant 1663210 + selector:949 + SF_32.",
+        : "Fournir une source officielle, extracted-game-data ou documented-dataset contenant 1663210 + eAttrib:994 + Bonus_Percent_Per_Power + local-role:949 + SF_32.",
     },
   },
   requiredClaim: {
@@ -80,22 +94,27 @@ const sourcePacket = {
     assetId: 1663210,
     entityId: "skill:1663210",
     type: sf32Task?.claim?.type ?? "sf32-field-ownership",
-    field: sf32Task?.claim?.field ?? "selector:949",
-    mustContain: sf32Task?.mustContain ?? ["1663210", "selector:949", "SF_32"],
+    field: revisedClaim.field,
+    mustContain: revisedClaim.mustContain,
     acceptedSourceKinds: sf32Task?.requiredSourceKinds ?? ["official", "extracted-game-data", "tool-output", "documented-dataset"],
-    rejects: sf32Task?.rejects ?? ["layout-analogy", "metadata 12337 seule", "scale 10 seul", "label UI"],
+    rejects: revisedClaim.rejects,
+  },
+  supersededClaim: {
+    obsolete: true,
+    field: "selector:949",
+    reason: "DiabloTools mappe Bonus_Percent_Per_Power vers eAttrib 994; 949 doit etre traite comme role local non nomme.",
   },
   rejectedLocalSignals,
   intakeTemplate: sf32Task?.intakeTemplate ?? null,
   parserBridgeContract: {
     id: "parser-bridge-sf32-owner-selector-949",
     status: acceptedEvidence.length ? "ready-after-review" : "blocked-waiting-for-source",
-    input: "accepted external evidence claim sf32-field-ownership / selector:949",
-    output: "normalized field ownership mapping selector:949 -> SF_32 for asset 1663210",
+    input: "accepted external evidence claim sf32-field-ownership / eAttrib:994 + local-role:949",
+    output: "normalized field ownership mapping eAttrib:994 + local-role:949 -> SF_32 for asset 1663210",
     forbiddenOutputs: ["reliableDps", "promotionReady", "canUseForReliableDps"],
     requiredInvariants: [
       "accepted evidence exists",
-      "claim contains 1663210, selector:949 and SF_32",
+      "claim contains 1663210, eAttrib:994, Bonus_Percent_Per_Power, local-role:949 and SF_32",
       "reliableDps remains strict-only",
       "delta 48960 remains blocked until SF_33 and uptime are also proven",
     ],

@@ -73,6 +73,7 @@ const generationSteps = [
   "audit-delta-parent-nontext-table-signals.js",
   "build-sf32-local-exhaustion-conclusion.js",
   "build-sf32-owner-source-packet.js",
+  "test-sf32-owner-source-packet.js",
   "build-sf32-owner-parser-bridge.js",
   "test-sf32-owner-parser-bridge.js",
   "build-sf33-trigger-source-packet.js",
@@ -330,7 +331,11 @@ assertInvariant(sf32LocalExhaustionConclusion.summary.fieldOwnershipProven === f
 assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === true, "SF_32 local exhaustion conclusion should close local SF_32 exploration");
 assertInvariant(sf32OwnerSourcePacket.summary.canModifyReliableDps === false, "SF_32 owner source packet must not modify reliable DPS");
 assertInvariant(sf32OwnerSourcePacket.summary.parserBridgeRequired === true, "SF_32 owner source packet must require a parser bridge");
-assertInvariant(sf32OwnerSourcePacket.requiredClaim?.field === "selector:949", "SF_32 owner source packet must target selector:949");
+assertInvariant(sf32OwnerSourcePacket.summary.priorSelector949DirectClaimSuspended === true, "SF_32 owner source packet must suspend direct selector:949 claim");
+assertInvariant(sf32OwnerSourcePacket.summary.templateNeedsRevision === true, "SF_32 owner source packet must require revised template");
+assertInvariant(sf32OwnerSourcePacket.requiredClaim?.field === "eAttrib:994 + local-role:949", "SF_32 owner source packet must target revised 994 + local 949 claim");
+assertInvariant(sf32OwnerSourcePacket.requiredClaim?.mustContain?.includes("eAttrib:994"), "SF_32 owner source packet must require eAttrib:994");
+assertInvariant(sf32OwnerSourcePacket.requiredClaim?.mustContain?.includes("local-role:949"), "SF_32 owner source packet must require local-role:949");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.canModifyReliableDps === false, "SF_32 source hunt plan must not modify reliable DPS");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.searches === 4, "SF_32 source hunt plan must expose four searches");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetReady === true, "SF_32 source hunt plan must carry the pending candidate snippet");

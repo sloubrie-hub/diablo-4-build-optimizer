@@ -20,17 +20,19 @@ function acceptedEvidenceContainsRequiredTerms(evidence, requiredTerms) {
 
 const packet = readJson(sourcePacketFile);
 const reliableGates = readJson(reliableGatesFile);
-const requiredTerms = packet.requiredClaim?.mustContain ?? ["1663210", "selector:949", "SF_32"];
+const requiredTerms = packet.requiredClaim?.mustContain ?? ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"];
+const requiredField = packet.requiredClaim?.field ?? "eAttrib:994 + local-role:949";
 const acceptedEvidence = (packet.acceptedEvidence ?? []).filter((evidence) =>
   evidence.claim?.type === "sf32-field-ownership"
-  && evidence.claim?.field === "selector:949"
+  && evidence.claim?.field === requiredField
   && acceptedEvidenceContainsRequiredTerms(evidence, requiredTerms));
 
 const mappings = acceptedEvidence.map((evidence) => ({
-  id: "sf32-owner-selector-949",
+  id: "sf32-owner-eattrib-994-local-role-949",
   assetId: packet.summary?.assetId ?? 1663210,
   entityId: packet.summary?.entityId ?? "skill:1663210",
-  selector: "selector:949",
+  sourceAnchor: "eAttrib:994",
+  localRole: "local-role:949",
   ownerField: "SF_32",
   sourceEvidenceId: evidence.id,
   status: "normalized-from-accepted-evidence",
@@ -50,7 +52,8 @@ const report = {
   summary: {
     assetId: packet.summary?.assetId ?? 1663210,
     entityId: packet.summary?.entityId ?? "skill:1663210",
-    selector: "selector:949",
+    sourceAnchor: "eAttrib:994",
+    localRole: "local-role:949",
     ownerField: "SF_32",
     acceptedEvidence: acceptedEvidence.length,
     mappings: mappings.length,
@@ -65,7 +68,7 @@ const report = {
       confidence: "high",
       promotionReady: false,
       finding: bridgeReady
-        ? "Le mapping selector:949 -> SF_32 peut etre normalise depuis une preuve acceptee, sans modifier reliableDps."
+        ? "Le mapping eAttrib:994 + local-role:949 -> SF_32 peut etre normalise depuis une preuve acceptee, sans modifier reliableDps."
         : "Le bridge parser SF_32 reste bloque faute de preuve acceptee.",
       nextAction: bridgeReady
         ? "Consommer ce mapping dans une conclusion SF_32 dediee, puis garder le delta bloque tant que SF_33 et uptime manquent."
@@ -75,7 +78,7 @@ const report = {
   mappings,
   rejectedLocalSignals: packet.rejectedLocalSignals ?? [],
   requiredInvariants: [
-    "Le mapping exige une preuve acceptee sf32-field-ownership / selector:949.",
+    "Le mapping exige une preuve acceptee sf32-field-ownership / eAttrib:994 + local-role:949.",
     "Le mapping ne modifie pas reliableDps.",
     "Le mapping ne ferme pas SF_33 ni uptime.",
     "Le delta 48960 reste hors ranking fiable tant que toutes les gates ne passent pas.",

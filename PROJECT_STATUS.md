@@ -1760,3 +1760,16 @@ Build de reference :
   - promotions rejetees : selector `949`, metadata `12337`, scale `10`, adjacency binaire
   - plan optimiseur et site : nouveau panneau `Gap semantique SF_32`
   - decision : la preuve binaire est acceptee comme structurelle, mais il faut encore une table/dictionnaire ou parser champ exact avant bridge DPS
+- contrat source `SF_32` revise
+  - script modifie : `work/diablo4-data-exporter/scripts/build-sf32-owner-source-packet.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-sf32-owner-source-packet.js`
+  - bridge modifie : `work/diablo4-data-exporter/scripts/build-sf32-owner-parser-bridge.js`
+  - test bridge modifie : `work/diablo4-data-exporter/scripts/test-sf32-owner-parser-bridge.js`
+  - suite optimiseur : `128` etapes, statut `target-optimizer-suite-ok`
+  - ancien claim direct `selector:949 -> SF_32` : suspendu
+  - nouveau claim requis : `eAttrib:994 + local-role:949`
+  - termes requis : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+  - bridge `SF_32` : ancre `eAttrib:994`, role local `local-role:949`, statut reel bloque sans preuve acceptee
+  - reliableDps modifiable : `false`
+  - plan optimiseur et site : packet/bridge affichent l'ancre revisee
+  - decision : ne plus accepter une preuve `selector:949` seule; toute preuve doit relier l'ancre officielle `994` au role local `949` avant bridge
