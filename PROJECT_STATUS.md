@@ -1458,3 +1458,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Preview intake`
   - reliableDps modifiable : `false`
   - decision : produire une preview copiable seulement; aucune mutation de `inputs/external-evidence-candidates.json`
+- audit post-copy intake soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-external-evidence-submission-post-copy-intake.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-post-copy-intake.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-submission-post-copy-intake.json`
+  - suite optimiseur : `89` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - audit reel : `readyForManualReview false`, `addedCandidates 0`, preview bloquee
+  - test synthetique : `readyForManualReview true`, candidat `pending`, blocker `manual-review-required`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Post-copy intake`
+  - reliableDps modifiable : `false`
+  - decision : simuler la post-copie seulement; pending exige revue humaine et ne devient jamais accepted automatiquement

@@ -13,6 +13,7 @@ const EXTERNAL_DELTA_EVIDENCE_WORKORDER_URL = "../outputs/diablo4-external-delta
 const EXTERNAL_EVIDENCE_SUBMISSION_PACK_URL = "../outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json";
 const EXTERNAL_EVIDENCE_SUBMISSION_GATE_URL = "../outputs/diablo4-external-evidence-submission-gate/external-evidence-submission-gate.json";
 const EXTERNAL_EVIDENCE_SUBMISSION_INTAKE_PREVIEW_URL = "../outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json";
+const EXTERNAL_EVIDENCE_SUBMISSION_POST_COPY_INTAKE_URL = "../outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-submission-post-copy-intake.json";
 const NEW_BINARY_FAMILY_PLAN_URL = "../outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const NEW_BINARY_FAMILY_DELTA_PARENT_AUDIT_URL = "../outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const DELTA_PARENT_CONSUMER_CORPUS_SCAN_URL = "../outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -73,6 +74,7 @@ const state = {
   externalEvidenceSubmissionPack: null,
   externalEvidenceSubmissionGate: null,
   externalEvidenceSubmissionIntakePreview: null,
+  externalEvidenceSubmissionPostCopyIntake: null,
   newBinaryFamilyPlan: null,
   newBinaryFamilyDeltaParentAudit: null,
   deltaParentConsumerCorpusScan: null,
@@ -168,6 +170,7 @@ async function boot() {
     await loadExternalEvidenceSubmissionPack();
     await loadExternalEvidenceSubmissionGate();
     await loadExternalEvidenceSubmissionIntakePreview();
+    await loadExternalEvidenceSubmissionPostCopyIntake();
     await loadNewBinaryFamilyPlan();
     await loadNewBinaryFamilyDeltaParentAudit();
     await loadDeltaParentConsumerCorpusScan();
@@ -435,6 +438,10 @@ async function loadExternalEvidenceSubmissionIntakePreview() {
   state.externalEvidenceSubmissionIntakePreview = await fetchOptionalJson(EXTERNAL_EVIDENCE_SUBMISSION_INTAKE_PREVIEW_URL);
 }
 
+async function loadExternalEvidenceSubmissionPostCopyIntake() {
+  state.externalEvidenceSubmissionPostCopyIntake = await fetchOptionalJson(EXTERNAL_EVIDENCE_SUBMISSION_POST_COPY_INTAKE_URL);
+}
+
 async function loadNewBinaryFamilyPlan() {
   state.newBinaryFamilyPlan = await fetchOptionalJson(NEW_BINARY_FAMILY_PLAN_URL);
 }
@@ -661,6 +668,7 @@ function renderTargetOptimizerPlan() {
     ${renderExternalEvidenceSubmissionPack(state.externalEvidenceSubmissionPack ?? plan.externalEvidenceSubmissionPack)}
     ${renderExternalEvidenceSubmissionGate(state.externalEvidenceSubmissionGate ?? plan.externalEvidenceSubmissionGate)}
     ${renderExternalEvidenceSubmissionIntakePreview(state.externalEvidenceSubmissionIntakePreview ?? plan.externalEvidenceSubmissionIntakePreview)}
+    ${renderExternalEvidenceSubmissionPostCopyIntake(state.externalEvidenceSubmissionPostCopyIntake ?? plan.externalEvidenceSubmissionPostCopyIntake)}
     ${renderNewBinaryFamilyPlan(state.newBinaryFamilyPlan ?? plan.newBinaryFamilyPlan)}
     ${renderNewBinaryFamilyDeltaParentAudit(state.newBinaryFamilyDeltaParentAudit ?? plan.newBinaryFamilyDeltaParentAudit)}
     ${renderDeltaParentConsumerCorpusScan(state.deltaParentConsumerCorpusScan ?? plan.deltaParentConsumerCorpusScan)}
@@ -2997,6 +3005,46 @@ function renderExternalEvidenceSubmissionIntakePreview(report) {
           <span>preview</span>
           <strong>${candidate.id ?? "aucun candidat"}</strong>
           <p>${candidate.claim?.mapping ?? summary.assessment?.nextAction ?? ""}</p>
+        </article>
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderExternalEvidenceSubmissionPostCopyIntake(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const blockers = report.blockers ?? {};
+  return `
+    <div class="bonus-selector-proof external-evidence-submission-post-copy-intake">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Post-copy intake</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForManualReview ? "positive" : "blocked"}">
+          ${summary.readyForManualReview ? "revue prete" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidat", summary.candidateId ?? "n/a")}
+        ${targetMetric("Ajouts", formatNumber(summary.addedCandidates))}
+        ${targetMetric("Pending", formatNumber(summary.auditPending))}
+        ${targetMetric("Acceptes", formatNumber(summary.auditAccepted))}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Status ${summary.targetCandidateStatus ?? "n/a"}</span>
+        <span>Ecrit intake ${summary.writesRealIntake ? "oui" : "non"}</span>
+        <span>Bridge ${summary.acceptedForBridge ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        <article>
+          <span>blockers</span>
+          <strong>${(blockers.targetCandidateBlockers ?? []).join(", ") || "n/a"}</strong>
+          <p>${summary.assessment?.nextAction ?? ""}</p>
         </article>
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>

@@ -12001,3 +12001,47 @@ Validation :
 Decision :
 
 La preview reste bloquee tant que le gate de soumission ne passe pas. Meme quand le cas synthetique ajoute un candidat, il reste `pending`, sans bridge, sans promotion et sans ecriture dans l'intake reel.
+
+## Audit post-copy intake soumission preuve externe
+
+Un audit post-copie a ete ajoute pour le flux de soumission externe. Il simule l'etat de l'intake apres copie manuelle, puis relance l'audit intake sur le fichier simule, sans modifier l'intake reel.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-external-evidence-submission-post-copy-intake.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-post-copy-intake.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-submission-post-copy-intake.json`
+- `outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-candidates.submission-post-copy-simulated.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- audit reel : `readyForManualReview false`
+- candidats ajoutes reel : `0`
+- test synthetique : `readyForManualReview true`, `targetCandidateStatus pending`
+- blocker attendu : `manual-review-required`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `89` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit, le test, la suite, le plan optimiseur et le site
+- test post-copy intake : `external-evidence-submission-post-copy-intake-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `89` etapes
+- plan optimiseur : section `externalEvidenceSubmissionPostCopyIntake` presente
+- site : nouveau panneau `Post-copy intake`
+
+Decision :
+
+La simulation post-copie garde le candidat en `pending` et exige `manual-review-required`. Elle ne modifie pas l'intake reel, n'ouvre aucun bridge et ne change aucun score fiable.

@@ -20,6 +20,7 @@ const externalDeltaEvidenceWorkorderFile = "outputs/diablo4-external-delta-evide
 const externalEvidenceSubmissionPackFile = "outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json";
 const externalEvidenceSubmissionGateFile = "outputs/diablo4-external-evidence-submission-gate/external-evidence-submission-gate.json";
 const externalEvidenceSubmissionIntakePreviewFile = "outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json";
+const externalEvidenceSubmissionPostCopyIntakeFile = "outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-submission-post-copy-intake.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -506,6 +507,7 @@ const externalDeltaEvidenceWorkorder = readOptionalJson(externalDeltaEvidenceWor
 const externalEvidenceSubmissionPack = readOptionalJson(externalEvidenceSubmissionPackFile);
 const externalEvidenceSubmissionGate = readOptionalJson(externalEvidenceSubmissionGateFile);
 const externalEvidenceSubmissionIntakePreview = readOptionalJson(externalEvidenceSubmissionIntakePreviewFile);
+const externalEvidenceSubmissionPostCopyIntake = readOptionalJson(externalEvidenceSubmissionPostCopyIntakeFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
@@ -615,6 +617,7 @@ const report = {
     externalEvidenceSubmissionPackFile: externalEvidenceSubmissionPack ? externalEvidenceSubmissionPackFile : null,
     externalEvidenceSubmissionGateFile: externalEvidenceSubmissionGate ? externalEvidenceSubmissionGateFile : null,
     externalEvidenceSubmissionIntakePreviewFile: externalEvidenceSubmissionIntakePreview ? externalEvidenceSubmissionIntakePreviewFile : null,
+    externalEvidenceSubmissionPostCopyIntakeFile: externalEvidenceSubmissionPostCopyIntake ? externalEvidenceSubmissionPostCopyIntakeFile : null,
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
     newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
@@ -790,6 +793,16 @@ const report = {
         summary: externalEvidenceSubmissionIntakePreview.summary,
         candidatePreview: externalEvidenceSubmissionIntakePreview.candidatePreview,
         safeguards: externalEvidenceSubmissionIntakePreview.safeguards,
+      }
+    : null,
+  externalEvidenceSubmissionPostCopyIntake: externalEvidenceSubmissionPostCopyIntake
+    ? {
+        file: externalEvidenceSubmissionPostCopyIntakeFile,
+        summary: externalEvidenceSubmissionPostCopyIntake.summary,
+        candidateToCopy: externalEvidenceSubmissionPostCopyIntake.candidateToCopy,
+        targetCandidate: externalEvidenceSubmissionPostCopyIntake.targetCandidate,
+        blockers: externalEvidenceSubmissionPostCopyIntake.blockers,
+        safeguards: externalEvidenceSubmissionPostCopyIntake.safeguards,
       }
     : null,
   newBinaryFamilyPlan: newBinaryFamilyPlan

@@ -27,6 +27,8 @@ const generationSteps = [
   "test-external-evidence-submission-gate.js",
   "preview-external-evidence-submission-intake.js",
   "test-external-evidence-submission-intake-preview.js",
+  "audit-external-evidence-submission-post-copy-intake.js",
+  "test-external-evidence-submission-post-copy-intake.js",
   "build-next-evidence-roadmap.js",
   "build-new-binary-family-plan.js",
   "audit-new-binary-family-delta-parent.js",
@@ -129,6 +131,7 @@ const externalDeltaEvidenceWorkorder = readJson("outputs/diablo4-external-delta-
 const externalEvidenceSubmissionPack = readJson("outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json");
 const externalEvidenceSubmissionGate = readJson("outputs/diablo4-external-evidence-submission-gate/external-evidence-submission-gate.json");
 const externalEvidenceSubmissionIntakePreview = readJson("outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json");
+const externalEvidenceSubmissionPostCopyIntake = readJson("outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-submission-post-copy-intake.json");
 const newBinaryFamilyPlan = readJson("outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json");
 const newBinaryFamilyDeltaParentAudit = readJson("outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json");
 const deltaParentConsumerCorpusScan = readJson("outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json");
@@ -196,6 +199,9 @@ assertInvariant(externalEvidenceSubmissionGate.summary.readyForIntakeCopy === fa
 assertInvariant(externalEvidenceSubmissionIntakePreview.summary.canModifyReliableDps === false, "external evidence submission intake preview must not modify reliable DPS");
 assertInvariant(externalEvidenceSubmissionIntakePreview.summary.writesRealIntake === false, "external evidence submission intake preview must not write intake");
 assertInvariant(externalEvidenceSubmissionIntakePreview.summary.previewMergeReady === false, "real external evidence submission intake preview should remain blocked");
+assertInvariant(externalEvidenceSubmissionPostCopyIntake.summary.canModifyReliableDps === false, "external evidence submission post-copy intake must not modify reliable DPS");
+assertInvariant(externalEvidenceSubmissionPostCopyIntake.summary.writesRealIntake === false, "external evidence submission post-copy intake must not write intake");
+assertInvariant(externalEvidenceSubmissionPostCopyIntake.summary.readyForManualReview === false, "real external evidence submission post-copy intake should remain blocked");
 assertInvariant(newBinaryFamilyPlan.summary.canModifyReliableDps === false, "new binary family plan must not modify reliable DPS");
 assertInvariant(newBinaryFamilyPlan.summary.nextProbeId === "binary-family-delta-parent-1663210", "new binary family plan should prioritize the delta parent probe");
 assertInvariant(newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps === false, "new binary family delta parent audit must not modify reliable DPS");
@@ -393,6 +399,9 @@ const report = {
     { id: "external-evidence-submission-intake-preview-safe", status: "passed", value: externalEvidenceSubmissionIntakePreview.summary.canModifyReliableDps },
     { id: "external-evidence-submission-intake-preview-no-write", status: "passed", value: externalEvidenceSubmissionIntakePreview.summary.writesRealIntake },
     { id: "external-evidence-submission-intake-preview-blocked-real", status: "passed", value: externalEvidenceSubmissionIntakePreview.summary.previewMergeReady },
+    { id: "external-evidence-submission-post-copy-safe", status: "passed", value: externalEvidenceSubmissionPostCopyIntake.summary.canModifyReliableDps },
+    { id: "external-evidence-submission-post-copy-no-write", status: "passed", value: externalEvidenceSubmissionPostCopyIntake.summary.writesRealIntake },
+    { id: "external-evidence-submission-post-copy-blocked-real", status: "passed", value: externalEvidenceSubmissionPostCopyIntake.summary.readyForManualReview },
     { id: "new-binary-family-plan-safe", status: "passed", value: newBinaryFamilyPlan.summary.canModifyReliableDps },
     { id: "new-binary-family-priority-delta", status: "passed", value: newBinaryFamilyPlan.summary.nextProbeId },
     { id: "new-binary-family-delta-parent-safe", status: "passed", value: newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps },
@@ -562,6 +571,7 @@ assertInvariant(optimizerPlan.externalDeltaEvidenceWorkorder?.summary?.canModify
 assertInvariant(optimizerPlan.externalEvidenceSubmissionPack?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission pack");
 assertInvariant(optimizerPlan.externalEvidenceSubmissionGate?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission gate");
 assertInvariant(optimizerPlan.externalEvidenceSubmissionIntakePreview?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission intake preview");
+assertInvariant(optimizerPlan.externalEvidenceSubmissionPostCopyIntake?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission post-copy intake");
 assertInvariant(optimizerPlan.newBinaryFamilyPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe new binary family plan");
 assertInvariant(optimizerPlan.newBinaryFamilyDeltaParentAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent audit");
 assertInvariant(optimizerPlan.deltaParentConsumerCorpusScan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent corpus scan");
