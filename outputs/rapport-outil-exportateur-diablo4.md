@@ -12453,3 +12453,47 @@ Validation :
 Decision :
 
 DiabloTools aide fortement, mais pas comme preuve directe `SF_32`. Il contredit l'hypothese `selector:949 = Bonus_Percent_Per_Power`; dans ce dictionnaire, `Bonus_Percent_Per_Power` est `eAttrib 994`. La prochaine etape doit donc reconcilier la semantique du raw `949` local avant toute preuve `SF_32` ou promotion de delta.
+
+## Reconciliation selector 949
+
+Un audit de reconciliation a ete ajoute pour comparer les anciens selecteurs locaux avec la source DiabloTools. Il consolide la matrice `Bonus_Percent_Per_Power`, l'audit pair-a-pair `selector:949`, l'audit `metadata 12337` et le dictionnaire `attributes.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-selector-949-reconciliation-audit.js`
+- `work/diablo4-data-exporter/scripts/test-selector-949-reconciliation-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- `selector 994` aligne avec DiabloTools : `true`
+- `selector 949` contredit par DiabloTools : `true`
+- compact `949` unique : `true`
+- metadata `12337/10` transverse : `true`
+- reinterpretation requise : `true`
+- next focus : `reinterpret-local-949-as-non-eattrib-or-wrapper`
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `111` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la reconciliation 949, le test, la suite, le plan optimiseur et le site
+- test reconciliation : `selector-949-reconciliation-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `111` etapes
+- plan optimiseur : section `selector949ReconciliationAudit` presente
+- site : nouveau panneau `Reconciliation 949`
+
+Decision :
+
+Le `selector 994` devient l'ancre source-backed pour `Bonus_Percent_Per_Power`. Le `949` local ne doit plus etre traite comme preuve directe de ce champ; il faut reparser la fenetre `1663210` comme possible wrapper, opcode, layout local ou champ different avant de corriger les templates `SF_32`. Aucun bridge et aucune promotion DPS ne sont ouverts.

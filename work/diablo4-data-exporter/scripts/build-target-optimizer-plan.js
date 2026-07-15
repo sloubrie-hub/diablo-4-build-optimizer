@@ -43,6 +43,7 @@ const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion
 const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
+const selector949ReconciliationAuditFile = "outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const sf32OwnerParserBridgeFile = "outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const sf33TriggerSourcePacketFile = "outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const sf33TriggerParserBridgeFile = "outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -540,6 +541,7 @@ const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclu
 const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
 const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
 const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
+const selector949ReconciliationAudit = readOptionalJson(selector949ReconciliationAuditFile);
 const sf32OwnerParserBridge = readOptionalJson(sf32OwnerParserBridgeFile);
 const sf33TriggerSourcePacket = readOptionalJson(sf33TriggerSourcePacketFile);
 const sf33TriggerParserBridge = readOptionalJson(sf33TriggerParserBridgeFile);
@@ -660,6 +662,7 @@ const report = {
     sf32OwnerSourcePacketFile: sf32OwnerSourcePacket ? sf32OwnerSourcePacketFile : null,
     sf32OwnerSourceHuntPlanFile: sf32OwnerSourceHuntPlan ? sf32OwnerSourceHuntPlanFile : null,
     diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
+    selector949ReconciliationAuditFile: selector949ReconciliationAudit ? selector949ReconciliationAuditFile : null,
     sf32OwnerParserBridgeFile: sf32OwnerParserBridge ? sf32OwnerParserBridgeFile : null,
     sf33TriggerSourcePacketFile: sf33TriggerSourcePacket ? sf33TriggerSourcePacketFile : null,
     sf33TriggerParserBridgeFile: sf33TriggerParserBridge ? sf33TriggerParserBridgeFile : null,
@@ -1050,6 +1053,15 @@ const report = {
         evidence: diabloToolsAttributeSourceAudit.evidence,
         impact: diabloToolsAttributeSourceAudit.impact,
         safeguards: diabloToolsAttributeSourceAudit.safeguards,
+      }
+    : null,
+  selector949ReconciliationAudit: selector949ReconciliationAudit
+    ? {
+        file: selector949ReconciliationAuditFile,
+        summary: selector949ReconciliationAudit.summary,
+        selectorFindings: selector949ReconciliationAudit.selectorFindings,
+        revisedHypotheses: selector949ReconciliationAudit.revisedHypotheses,
+        safeguards: selector949ReconciliationAudit.safeguards,
       }
     : null,
   sf32OwnerParserBridge: sf32OwnerParserBridge

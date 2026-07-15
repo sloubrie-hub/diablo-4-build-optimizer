@@ -1608,3 +1608,16 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `DiabloTools attributes`
   - reliableDps modifiable : `false`
   - decision : reviser l'hypothese `selector:949` avant toute preuve `SF_32`; verifier si le raw `949` local est vraiment un `eAttrib` ou un autre index
+- audit reconciliation `selector:949` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-selector-949-reconciliation-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-selector-949-reconciliation-audit.js`
+  - rapport genere : `outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json`
+  - suite optimiseur : `111` etapes, statut `target-optimizer-suite-ok`
+  - alignement : `selector 994` = `Bonus_Percent_Per_Power` confirme par DiabloTools
+  - conflit : `selector 949` contredit par DiabloTools (`Damage_Percent_Reduction_From_Elites`)
+  - compact `949/asset/metadata/scale` : unique a `1663210`
+  - metadata `12337/10` : transverse a plusieurs selecteurs
+  - next focus : `reinterpret-local-949-as-non-eattrib-or-wrapper`
+  - plan optimiseur et site : nouveau panneau `Reconciliation 949`
+  - reliableDps modifiable : `false`
+  - decision : ne plus traiter `949` comme preuve directe `Bonus_Percent_Per_Power`; reparser la fenetre `1663210` comme wrapper/layout local avant de corriger les templates `SF_32`

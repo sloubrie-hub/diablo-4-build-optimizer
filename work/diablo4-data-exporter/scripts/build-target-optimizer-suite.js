@@ -113,6 +113,8 @@ const generationSteps = [
   "test-sf32-owner-source-hunt-plan.js",
   "build-diablo-tools-attribute-source-audit.js",
   "test-diablo-tools-attribute-source-audit.js",
+  "build-selector-949-reconciliation-audit.js",
+  "test-selector-949-reconciliation-audit.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -174,6 +176,7 @@ const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhau
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
 const sf32OwnerSourceHuntPlan = readJson("outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json");
 const diabloToolsAttributeSourceAudit = readJson("outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json");
+const selector949ReconciliationAudit = readJson("outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json");
 const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json");
 const sf33TriggerSourcePacket = readJson("outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json");
 const sf33TriggerParserBridge = readJson("outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json");
@@ -309,6 +312,10 @@ assertInvariant(diabloToolsAttributeSourceAudit.summary.canModifyReliableDps ===
 assertInvariant(diabloToolsAttributeSourceAudit.summary.selector949Name === "Damage_Percent_Reduction_From_Elites", "DiabloTools must map eAttrib 949 to Damage_Percent_Reduction_From_Elites");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib === 994, "DiabloTools must map Bonus_Percent_Per_Power to eAttrib 994");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.sourceContradictsPriorSelectorAssumption === true, "DiabloTools audit must flag selector assumption mismatch");
+assertInvariant(selector949ReconciliationAudit.summary.canModifyReliableDps === false, "selector 949 reconciliation must not modify reliable DPS");
+assertInvariant(selector949ReconciliationAudit.summary.selector994Aligned === true, "selector 949 reconciliation must align selector 994");
+assertInvariant(selector949ReconciliationAudit.summary.selector949Contradicted === true, "selector 949 reconciliation must flag 949 contradiction");
+assertInvariant(selector949ReconciliationAudit.summary.needsReinterpretation === true, "selector 949 reconciliation must require reinterpretation");
 assertInvariant(sf32OwnerParserBridge.summary.canModifyReliableDps === false, "SF_32 owner parser bridge must not modify reliable DPS");
 assertInvariant(sf32OwnerParserBridge.summary.bridgeReady === false, "real SF_32 owner parser bridge should remain blocked without accepted evidence");
 assertInvariant(sf32OwnerParserBridge.summary.reliableDpsStillBlocked === true, "SF_32 owner parser bridge must keep reliable gates blocked");
@@ -553,6 +560,10 @@ const report = {
     { id: "diablo-tools-attribute-audit-949-name", status: "passed", value: diabloToolsAttributeSourceAudit.summary.selector949Name },
     { id: "diablo-tools-attribute-audit-bonus-eattrib", status: "passed", value: diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib },
     { id: "diablo-tools-attribute-audit-contradiction", status: "passed", value: diabloToolsAttributeSourceAudit.summary.sourceContradictsPriorSelectorAssumption },
+    { id: "selector-949-reconciliation-safe", status: "passed", value: selector949ReconciliationAudit.summary.canModifyReliableDps },
+    { id: "selector-949-reconciliation-994-aligned", status: "passed", value: selector949ReconciliationAudit.summary.selector994Aligned },
+    { id: "selector-949-reconciliation-949-conflict", status: "passed", value: selector949ReconciliationAudit.summary.selector949Contradicted },
+    { id: "selector-949-reconciliation-next-focus", status: "passed", value: selector949ReconciliationAudit.summary.recommendedNextFocus },
     { id: "sf32-owner-parser-bridge-safe", status: "passed", value: sf32OwnerParserBridge.summary.canModifyReliableDps },
     { id: "sf32-owner-parser-bridge-blocked-real", status: "passed", value: sf32OwnerParserBridge.summary.bridgeReady },
     { id: "sf32-owner-parser-bridge-gates-blocked", status: "passed", value: sf32OwnerParserBridge.summary.reliableDpsStillBlocked },
@@ -712,6 +723,7 @@ assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyR
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
 assertInvariant(optimizerPlan.sf32OwnerSourceHuntPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source hunt plan");
 assertInvariant(optimizerPlan.diabloToolsAttributeSourceAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe DiabloTools attribute audit");
+assertInvariant(optimizerPlan.selector949ReconciliationAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 reconciliation audit");
 assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner parser bridge");
 assertInvariant(optimizerPlan.sf33TriggerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger source packet");
 assertInvariant(optimizerPlan.sf33TriggerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger parser bridge");

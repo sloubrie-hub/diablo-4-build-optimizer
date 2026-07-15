@@ -36,6 +36,7 @@ const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exha
 const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
+const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -107,6 +108,7 @@ const state = {
   sf32OwnerSourcePacket: null,
   sf32OwnerSourceHuntPlan: null,
   diabloToolsAttributeSourceAudit: null,
+  selector949ReconciliationAudit: null,
   sf32OwnerParserBridge: null,
   sf33TriggerSourcePacket: null,
   sf33TriggerParserBridge: null,
@@ -213,6 +215,7 @@ async function boot() {
     await loadSf32OwnerSourcePacket();
     await loadSf32OwnerSourceHuntPlan();
     await loadDiabloToolsAttributeSourceAudit();
+    await loadSelector949ReconciliationAudit();
     await loadSf32OwnerParserBridge();
     await loadSf33TriggerSourcePacket();
     await loadSf33TriggerParserBridge();
@@ -560,6 +563,10 @@ async function loadDiabloToolsAttributeSourceAudit() {
   state.diabloToolsAttributeSourceAudit = await fetchOptionalJson(DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL);
 }
 
+async function loadSelector949ReconciliationAudit() {
+  state.selector949ReconciliationAudit = await fetchOptionalJson(SELECTOR_949_RECONCILIATION_AUDIT_URL);
+}
+
 async function loadSf32OwnerParserBridge() {
   state.sf32OwnerParserBridge = await fetchOptionalJson(SF32_OWNER_PARSER_BRIDGE_URL);
 }
@@ -761,6 +768,7 @@ function renderTargetOptimizerPlan() {
     ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
     ${renderSf32OwnerSourceHuntPlan(state.sf32OwnerSourceHuntPlan ?? plan.sf32OwnerSourceHuntPlan)}
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
+    ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
     ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
     ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
@@ -1656,6 +1664,54 @@ function renderDiabloToolsAttributeSourceAudit(report) {
       <div class="suite-invariant-list">
         ${(evidence.selector949 ?? []).map((item) => `<span class="failed">949: ${item.name}</span>`).join("")}
         ${(evidence.selector994 ?? []).map((item) => `<span class="passed">994: ${item.name}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSelector949ReconciliationAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const findings = report.selectorFindings ?? [];
+  const hypotheses = report.revisedHypotheses ?? [];
+  return `
+    <div class="bonus-selector-proof selector-949-reconciliation-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Reconciliation 949</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.needsReinterpretation ? "blocked" : "positive"}">
+          ${summary.needsReinterpretation ? "a reinterpreter" : "stable"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("994", summary.selector994Aligned ? "aligne" : "non")}
+        ${targetMetric("949", summary.selector949Contradicted ? "conflit" : "ouvert")}
+        ${targetMetric("Compact", summary.compact949Unique ? "unique" : "repete")}
+        ${targetMetric("Focus", summary.recommendedNextFocus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Bridge ${summary.acceptedForBridge ? "ouvert" : "ferme"}</span>
+        <span>Metadata ${summary.metadataCrossSelector ? "transverse" : "locale"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "non"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${findings.map((item) => `
+          <span class="${item.status === "aligned" ? "passed" : "failed"}">${item.id}: ${item.status}</span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${hypotheses.map((item) => `
+          <article>
+            <span>${item.status} - ${item.confidence}</span>
+            <strong>${item.id}</strong>
+            <p>${item.implication}</p>
+          </article>
+        `).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
