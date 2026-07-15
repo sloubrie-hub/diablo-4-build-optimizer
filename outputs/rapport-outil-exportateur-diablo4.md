@@ -12497,3 +12497,51 @@ Validation :
 Decision :
 
 Le `selector 994` devient l'ancre source-backed pour `Bonus_Percent_Per_Power`. Le `949` local ne doit plus etre traite comme preuve directe de ce champ; il faut reparser la fenetre `1663210` comme possible wrapper, opcode, layout local ou champ different avant de corriger les templates `SF_32`. Aucun bridge et aucune promotion DPS ne sont ouverts.
+
+## Reparse fenetre selector 949
+
+Un audit de reparse de la fenetre locale `1663210` a ete ajoute pour transformer la contradiction DiabloTools en garde-fou executable. Il compare les exemples directs `selector 994`, les exemples locaux `selector 949`, le compact `949/asset/metadata/scale` et la transversalite de `metadata 12337/10`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-selector-949-window-reparse-audit.js`
+- `work/diablo4-data-exporter/scripts/test-selector-949-window-reparse-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- exemples directs `selector 994` : `3`
+- exemples `selector 949` : `2`
+- compact `selector 949` : `1`
+- non compact `selector 949` : `1`
+- `selector 994` aligne avec `Bonus_Percent_Per_Power` : `true`
+- `selector 949` n'est pas l'eAttrib bonus : `true`
+- fenetre compacte avec asset inline : `true`
+- metadata `12337/10` transverse : `true`
+- verdict : `wrapper-or-layout-candidate`
+- revision template `SF_32` requise : `true`
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `113` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit reparse 949, le test, la suite, le plan optimiseur et le site
+- test reparse 949 : `selector-949-window-reparse-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `113` etapes
+- plan optimiseur : section `selector949WindowReparseAudit` presente
+- site : nouveau panneau `Reparse fenetre 949`
+
+Decision :
+
+La demande directe `selector:949 -> SF_32` est suspendue. La prochaine passe doit construire le parser autour de l'ancre source-backed `994` pour `Bonus_Percent_Per_Power` et traiter `949` comme role local a decoder. Le DPS fiable reste strict-only.

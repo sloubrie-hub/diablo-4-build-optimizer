@@ -1621,3 +1621,16 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Reconciliation 949`
   - reliableDps modifiable : `false`
   - decision : ne plus traiter `949` comme preuve directe `Bonus_Percent_Per_Power`; reparser la fenetre `1663210` comme wrapper/layout local avant de corriger les templates `SF_32`
+- audit reparse fenetre `selector:949` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-selector-949-window-reparse-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-selector-949-window-reparse-audit.js`
+  - rapport genere : `outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json`
+  - suite optimiseur : `113` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - `selector 994` : `3` exemples directs `Bonus_Percent_Per_Power`, aligne avec DiabloTools
+  - `selector 949` : `2` exemples locaux, `1` compact unique, `1` non compact
+  - verdict : `wrapper-or-layout-candidate`
+  - template `SF_32` : revision requise `true`
+  - plan optimiseur et site : nouveau panneau `Reparse fenetre 949`
+  - reliableDps modifiable : `false`
+  - decision : suspendre la demande directe `selector:949 -> SF_32`; utiliser `994` comme ancre bonus et traiter `949` comme role local a decoder

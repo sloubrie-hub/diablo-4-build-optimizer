@@ -37,6 +37,7 @@ const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packe
 const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
+const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -109,6 +110,7 @@ const state = {
   sf32OwnerSourceHuntPlan: null,
   diabloToolsAttributeSourceAudit: null,
   selector949ReconciliationAudit: null,
+  selector949WindowReparseAudit: null,
   sf32OwnerParserBridge: null,
   sf33TriggerSourcePacket: null,
   sf33TriggerParserBridge: null,
@@ -216,6 +218,7 @@ async function boot() {
     await loadSf32OwnerSourceHuntPlan();
     await loadDiabloToolsAttributeSourceAudit();
     await loadSelector949ReconciliationAudit();
+    await loadSelector949WindowReparseAudit();
     await loadSf32OwnerParserBridge();
     await loadSf33TriggerSourcePacket();
     await loadSf33TriggerParserBridge();
@@ -567,6 +570,10 @@ async function loadSelector949ReconciliationAudit() {
   state.selector949ReconciliationAudit = await fetchOptionalJson(SELECTOR_949_RECONCILIATION_AUDIT_URL);
 }
 
+async function loadSelector949WindowReparseAudit() {
+  state.selector949WindowReparseAudit = await fetchOptionalJson(SELECTOR_949_WINDOW_REPARSE_AUDIT_URL);
+}
+
 async function loadSf32OwnerParserBridge() {
   state.sf32OwnerParserBridge = await fetchOptionalJson(SF32_OWNER_PARSER_BRIDGE_URL);
 }
@@ -769,6 +776,7 @@ function renderTargetOptimizerPlan() {
     ${renderSf32OwnerSourceHuntPlan(state.sf32OwnerSourceHuntPlan ?? plan.sf32OwnerSourceHuntPlan)}
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
+    ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
     ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
     ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
@@ -1710,6 +1718,54 @@ function renderSelector949ReconciliationAudit(report) {
             <span>${item.status} - ${item.confidence}</span>
             <strong>${item.id}</strong>
             <p>${item.implication}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSelector949WindowReparseAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const comparisons = report.comparisons ?? [];
+  const claims = report.revisedClaims ?? [];
+  return `
+    <div class="bonus-selector-proof selector-949-window-reparse-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Reparse fenetre 949</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.sf32TemplateNeedsRevision ? "blocked" : "positive"}">
+          ${summary.sf32TemplateNeedsRevision ? "template a reviser" : "stable"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("994 directs", summary.selector994DirectExamples ?? 0)}
+        ${targetMetric("949", summary.selector949Examples ?? 0)}
+        ${targetMetric("Compact", `${summary.selector949CompactExamples ?? 0}/${summary.selector949NonCompactExamples ?? 0}`)}
+        ${targetMetric("Statut", summary.windowReparseStatus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>949 ${summary.selector949NotBonusEAttrib ? "pas bonus" : "ouvert"}</span>
+        <span>994 ${summary.selector994AlignedWithAttribute ? "source-backed" : "non prouve"}</span>
+        <span>Bridge ${summary.acceptedForBridge ? "ouvert" : "ferme"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${comparisons.map((item) => `
+          <span class="${item.status === "source-backed" ? "passed" : "failed"}">${item.id}: ${item.status}</span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${claims.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.id}</strong>
+            <p>${item.reason}</p>
           </article>
         `).join("")}
       </div>
