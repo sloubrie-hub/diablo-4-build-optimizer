@@ -42,6 +42,7 @@ const deltaNextActionDecisionFile = "outputs/diablo4-delta-next-action-decision/
 const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
+const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const sf32OwnerParserBridgeFile = "outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const sf33TriggerSourcePacketFile = "outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const sf33TriggerParserBridgeFile = "outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -538,6 +539,7 @@ const deltaNextActionDecision = readOptionalJson(deltaNextActionDecisionFile);
 const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclusionFile);
 const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
 const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
+const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
 const sf32OwnerParserBridge = readOptionalJson(sf32OwnerParserBridgeFile);
 const sf33TriggerSourcePacket = readOptionalJson(sf33TriggerSourcePacketFile);
 const sf33TriggerParserBridge = readOptionalJson(sf33TriggerParserBridgeFile);
@@ -657,6 +659,7 @@ const report = {
     sf32LocalExhaustionConclusionFile: sf32LocalExhaustionConclusion ? sf32LocalExhaustionConclusionFile : null,
     sf32OwnerSourcePacketFile: sf32OwnerSourcePacket ? sf32OwnerSourcePacketFile : null,
     sf32OwnerSourceHuntPlanFile: sf32OwnerSourceHuntPlan ? sf32OwnerSourceHuntPlanFile : null,
+    diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
     sf32OwnerParserBridgeFile: sf32OwnerParserBridge ? sf32OwnerParserBridgeFile : null,
     sf33TriggerSourcePacketFile: sf33TriggerSourcePacket ? sf33TriggerSourcePacketFile : null,
     sf33TriggerParserBridgeFile: sf33TriggerParserBridge ? sf33TriggerParserBridgeFile : null,
@@ -1037,6 +1040,16 @@ const report = {
         acceptanceChecklist: sf32OwnerSourceHuntPlan.acceptanceChecklist,
         rejectionChecklist: sf32OwnerSourceHuntPlan.rejectionChecklist,
         safeguards: sf32OwnerSourceHuntPlan.safeguards,
+      }
+    : null,
+  diabloToolsAttributeSourceAudit: diabloToolsAttributeSourceAudit
+    ? {
+        file: diabloToolsAttributeSourceAuditFile,
+        source: diabloToolsAttributeSourceAudit.source,
+        summary: diabloToolsAttributeSourceAudit.summary,
+        evidence: diabloToolsAttributeSourceAudit.evidence,
+        impact: diabloToolsAttributeSourceAudit.impact,
+        safeguards: diabloToolsAttributeSourceAudit.safeguards,
       }
     : null,
   sf32OwnerParserBridge: sf32OwnerParserBridge

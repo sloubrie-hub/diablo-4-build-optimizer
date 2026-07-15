@@ -1593,3 +1593,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Recherche source SF_32`
   - reliableDps modifiable : `false`
   - decision : chercher une source exacte sans ecriture intake ni approbation automatique; aucun resultat public exact exploitable trouve pendant le controle manuel
+- audit source DiabloTools attributes ajoute
+  - source verifiee : `https://github.com/DiabloTools/Diablo4Tools-Releases`, release `2026-06-19 Diablo IV 3.0.4`
+  - archive inspectee : `outputs/tools/Diablo4Tools_2026-06-19_win.7z`
+  - hash SHA256 conforme : `4c3b8dd01c43b82cc37dd65b384c17a4de4c02b878ba6f5885424b9c0e9b57f0`
+  - donnees extraites : `outputs/tools/Diablo4Tools_2026-06-19_data/data/attributes.json` et `data/names/*`
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-diablo-tools-attribute-source-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-diablo-tools-attribute-source-audit.js`
+  - rapport genere : `outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json`
+  - suite optimiseur : `109` etapes, statut `target-optimizer-suite-ok`
+  - constat critique : `eAttrib 949 = Damage_Percent_Reduction_From_Elites`
+  - constat critique : `Bonus_Percent_Per_Power = eAttrib 994`
+  - contradiction : `selector:949` ne mappe pas vers `Bonus_Percent_Per_Power` dans DiabloTools
+  - plan optimiseur et site : nouveau panneau `DiabloTools attributes`
+  - reliableDps modifiable : `false`
+  - decision : reviser l'hypothese `selector:949` avant toute preuve `SF_32`; verifier si le raw `949` local est vraiment un `eAttrib` ou un autre index

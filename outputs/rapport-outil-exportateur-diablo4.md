@@ -12409,3 +12409,47 @@ Validation :
 Decision :
 
 Aucune preuve n'est creee ou approuvee par ce plan. Les recherches doivent produire une source contenant explicitement `1663210`, `selector:949` et `SF_32`; sinon le candidat reste pending et le bridge reste ferme. Un controle web manuel exact n'a pas trouve de resultat public exploitable, donc la suite probable est soit une source fournie/importee, soit la sonde de nouvelle famille binaire.
+
+## Audit source DiabloTools attributes
+
+Le depot `DiabloTools/Diablo4Tools-Releases` a ete inspecte comme source externe potentielle. La release `2026-06-19 Diablo IV 3.0.4` fournit `D4Analyzer` et des donnees embarquees, dont `attributes.json` et plusieurs dictionnaires de noms. L'archive a ete telechargee, son SHA256 verifie, puis seuls les fichiers `data/` ont ete extraits pour inspection.
+
+Fichiers modifies ou ajoutes :
+
+- `outputs/tools/Diablo4Tools_2026-06-19_win.7z`
+- `outputs/tools/Diablo4Tools_2026-06-19_data/data/attributes.json`
+- `outputs/tools/Diablo4Tools_2026-06-19_data/data/names/*`
+- `work/diablo4-data-exporter/scripts/build-diablo-tools-attribute-source-audit.js`
+- `work/diablo4-data-exporter/scripts/test-diablo-tools-attribute-source-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- source : `DiabloTools attributes.json`
+- release : `2026-06-19 Diablo IV 3.0.4`
+- hash archive conforme : `true`
+- `eAttrib 949` : `Damage_Percent_Reduction_From_Elites`
+- `Bonus_Percent_Per_Power` : `eAttrib 994`
+- `selector:949` mappe vers `Bonus_Percent_Per_Power` : `false`
+- contradiction de l'hypothese precedente : `true`
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `109` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit DiabloTools, le test, la suite, le plan optimiseur et le site
+- test audit DiabloTools : `diablo-tools-attribute-source-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `109` etapes
+- plan optimiseur : section `diabloToolsAttributeSourceAudit` presente
+- site : nouveau panneau `DiabloTools attributes`
+
+Decision :
+
+DiabloTools aide fortement, mais pas comme preuve directe `SF_32`. Il contredit l'hypothese `selector:949 = Bonus_Percent_Per_Power`; dans ce dictionnaire, `Bonus_Percent_Per_Power` est `eAttrib 994`. La prochaine etape doit donc reconcilier la semantique du raw `949` local avant toute preuve `SF_32` ou promotion de delta.
