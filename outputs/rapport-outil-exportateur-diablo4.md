@@ -12361,3 +12361,51 @@ Validation :
 Decision :
 
 La prochaine action prioritaire est de collecter une preuve externe source-backed pour le delta, en commencant par `delta-proof-sf32-owner`. Si cette piste ne peut pas etre alimentee, la deuxieme action utile est une nouvelle famille binaire source-backed. Le scenario utilisateur what-if reste conserve, mais hors `reliableDps` et hors ranking fiable.
+
+## Plan collecte source SF_32
+
+Un plan de collecte source a ete ajoute pour la preuve `delta-proof-sf32-owner`. Il transforme la decision `collect-source-backed-delta-proof` en recherches exactes et en criteres d'acceptation/rejet pour `selector:949 -> SF_32`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-source-hunt-plan.js`
+- `work/diablo4-data-exporter/scripts/test-sf32-owner-source-hunt-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json`
+- `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.md`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- mapping recherche : `selector:949 -> SF_32`
+- action recommandee : `collect-source-backed-delta-proof`
+- recherches : `4`
+- recherches priorite haute : `2`
+- termes requis : `1663210`, `selector:949`, `SF_32`
+- signaux locaux rejetes conserves : `7`
+- snippet candidat pending : `true`
+- accepted evidence : `0`
+- `writesIntake false`
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `107` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le plan de collecte SF_32, le test, la suite, le plan optimiseur et le site
+- test plan collecte SF_32 : `sf32-owner-source-hunt-plan-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `107` etapes
+- plan optimiseur : section `sf32OwnerSourceHuntPlan` presente
+- site : nouveau panneau `Recherche source SF_32`
+
+Decision :
+
+Aucune preuve n'est creee ou approuvee par ce plan. Les recherches doivent produire une source contenant explicitement `1663210`, `selector:949` et `SF_32`; sinon le candidat reste pending et le bridge reste ferme. Un controle web manuel exact n'a pas trouve de resultat public exploitable, donc la suite probable est soit une source fournie/importee, soit la sonde de nouvelle famille binaire.

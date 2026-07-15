@@ -109,6 +109,8 @@ const generationSteps = [
   "build-delta-local-exhaustion-conclusion.js",
   "build-delta-next-action-decision.js",
   "test-delta-next-action-decision.js",
+  "build-sf32-owner-source-hunt-plan.js",
+  "test-sf32-owner-source-hunt-plan.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -168,6 +170,7 @@ const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exh
 const deltaNextActionDecision = readJson("outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json");
 const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
+const sf32OwnerSourceHuntPlan = readJson("outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json");
 const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json");
 const sf33TriggerSourcePacket = readJson("outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json");
 const sf33TriggerParserBridge = readJson("outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json");
@@ -296,6 +299,9 @@ assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === tru
 assertInvariant(sf32OwnerSourcePacket.summary.canModifyReliableDps === false, "SF_32 owner source packet must not modify reliable DPS");
 assertInvariant(sf32OwnerSourcePacket.summary.parserBridgeRequired === true, "SF_32 owner source packet must require a parser bridge");
 assertInvariant(sf32OwnerSourcePacket.requiredClaim?.field === "selector:949", "SF_32 owner source packet must target selector:949");
+assertInvariant(sf32OwnerSourceHuntPlan.summary.canModifyReliableDps === false, "SF_32 source hunt plan must not modify reliable DPS");
+assertInvariant(sf32OwnerSourceHuntPlan.summary.searches === 4, "SF_32 source hunt plan must expose four searches");
+assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetReady === true, "SF_32 source hunt plan must carry the pending candidate snippet");
 assertInvariant(sf32OwnerParserBridge.summary.canModifyReliableDps === false, "SF_32 owner parser bridge must not modify reliable DPS");
 assertInvariant(sf32OwnerParserBridge.summary.bridgeReady === false, "real SF_32 owner parser bridge should remain blocked without accepted evidence");
 assertInvariant(sf32OwnerParserBridge.summary.reliableDpsStillBlocked === true, "SF_32 owner parser bridge must keep reliable gates blocked");
@@ -533,6 +539,9 @@ const report = {
     { id: "sf32-owner-source-packet-safe", status: "passed", value: sf32OwnerSourcePacket.summary.canModifyReliableDps },
     { id: "sf32-owner-source-packet-bridge-required", status: "passed", value: sf32OwnerSourcePacket.summary.parserBridgeRequired },
     { id: "sf32-owner-source-packet-field", status: "passed", value: sf32OwnerSourcePacket.requiredClaim?.field },
+    { id: "sf32-owner-source-hunt-safe", status: "passed", value: sf32OwnerSourceHuntPlan.summary.canModifyReliableDps },
+    { id: "sf32-owner-source-hunt-searches", status: "passed", value: sf32OwnerSourceHuntPlan.summary.searches },
+    { id: "sf32-owner-source-hunt-snippet-ready", status: "passed", value: sf32OwnerSourceHuntPlan.summary.candidateSnippetReady },
     { id: "sf32-owner-parser-bridge-safe", status: "passed", value: sf32OwnerParserBridge.summary.canModifyReliableDps },
     { id: "sf32-owner-parser-bridge-blocked-real", status: "passed", value: sf32OwnerParserBridge.summary.bridgeReady },
     { id: "sf32-owner-parser-bridge-gates-blocked", status: "passed", value: sf32OwnerParserBridge.summary.reliableDpsStillBlocked },
@@ -690,6 +699,7 @@ assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModify
 assertInvariant(optimizerPlan.deltaNextActionDecision?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta next action decision");
 assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
+assertInvariant(optimizerPlan.sf32OwnerSourceHuntPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source hunt plan");
 assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner parser bridge");
 assertInvariant(optimizerPlan.sf33TriggerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger source packet");
 assertInvariant(optimizerPlan.sf33TriggerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger parser bridge");

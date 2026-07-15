@@ -1577,3 +1577,19 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Decision delta`
   - reliableDps modifiable : `false`
   - decision : poursuivre par preuve externe source-backed en premier; sinon nouvelle famille binaire, avec what-if conserve hors ranking fiable
+- plan collecte source `SF_32` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-sf32-owner-source-hunt-plan.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-sf32-owner-source-hunt-plan.js`
+  - rapport genere : `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json`
+  - markdown genere : `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.md`
+  - suite optimiseur : `107` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`, `selector:949 -> SF_32`
+  - action recommandee : `collect-source-backed-delta-proof`
+  - recherches : `4`, dont `2` priorite haute
+  - termes requis : `1663210`, `selector:949`, `SF_32`
+  - signaux locaux rejetes conserves : `7`
+  - snippet candidat pending : `true`
+  - accepted evidence : `0`
+  - plan optimiseur et site : nouveau panneau `Recherche source SF_32`
+  - reliableDps modifiable : `false`
+  - decision : chercher une source exacte sans ecriture intake ni approbation automatique; aucun resultat public exact exploitable trouve pendant le controle manuel

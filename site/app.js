@@ -34,6 +34,7 @@ const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-ex
 const DELTA_NEXT_ACTION_DECISION_URL = "../outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json";
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
+const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -103,6 +104,7 @@ const state = {
   deltaNextActionDecision: null,
   sf32LocalExhaustionConclusion: null,
   sf32OwnerSourcePacket: null,
+  sf32OwnerSourceHuntPlan: null,
   sf32OwnerParserBridge: null,
   sf33TriggerSourcePacket: null,
   sf33TriggerParserBridge: null,
@@ -207,6 +209,7 @@ async function boot() {
     await loadDeltaNextActionDecision();
     await loadSf32LocalExhaustionConclusion();
     await loadSf32OwnerSourcePacket();
+    await loadSf32OwnerSourceHuntPlan();
     await loadSf32OwnerParserBridge();
     await loadSf33TriggerSourcePacket();
     await loadSf33TriggerParserBridge();
@@ -546,6 +549,10 @@ async function loadSf32OwnerSourcePacket() {
   state.sf32OwnerSourcePacket = await fetchOptionalJson(SF32_OWNER_SOURCE_PACKET_URL);
 }
 
+async function loadSf32OwnerSourceHuntPlan() {
+  state.sf32OwnerSourceHuntPlan = await fetchOptionalJson(SF32_OWNER_SOURCE_HUNT_PLAN_URL);
+}
+
 async function loadSf32OwnerParserBridge() {
   state.sf32OwnerParserBridge = await fetchOptionalJson(SF32_OWNER_PARSER_BRIDGE_URL);
 }
@@ -745,6 +752,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaNextActionDecision(state.deltaNextActionDecision ?? plan.deltaNextActionDecision)}
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
     ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
+    ${renderSf32OwnerSourceHuntPlan(state.sf32OwnerSourceHuntPlan ?? plan.sf32OwnerSourceHuntPlan)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
     ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
     ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
@@ -1557,6 +1565,52 @@ function renderSf32OwnerSourcePacket(report) {
             <p>${item.reasonRejectedForOwnership}</p>
           </article>
         `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSf32OwnerSourceHuntPlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const searches = report.searches ?? [];
+  const accept = report.acceptanceChecklist ?? [];
+  return `
+    <div class="bonus-selector-proof sf32-owner-source-hunt-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Recherche source SF_32</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.acceptedEvidence > 0 ? "positive" : "blocked"}">
+          ${summary.acceptedEvidence > 0 ? "source presente" : "a chercher"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Recherches", summary.searches)}
+        ${targetMetric("Priorite haute", summary.highPrioritySearches)}
+        ${targetMetric("Termes requis", summary.requiredTerms)}
+        ${targetMetric("Candidat", summary.candidateSnippetReady ? "pret" : "absent")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>${summary.targetSelector ?? "selector"} -> ${summary.targetField ?? "field"}</span>
+        <span>Intake ${summary.writesIntake ? "ecrit" : "protege"}</span>
+        <span>Bridge ${summary.acceptedForBridge ? "ouvert" : "ferme"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${searches.map((item) => `
+          <article>
+            <span>${item.priority} - ${item.sourceKind}</span>
+            <strong>${item.id}</strong>
+            <p>${item.query}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${accept.map((item) => `<span class="passed">${item}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
