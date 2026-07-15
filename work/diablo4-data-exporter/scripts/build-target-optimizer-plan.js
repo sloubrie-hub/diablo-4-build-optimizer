@@ -27,6 +27,7 @@ const externalEvidenceSubmissionReviewDecisionAuditFile = "outputs/diablo4-exter
 const externalEvidenceSubmissionPromotionAuditFile = "outputs/diablo4-external-evidence-submission-promotion-audit/external-evidence-submission-promotion-audit.json";
 const externalEvidenceSubmissionImplementationDryRunFile = "outputs/diablo4-external-evidence-submission-implementation-dry-run/external-evidence-submission-implementation-dry-run.json";
 const externalEvidenceSubmissionApplicationGateFile = "outputs/diablo4-external-evidence-submission-application-gate/external-evidence-submission-application-gate.json";
+const externalEvidenceSubmissionApplyPlanFile = "outputs/diablo4-external-evidence-submission-apply-plan/external-evidence-submission-apply-plan.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -520,6 +521,7 @@ const externalEvidenceSubmissionReviewDecisionAudit = readOptionalJson(externalE
 const externalEvidenceSubmissionPromotionAudit = readOptionalJson(externalEvidenceSubmissionPromotionAuditFile);
 const externalEvidenceSubmissionImplementationDryRun = readOptionalJson(externalEvidenceSubmissionImplementationDryRunFile);
 const externalEvidenceSubmissionApplicationGate = readOptionalJson(externalEvidenceSubmissionApplicationGateFile);
+const externalEvidenceSubmissionApplyPlan = readOptionalJson(externalEvidenceSubmissionApplyPlanFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
@@ -636,6 +638,7 @@ const report = {
     externalEvidenceSubmissionPromotionAuditFile: externalEvidenceSubmissionPromotionAudit ? externalEvidenceSubmissionPromotionAuditFile : null,
     externalEvidenceSubmissionImplementationDryRunFile: externalEvidenceSubmissionImplementationDryRun ? externalEvidenceSubmissionImplementationDryRunFile : null,
     externalEvidenceSubmissionApplicationGateFile: externalEvidenceSubmissionApplicationGate ? externalEvidenceSubmissionApplicationGateFile : null,
+    externalEvidenceSubmissionApplyPlanFile: externalEvidenceSubmissionApplyPlan ? externalEvidenceSubmissionApplyPlanFile : null,
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
     newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
@@ -881,6 +884,16 @@ const report = {
         patchPreview: externalEvidenceSubmissionApplicationGate.patchPreview,
         applyContract: externalEvidenceSubmissionApplicationGate.applyContract,
         safeguards: externalEvidenceSubmissionApplicationGate.safeguards,
+      }
+    : null,
+  externalEvidenceSubmissionApplyPlan: externalEvidenceSubmissionApplyPlan
+    ? {
+        file: externalEvidenceSubmissionApplyPlanFile,
+        summary: externalEvidenceSubmissionApplyPlan.summary,
+        planChecks: externalEvidenceSubmissionApplyPlan.planChecks,
+        applySteps: externalEvidenceSubmissionApplyPlan.applySteps,
+        patchPreview: externalEvidenceSubmissionApplyPlan.patchPreview,
+        safeguards: externalEvidenceSubmissionApplyPlan.safeguards,
       }
     : null,
   newBinaryFamilyPlan: newBinaryFamilyPlan

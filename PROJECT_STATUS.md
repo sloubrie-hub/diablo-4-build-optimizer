@@ -1546,3 +1546,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Porte externe`
   - reliableDps modifiable : `false`
   - decision : autoriser seulement une future application explicite avec sauvegarde, diff et regressions; rien n'est applique ici
+- plan application soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-apply-plan.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-apply-plan.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-apply-plan/external-evidence-submission-apply-plan.json`
+  - suite optimiseur : `103` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - plan reel : `applyPlanReady false`, check echoue `manual-apply-allowed`
+  - patch conserve : `163200 -> 212160`
+  - test synthetique : `applyPlanReady true`, avec sauvegarde, patch cible, regression et revue de diff, sans ecriture ni promotion
+  - ecriture target dataset : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Plan externe`
+  - reliableDps modifiable : `false`
+  - decision : documenter les etapes d'application explicite; aucune mutation sans confirmation humaine finale

@@ -12272,3 +12272,47 @@ Validation :
 Decision :
 
 La porte externe n'applique jamais le patch. `manualApplyAllowed` ne vaut pas `promotionReady`; toute application future doit rester explicite, auditee, sauvegardee et couverte par regressions.
+
+## Plan application soumission preuve externe
+
+Un plan d'application explicite a ete ajoute apres la porte externe. Il decrit l'ordre minimal d'une future application manuelle : sauvegarde du dataset cible, application du patch cible, regressions obligatoires et revue du diff.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-apply-plan.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-apply-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-apply-plan/external-evidence-submission-apply-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- plan reel : `applyPlanReady false`
+- check echoue reel : `manual-apply-allowed`
+- patch conserve : `163200 -> 212160`
+- test synthetique : `applyPlanReady true`
+- etapes synthetiques : sauvegarde, patch, regressions, revue du diff
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `103` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le plan externe, le test, la suite, le plan optimiseur et le site
+- test plan application externe : `external-evidence-submission-apply-plan-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `103` etapes
+- plan optimiseur : section `externalEvidenceSubmissionApplyPlan` presente
+- site : nouveau panneau `Plan externe`
+
+Decision :
+
+Le plan externe ne modifie pas `target-dataset.json`. Il rend l'application future auditable, mais la branche reelle reste bloquee tant que `manualApplyAllowed` est faux. Aucune valeur conditionnelle n'est promue dans `reliableDps`.
