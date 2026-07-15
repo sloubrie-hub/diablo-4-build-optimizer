@@ -48,6 +48,7 @@ const DELTA_EVIDENCE_REVIEW_DECISION_AUDIT_URL = "../outputs/diablo4-delta-evide
 const DELTA_EVIDENCE_PROMOTION_AUDIT_URL = "../outputs/diablo4-delta-evidence-promotion-audit/delta-evidence-promotion-audit.json";
 const DELTA_PROMOTION_IMPLEMENTATION_DRY_RUN_URL = "../outputs/diablo4-delta-promotion-implementation-dry-run/delta-promotion-implementation-dry-run.json";
 const DELTA_PROMOTION_APPLICATION_GATE_URL = "../outputs/diablo4-delta-promotion-application-gate/delta-promotion-application-gate.json";
+const DELTA_PROMOTION_APPLY_PLAN_URL = "../outputs/diablo4-delta-promotion-apply-plan/delta-promotion-apply-plan.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -104,6 +105,7 @@ const state = {
   deltaEvidencePromotionAudit: null,
   deltaPromotionImplementationDryRun: null,
   deltaPromotionApplicationGate: null,
+  deltaPromotionApplyPlan: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -195,6 +197,7 @@ async function boot() {
     await loadDeltaEvidencePromotionAudit();
     await loadDeltaPromotionImplementationDryRun();
     await loadDeltaPromotionApplicationGate();
+    await loadDeltaPromotionApplyPlan();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -563,6 +566,10 @@ async function loadDeltaPromotionApplicationGate() {
   state.deltaPromotionApplicationGate = await fetchOptionalJson(DELTA_PROMOTION_APPLICATION_GATE_URL);
 }
 
+async function loadDeltaPromotionApplyPlan() {
+  state.deltaPromotionApplyPlan = await fetchOptionalJson(DELTA_PROMOTION_APPLY_PLAN_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -668,6 +675,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaEvidencePromotionAudit(state.deltaEvidencePromotionAudit ?? plan.deltaEvidencePromotionAudit)}
     ${renderDeltaPromotionImplementationDryRun(state.deltaPromotionImplementationDryRun ?? plan.deltaPromotionImplementationDryRun)}
     ${renderDeltaPromotionApplicationGate(state.deltaPromotionApplicationGate ?? plan.deltaPromotionApplicationGate)}
+    ${renderDeltaPromotionApplyPlan(state.deltaPromotionApplyPlan ?? plan.deltaPromotionApplyPlan)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -2582,6 +2590,53 @@ function renderDeltaPromotionApplicationGate(report) {
           <article>
             <span>avant apply</span>
             <strong>${item}</strong>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaPromotionApplyPlan(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const checks = report.planChecks ?? [];
+  const steps = report.applySteps ?? [];
+  const patch = report.patchPreview ?? {};
+  return `
+    <div class="bonus-selector-proof delta-promotion-apply-plan">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Plan application</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.applyPlanReady ? "positive" : "blocked"}">
+          ${summary.applyPlanReady ? "plan pret" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Avant", formatNumber(summary.patchBefore ?? patch.before))}
+        ${targetMetric("Apres", formatNumber(summary.patchAfter ?? patch.after))}
+        ${targetMetric("Propose", formatNumber(summary.proposedReliableDps))}
+        ${targetMetric("Checks", `${formatNumber(summary.checks - summary.failedChecks)}/${formatNumber(summary.checks)}`)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ecriture dataset ${summary.writesTargetDataset ? "oui" : "non"}</span>
+        <span>Accepted bridge ${summary.acceptedForBridge ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${checks.map((check) => `<span class="${check.status === "passed" ? "passed" : "failed"}">${check.id}: ${check.status}</span>`).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${steps.map((step) => `
+          <article>
+            <span>${step.required ? "requis" : "option"}</span>
+            <strong>${step.id}</strong>
+            <p>${step.action ?? ""}</p>
           </article>
         `).join("")}
       </div>

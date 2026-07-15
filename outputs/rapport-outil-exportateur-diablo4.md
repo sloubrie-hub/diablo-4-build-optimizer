@@ -11827,3 +11827,47 @@ Validation :
 Decision :
 
 La porte d'application ne modifie aucun fichier. Meme quand le cas synthetique autorise une application manuelle, l'application doit rester une etape explicite avec sauvegarde, diff et regressions.
+
+## Plan application promotion delta
+
+Un plan d'application explicite a ete ajoute apres la porte. Il decrit les etapes a executer si une application humaine est autorisee, mais ne modifie aucun fichier.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-promotion-apply-plan.js`
+- `work/diablo4-data-exporter/scripts/test-delta-promotion-apply-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-promotion-apply-plan/delta-promotion-apply-plan.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- reliable propose : `212160`
+- plan reel : `applyPlanReady false`
+- check echoue reel : `manual-apply-allowed`
+- patch conserve : `163200 -> 212160`
+- test synthetique : `applyPlanReady true`, `patchBefore 163200`, `patchAfter 212160`
+- etapes documentees : sauvegarde dataset, patch cible, suite de regression, revue de diff
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `81` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le plan, le test, la suite, le plan optimiseur et le site
+- test plan application : `delta-promotion-apply-plan-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `81` etapes
+- plan optimiseur : section `deltaPromotionApplyPlan` presente
+- site : nouveau panneau `Plan application`
+
+Decision :
+
+Le plan d'application documente la procedure future, mais ne l'execute pas. Aucune mutation de `target-dataset.json`, aucun bridge et aucune promotion reliableDps ne sont autorises sans confirmation humaine finale et regression complete.

@@ -1401,3 +1401,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Porte application`
   - reliableDps modifiable : `false`
   - decision : autoriser seulement une future application explicite avec sauvegarde, diff et regressions; rien n'est applique ici
+- plan application promotion delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-promotion-apply-plan.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-promotion-apply-plan.js`
+  - rapport genere : `outputs/diablo4-delta-promotion-apply-plan/delta-promotion-apply-plan.json`
+  - suite optimiseur : `81` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - plan reel : `applyPlanReady false`, check echoue `manual-apply-allowed`
+  - patch conserve : `163200 -> 212160`
+  - test synthetique : `applyPlanReady true`, avec sauvegarde, patch cible, regression et revue de diff, sans ecriture ni promotion
+  - ecriture target dataset : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Plan application`
+  - reliableDps modifiable : `false`
+  - decision : documenter les etapes d'application explicite; aucune mutation sans confirmation humaine finale
