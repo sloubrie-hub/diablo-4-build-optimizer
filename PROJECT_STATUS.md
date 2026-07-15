@@ -1298,3 +1298,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Copie intake`
   - reliableDps modifiable : `false`
   - decision : rendre la copie manuelle explicite et non destructive; copiable ne vaut pas approved, bridge ou promotion fiable
+- audit post-copie intake preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-evidence-post-copy-intake.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-post-copy-intake.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-post-copy-intake/delta-evidence-post-copy-intake.json`
+  - simulation generee : `outputs/diablo4-delta-evidence-post-copy-intake/external-evidence-candidates.post-copy-simulated.json`
+  - suite optimiseur : `67` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - simulation reelle : `copyGateReady false`, `addedCandidates 0`, `readyForManualReview false`
+  - test synthetique : `copyGateReady true`, `addedCandidates 1`, `targetCandidateStatus pending`, `readyForManualReview true`
+  - audit synthetique : `accepted 0`, `pending 1`, bloqueur `manual-review-required`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Post-copie`
+  - reliableDps modifiable : `false`
+  - decision : verifier la copie comme simulation seulement; pending ouvre une revue humaine, pas une approbation ni une promotion

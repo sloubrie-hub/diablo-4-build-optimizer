@@ -48,6 +48,7 @@ const deltaEvidenceFilledDraftFile = "outputs/diablo4-delta-evidence-filled-draf
 const deltaEvidenceFilledDraftAuditFile = "outputs/diablo4-delta-evidence-filled-draft-audit/delta-evidence-filled-draft-audit.json";
 const deltaEvidenceFilledDraftIntakePreviewFile = "outputs/diablo4-delta-evidence-filled-draft-intake-preview/delta-evidence-filled-draft-intake-preview.json";
 const deltaEvidenceIntakeCopyGateFile = "outputs/diablo4-delta-evidence-intake-copy-gate/delta-evidence-intake-copy-gate.json";
+const deltaEvidencePostCopyIntakeFile = "outputs/diablo4-delta-evidence-post-copy-intake/delta-evidence-post-copy-intake.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -523,6 +524,7 @@ const deltaEvidenceFilledDraft = readOptionalJson(deltaEvidenceFilledDraftFile);
 const deltaEvidenceFilledDraftAudit = readOptionalJson(deltaEvidenceFilledDraftAuditFile);
 const deltaEvidenceFilledDraftIntakePreview = readOptionalJson(deltaEvidenceFilledDraftIntakePreviewFile);
 const deltaEvidenceIntakeCopyGate = readOptionalJson(deltaEvidenceIntakeCopyGateFile);
+const deltaEvidencePostCopyIntake = readOptionalJson(deltaEvidencePostCopyIntakeFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -620,6 +622,7 @@ const report = {
     deltaEvidenceFilledDraftAuditFile: deltaEvidenceFilledDraftAudit ? deltaEvidenceFilledDraftAuditFile : null,
     deltaEvidenceFilledDraftIntakePreviewFile: deltaEvidenceFilledDraftIntakePreview ? deltaEvidenceFilledDraftIntakePreviewFile : null,
     deltaEvidenceIntakeCopyGateFile: deltaEvidenceIntakeCopyGate ? deltaEvidenceIntakeCopyGateFile : null,
+    deltaEvidencePostCopyIntakeFile: deltaEvidencePostCopyIntake ? deltaEvidencePostCopyIntakeFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -1030,6 +1033,17 @@ const report = {
         manualCopyTarget: deltaEvidenceIntakeCopyGate.manualCopyTarget,
         manualSteps: deltaEvidenceIntakeCopyGate.manualSteps,
         safeguards: deltaEvidenceIntakeCopyGate.safeguards,
+      }
+    : null,
+  deltaEvidencePostCopyIntake: deltaEvidencePostCopyIntake
+    ? {
+        file: deltaEvidencePostCopyIntakeFile,
+        summary: deltaEvidencePostCopyIntake.summary,
+        candidateToCopy: deltaEvidencePostCopyIntake.candidateToCopy,
+        targetCandidate: deltaEvidencePostCopyIntake.targetCandidate,
+        intakeAuditSummary: deltaEvidencePostCopyIntake.intakeAuditSummary,
+        blockers: deltaEvidencePostCopyIntake.blockers,
+        safeguards: deltaEvidencePostCopyIntake.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios

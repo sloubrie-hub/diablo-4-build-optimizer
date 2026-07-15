@@ -11512,3 +11512,48 @@ Validation :
 Decision :
 
 La porte de copie rend l'action humaine explicite sans l'executer. Meme quand la preview synthetique est copiable, la sortie reste `pending`, n'ecrit pas dans l'intake reel, n'accepte aucun bridge et ne change pas `reliableDps`.
+
+## Audit post-copie intake preuve delta
+
+Un audit post-copie en dry-run a ete ajoute pour verifier l'etat attendu apres copie manuelle d'un candidat pending dans l'intake.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-evidence-post-copy-intake.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-post-copy-intake.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-post-copy-intake/delta-evidence-post-copy-intake.json`
+- `outputs/diablo4-delta-evidence-post-copy-intake/external-evidence-candidates.post-copy-simulated.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- simulation reelle : `copyGateReady false`
+- candidats ajoutes reel : `0`
+- `readyForManualReview false`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `copyGateReady true`, `addedCandidates 1`, `targetCandidateStatus pending`, `readyForManualReview true`
+- audit synthetique : `accepted 0`, `pending 1`, bloqueur `manual-review-required`
+- suite optimiseur : `target-optimizer-suite-ok`, `67` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit post-copie, le test, la suite, le plan optimiseur et le site
+- test audit post-copie : `delta-evidence-post-copy-intake-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `67` etapes
+- plan optimiseur : section `deltaEvidencePostCopyIntake` presente
+- site : nouveau panneau `Post-copie`
+
+Decision :
+
+L'audit post-copie prouve que la copie manuelle attendue ne doit produire qu'un candidat `pending`. Le passage a `approved`, l'acceptation bridge et toute modification de `reliableDps` restent separes et bloques.

@@ -41,6 +41,7 @@ const DELTA_EVIDENCE_FILLED_DRAFT_URL = "../outputs/diablo4-delta-evidence-fille
 const DELTA_EVIDENCE_FILLED_DRAFT_AUDIT_URL = "../outputs/diablo4-delta-evidence-filled-draft-audit/delta-evidence-filled-draft-audit.json";
 const DELTA_EVIDENCE_FILLED_DRAFT_INTAKE_PREVIEW_URL = "../outputs/diablo4-delta-evidence-filled-draft-intake-preview/delta-evidence-filled-draft-intake-preview.json";
 const DELTA_EVIDENCE_INTAKE_COPY_GATE_URL = "../outputs/diablo4-delta-evidence-intake-copy-gate/delta-evidence-intake-copy-gate.json";
+const DELTA_EVIDENCE_POST_COPY_INTAKE_URL = "../outputs/diablo4-delta-evidence-post-copy-intake/delta-evidence-post-copy-intake.json";
 const USER_WHATIF_SCENARIOS_URL = "../outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const USER_WHATIF_CONTRACT_URL = "../outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const RELIABLE_DPS_GATES_URL = "../outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -90,6 +91,7 @@ const state = {
   deltaEvidenceFilledDraftAudit: null,
   deltaEvidenceFilledDraftIntakePreview: null,
   deltaEvidenceIntakeCopyGate: null,
+  deltaEvidencePostCopyIntake: null,
   userWhatIfScenarios: null,
   userWhatIfContract: null,
   reliableDpsGates: null,
@@ -174,6 +176,7 @@ async function boot() {
     await loadDeltaEvidenceFilledDraftAudit();
     await loadDeltaEvidenceFilledDraftIntakePreview();
     await loadDeltaEvidenceIntakeCopyGate();
+    await loadDeltaEvidencePostCopyIntake();
     await loadUserWhatIfScenarios();
     await loadUserWhatIfContract();
     await loadReliableDpsGates();
@@ -514,6 +517,10 @@ async function loadDeltaEvidenceIntakeCopyGate() {
   state.deltaEvidenceIntakeCopyGate = await fetchOptionalJson(DELTA_EVIDENCE_INTAKE_COPY_GATE_URL);
 }
 
+async function loadDeltaEvidencePostCopyIntake() {
+  state.deltaEvidencePostCopyIntake = await fetchOptionalJson(DELTA_EVIDENCE_POST_COPY_INTAKE_URL);
+}
+
 async function loadUserWhatIfScenarios() {
   state.userWhatIfScenarios = await fetchOptionalJson(USER_WHATIF_SCENARIOS_URL);
 }
@@ -612,6 +619,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaEvidenceFilledDraftAudit(state.deltaEvidenceFilledDraftAudit ?? plan.deltaEvidenceFilledDraftAudit)}
     ${renderDeltaEvidenceFilledDraftIntakePreview(state.deltaEvidenceFilledDraftIntakePreview ?? plan.deltaEvidenceFilledDraftIntakePreview)}
     ${renderDeltaEvidenceIntakeCopyGate(state.deltaEvidenceIntakeCopyGate ?? plan.deltaEvidenceIntakeCopyGate)}
+    ${renderDeltaEvidencePostCopyIntake(state.deltaEvidencePostCopyIntake ?? plan.deltaEvidencePostCopyIntake)}
     ${renderUserWhatIfContract(state.userWhatIfContract ?? plan.userWhatIfContract)}
     ${renderExternalEvidenceIntake(plan.externalEvidenceIntake)}
     ${renderExternalEvidenceBridgePlan(plan.externalEvidenceBridgePlan)}
@@ -2209,6 +2217,46 @@ function renderDeltaEvidenceIntakeCopyGate(report) {
             <strong>${step}</strong>
           </article>
         `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaEvidencePostCopyIntake(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const blockers = report.blockers ?? {};
+  const targetBlockers = blockers.targetCandidateBlockers ?? [];
+  const failedCopyChecks = blockers.copyGateFailedChecks ?? [];
+  return `
+    <div class="bonus-selector-proof delta-evidence-post-copy-intake">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Post-copie</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.readyForManualReview ? "positive" : "blocked"}">
+          ${summary.readyForManualReview ? "pret revue" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Candidat", summary.candidateId ?? "n/a")}
+        ${targetMetric("Ajoutes", summary.addedCandidates)}
+        ${targetMetric("Intake", `${formatNumber(summary.auditPending)}/${formatNumber(summary.auditCandidates)}`)}
+        ${targetMetric("Statut", summary.targetCandidateStatus ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ecriture intake ${summary.writesRealIntake ? "oui" : "non"}</span>
+        <span>Accepted bridge ${summary.acceptedForBridge ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "bloquee"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${failedCopyChecks.map((check) => `<span class="failed">${check}</span>`).join("")}
+        ${targetBlockers.map((blocker) => `<span class="${blocker === "manual-review-required" ? "" : "failed"}">${blocker}</span>`).join("")}
+        ${failedCopyChecks.length + targetBlockers.length === 0 ? `<span class="positive">Aucun bloqueur</span>` : ""}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
