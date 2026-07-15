@@ -12229,3 +12229,46 @@ Validation :
 Decision :
 
 Le dry-run externe ne modifie pas `target-dataset.json`. Meme quand le patch synthetique est pret, `patchPreviewReady` ne vaut pas `promotionReady`; toute application future doit etre separee, testee et revue.
+
+## Porte application soumission preuve externe
+
+Une porte d'application dediee au flux externe a ete ajoutee apres le dry-run. Elle peut autoriser une application manuelle future uniquement si le patch preview, les cibles de regression et les garde-fous sont prets.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-application-gate.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-application-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-application-gate/external-evidence-submission-application-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- porte reelle : `manualApplyAllowed false`
+- check echoue reel : `external-dry-run-ready`
+- patch conserve : `163200 -> 212160`
+- test synthetique : `manualApplyAllowed true`
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `101` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la porte externe, le test, la suite, le plan optimiseur et le site
+- test porte application externe : `external-evidence-submission-application-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `101` etapes
+- plan optimiseur : section `externalEvidenceSubmissionApplicationGate` presente
+- site : nouveau panneau `Porte externe`
+
+Decision :
+
+La porte externe n'applique jamais le patch. `manualApplyAllowed` ne vaut pas `promotionReady`; toute application future doit rester explicite, auditee, sauvegardee et couverte par regressions.

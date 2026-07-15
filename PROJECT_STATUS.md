@@ -1531,3 +1531,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Dry-run externe`
   - reliableDps modifiable : `false`
   - decision : preparer seulement un patch theorique; aucune application ni promotion automatique
+- porte application soumission preuve externe ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-application-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-application-gate.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-application-gate/external-evidence-submission-application-gate.json`
+  - suite optimiseur : `101` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - porte reelle : `manualApplyAllowed false`, check echoue `external-dry-run-ready`
+  - patch conserve : `163200 -> 212160`
+  - test synthetique : `manualApplyAllowed true`, sans ecriture ni promotion
+  - ecriture target dataset : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Porte externe`
+  - reliableDps modifiable : `false`
+  - decision : autoriser seulement une future application explicite avec sauvegarde, diff et regressions; rien n'est applique ici
