@@ -36,8 +36,9 @@ sf32.summary.acceptedEvidence = 1;
 sf32.summary.mappings = 1;
 sf32.summary.bridgeReady = true;
 sf32.mappings = [{
-  id: "sf32-owner-selector-949",
-  selector: "selector:949",
+  id: "sf32-owner-eattrib-994-local-role-949",
+  sourceAnchor: "eAttrib:994",
+  localRole: "local-role:949",
   ownerField: "SF_32",
   canModifyReliableDps: false,
 }];

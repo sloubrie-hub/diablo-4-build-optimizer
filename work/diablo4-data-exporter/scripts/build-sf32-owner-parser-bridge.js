@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const sourcePacketFile = process.argv[2] ?? "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const reliableGatesFile = process.argv[3] ?? "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -20,10 +21,10 @@ function acceptedEvidenceContainsRequiredTerms(evidence, requiredTerms) {
 
 const packet = readJson(sourcePacketFile);
 const reliableGates = readJson(reliableGatesFile);
-const requiredTerms = packet.requiredClaim?.mustContain ?? ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"];
-const requiredField = packet.requiredClaim?.field ?? "eAttrib:994 + local-role:949";
+const requiredTerms = packet.requiredClaim?.mustContain ?? [...SF32_OWNER_CLAIM.mustContain];
+const requiredField = packet.requiredClaim?.field ?? SF32_OWNER_CLAIM.field;
 const acceptedEvidence = (packet.acceptedEvidence ?? []).filter((evidence) =>
-  evidence.claim?.type === "sf32-field-ownership"
+  evidence.claim?.type === SF32_OWNER_CLAIM.type
   && evidence.claim?.field === requiredField
   && acceptedEvidenceContainsRequiredTerms(evidence, requiredTerms));
 

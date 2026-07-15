@@ -69,7 +69,7 @@ readyPreview.preview.candidates = [{
   },
   claim: {
     type: "sf32-field-ownership",
-    field: "selector:949",
+    field: "eAttrib:994 + local-role:949",
     value: "SF_32",
   },
   reviewer: {

@@ -60,8 +60,8 @@ const values = new Map([
   ["source.version", "3.0.4.72271-test"],
   ["source.capturedAt", "2026-07-15"],
   ["claim.value", "SF_32"],
-  ["claim.excerpt", "1663210 selector:949 SF_32"],
-  ["claim.mapping", "1663210 -> selector:949 -> SF_32"],
+  ["claim.excerpt", "1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 SF_32"],
+  ["claim.mapping", "1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32"],
   ["reviewer.notes[4]", "Synthetic test note: source fields replaced for dry-run audit."],
 ]);
 filledForm.fields = filledForm.fields.map((field) => ({

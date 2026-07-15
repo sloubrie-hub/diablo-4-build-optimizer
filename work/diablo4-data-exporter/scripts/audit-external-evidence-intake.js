@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const inputFile = process.argv[2] ?? "inputs/external-evidence-candidates.json";
 const outDir = process.argv[3] ?? "outputs/diablo4-external-evidence-intake";
@@ -10,8 +11,11 @@ const rejectedSourceKinds = new Set(["ui-label", "codex-ui", "localization", "in
 const domainRules = {
   "delta-1663210": {
     assetIds: new Set([1663210]),
-    claimTypes: new Set(["sf32-field-ownership", "sf33-trigger", "uptime", "source-mapping"]),
-    fields: new Set(["SF_32", "SF_33", "uptime", "Mod.SoilRuler_B", "selector:949", "Bonus_Percent_Per_Power"]),
+    claimTypes: new Set([SF32_OWNER_CLAIM.type, "sf33-trigger", "uptime", "source-mapping"]),
+    fields: new Set(["SF_32", "SF_33", "uptime", "Mod.SoilRuler_B", SF32_OWNER_CLAIM.field, "Bonus_Percent_Per_Power"]),
+    claimFieldRules: {
+      [SF32_OWNER_CLAIM.type]: new Set([SF32_OWNER_CLAIM.field]),
+    },
     requiredMappingTerms: ["1663210"],
   },
   "slots-1461593": {
@@ -86,6 +90,8 @@ function evaluateCandidate(candidate) {
   if (domainRule?.assetIds && !domainRule.assetIds.has(Number(candidate.assetId))) blockers.push("domain-asset-mismatch");
   if (domainRule?.claimTypes && !domainRule.claimTypes.has(candidate.claim.type)) blockers.push("claim-type-not-valid-for-domain");
   if (domainRule?.fields && !domainRule.fields.has(candidate.claim.field)) blockers.push("claim-field-not-valid-for-domain");
+  const claimFieldRule = domainRule?.claimFieldRules?.[candidate.claim.type];
+  if (claimFieldRule && !claimFieldRule.has(candidate.claim.field)) blockers.push("claim-field-not-valid-for-claim-type");
   if (domainRule?.requiredMappingTerms?.length) {
     const mappingText = `${candidate.claim.mapping} ${candidate.claim.excerpt} ${candidate.claim.value}`.toLowerCase();
     const missingTerms = domainRule.requiredMappingTerms.filter((term) => !mappingText.includes(String(term).toLowerCase()));
@@ -113,6 +119,9 @@ function evaluateCandidate(candidate) {
       ? {
           claimTypes: Array.from(domainRule.claimTypes).sort(),
           fields: Array.from(domainRule.fields).sort(),
+          claimFields: domainRule.claimFieldRules?.[candidate.claim.type]
+            ? Array.from(domainRule.claimFieldRules[candidate.claim.type]).sort()
+            : null,
           requiredMappingTerms: domainRule.requiredMappingTerms,
         }
       : null,
@@ -168,6 +177,10 @@ const report = {
         assetIds: rule.assetIds ? Array.from(rule.assetIds).sort((a, b) => a - b) : "any",
         claimTypes: Array.from(rule.claimTypes).sort(),
         fields: Array.from(rule.fields).sort(),
+        claimFieldRules: Object.fromEntries(Object.entries(rule.claimFieldRules ?? {}).map(([claimType, fields]) => [
+          claimType,
+          Array.from(fields).sort(),
+        ])),
         requiredMappingTerms: rule.requiredMappingTerms,
       },
     ])),

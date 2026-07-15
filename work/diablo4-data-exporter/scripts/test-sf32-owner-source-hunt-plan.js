@@ -41,6 +41,7 @@ assertInvariant(report.summary.assetId === 1663210, "hunt plan must target asset
 assertInvariant(report.summary.targetField === "Bonus_Percent_Per_Power / SF_32 role unresolved", "hunt plan must target revised SF_32 role");
 assertInvariant(report.summary.targetSelector === "eAttrib:994 + local-role:949", "hunt plan must target revised 994 + local 949");
 assertInvariant(report.summary.templateNeedsRevision === true, "hunt plan must require template revision");
+assertInvariant(report.summary.templateRevisionApplied === true, "hunt plan must confirm the revised template is applied");
 assertInvariant(report.summary.priorClaimSuspended === true, "hunt plan must suspend prior selector 949 claim");
 assertInvariant(report.summary.recommendedActionId === "collect-source-backed-delta-proof", "hunt plan must follow the source-backed decision");
 assertInvariant(report.summary.searches === 4, "hunt plan must expose four searches");
@@ -51,8 +52,9 @@ assertInvariant(report.mustContain.includes("Bonus_Percent_Per_Power"), "hunt pl
 assertInvariant(report.mustContain.includes("local-role:949"), "hunt plan must require local 949 role");
 assertInvariant(report.mustContain.includes("SF_32"), "hunt plan must require SF_32");
 assertInvariant(report.summary.candidateSnippetReady === true, "hunt plan must carry the pending candidate snippet");
-assertInvariant(report.summary.candidateSnippetUsable === false, "old candidate snippet must be marked unusable");
+assertInvariant(report.summary.candidateSnippetUsable === true, "revised candidate snippet must be usable for source collection");
 assertInvariant(report.supersededSubmission?.obsolete === true, "old submission must be superseded");
+assertInvariant(report.supersededSubmission?.claim?.field === "selector:949", "superseded submission must identify the old direct field");
 assertInvariant(report.summary.writesIntake === false, "hunt plan must not write intake");
 assertInvariant(report.summary.canModifyReliableDps === false, "hunt plan must not modify reliable DPS");
 assertInvariant(report.summary.canUseForReliableDps === false, "hunt plan must not allow reliable DPS");

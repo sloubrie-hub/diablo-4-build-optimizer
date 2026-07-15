@@ -1773,3 +1773,21 @@ Build de reference :
   - reliableDps modifiable : `false`
   - plan optimiseur et site : packet/bridge affichent l'ancre revisee
   - decision : ne plus accepter une preuve `selector:949` seule; toute preuve doit relier l'ancre officielle `994` au role local `949` avant bridge
+- contrat de preuve `SF_32` aligne de bout en bout
+  - contrat partage ajoute : `work/diablo4-data-exporter/src/delta-evidence-contract.js`
+  - type canonique : `sf32-field-ownership`
+  - champ canonique : `eAttrib:994 + local-role:949`
+  - ancien champ direct `selector:949` retire des champs acceptes par l'intake
+  - liaison type/champ imposee : `sf32-field-ownership` n'accepte que `eAttrib:994 + local-role:949`
+  - test contrat ajoute : le claim canonique approuve est accepte; le claim direct obsolete et le raccourci `field=SF_32` restent pending
+  - plan externe, workorder, paquet de soumission, brouillon, plan humain, formulaire, source packet et bridge partagent maintenant le meme contrat
+  - source hunt : `candidateSnippetUsable true`, statut `sf32-owner-source-hunt-open`
+  - termes requis : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+  - suite optimiseur : `129` etapes, statut `target-optimizer-suite-ok`
+  - parite stricte : `0`
+  - DPS strict : `163200`
+  - delta bloque : `48960`
+  - preuves reelles acceptees : `0`
+  - reliableDps modifiable : `false`
+  - serveur local et sorties principales : HTTP `200`
+  - decision : la collecte SF_32 peut utiliser le brouillon revise; la prochaine avancee exige une source qui explique reellement le role local `949`, sans promotion automatique du delta

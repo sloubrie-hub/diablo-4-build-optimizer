@@ -60,10 +60,10 @@ const fullFixture = {
   candidates: [
     approvedDeltaCandidate("fixture-delta-1663210-sf32-owner", {
       type: "sf32-field-ownership",
-      field: "selector:949",
+      field: "eAttrib:994 + local-role:949",
       value: "SF_32 owner mapping",
-      excerpt: "1663210 selector:949 SF_32 owner mapping",
-      mapping: "1663210 -> selector:949 -> SF_32",
+      excerpt: "1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 SF_32 owner mapping",
+      mapping: "1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32",
     }),
     approvedDeltaCandidate("fixture-delta-1663210-sf33-trigger", {
       type: "sf33-trigger",
@@ -120,6 +120,9 @@ assertInvariant(planReport.summary.missingProofs === 0, "no fixture proof should
 assertInvariant(planReport.summary.canModifyReliableDps === false, "delta plan must not modify reliable DPS");
 assertInvariant(planReport.summary.promotionReady === false, "delta plan must not mark promotion ready");
 assertInvariant(planReport.summary.assessment.kind === "external-delta-evidence-ready-for-parser-bridge", "delta plan should only become ready for parser bridge");
+assertInvariant(planReport.requiredProofs[0].acceptedClaim.field === "eAttrib:994 + local-role:949", "SF_32 proof must use revised claim field");
+assertInvariant(planReport.requiredProofs[0].mustContain.includes("eAttrib:994"), "SF_32 proof must require eAttrib:994");
+assertInvariant(planReport.requiredProofs[0].mustContain.includes("local-role:949"), "SF_32 proof must require local-role:949");
 
 run("audit-external-evidence-intake.js", [partialInput, partialIntakeOut]);
 run("build-external-evidence-bridge-plan.js", [

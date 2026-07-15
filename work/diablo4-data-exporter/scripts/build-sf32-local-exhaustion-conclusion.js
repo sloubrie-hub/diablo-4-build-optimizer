@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const sf32DecisionFile = process.argv[2] ?? "outputs/diablo4-sf32-field-promotion-decision/sf32-field-promotion-decision.json";
 const externalEvidenceIntakeFile = process.argv[3] ?? "outputs/diablo4-external-evidence-intake/external-evidence-intake.json";
@@ -115,8 +116,8 @@ const requiredProofs = [
   {
     id: "external-source-mapping-selector-949",
     priority: "high",
-    acceptedClaimType: "sf32-field-ownership",
-    requiredEvidence: "source officielle, extracted-game-data ou documented-dataset reliant selector:949 a Bonus_Percent_Per_Power pour asset 1663210.",
+    acceptedClaimType: SF32_OWNER_CLAIM.type,
+    requiredEvidence: `source officielle, extracted-game-data ou documented-dataset reliant ${SF32_OWNER_CLAIM.field} a SF_32 pour asset 1663210.`,
     rejects: ["layout-analogy", "ui-label", "localization", "inference-only"],
   },
   {

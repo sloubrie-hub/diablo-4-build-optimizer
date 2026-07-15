@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const workorderFile = process.argv[2] ?? "outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json";
 const intakeFile = process.argv[3] ?? "inputs/external-evidence-candidates.json";
@@ -36,12 +37,12 @@ const template = nextTask?.intakeTemplate ? clone(nextTask.intakeTemplate) : nul
 const templateNeedsRevision = selector949WindowReparseAudit?.summary?.sf32TemplateNeedsRevision === true
   && nextTask?.id === "delta-proof-sf32-owner";
 const revisedMustContain = templateNeedsRevision
-  ? ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"]
+  ? [...SF32_OWNER_CLAIM.mustContain]
   : nextTask?.mustContain ?? [];
 const revisedClaim = templateNeedsRevision
   ? {
-      type: "sf32-field-ownership-revised",
-      field: "eAttrib:994 + local-role:949",
+      type: SF32_OWNER_CLAIM.type,
+      field: SF32_OWNER_CLAIM.field,
     }
   : nextTask?.claim ?? null;
 
@@ -135,7 +136,9 @@ const report = {
   candidateSnippet: template,
   supersededClaim: {
     obsolete: templateNeedsRevision,
-    claim: templateNeedsRevision ? nextTask?.claim ?? null : null,
+    claim: templateNeedsRevision
+      ? { type: SF32_OWNER_CLAIM.type, field: SF32_OWNER_CLAIM.supersededField }
+      : null,
     reason: templateNeedsRevision
       ? "L'audit reparse 949 impose 994 comme ancre bonus; selector:949 ne peut plus etre soumis comme preuve directe SF_32."
       : null,

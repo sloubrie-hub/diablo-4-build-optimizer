@@ -52,8 +52,8 @@ filled.candidates[0].source.title = "Fixture extracted table";
 filled.candidates[0].source.version = "fixture-build";
 filled.candidates[0].source.capturedAt = "2026-07-14";
 filled.candidates[0].claim.value = "SF_32 owner mapping";
-filled.candidates[0].claim.excerpt = "1663210 selector:949 SF_32";
-filled.candidates[0].claim.mapping = "1663210 -> selector:949 -> SF_32";
+filled.candidates[0].claim.excerpt = "1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 SF_32";
+filled.candidates[0].claim.mapping = "1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32";
 filled.candidates[0].reviewer.status = "pending";
 filled.candidates[0].reviewer.notes = [
   "Fixture source verified structurally; reviewer approval still required.",

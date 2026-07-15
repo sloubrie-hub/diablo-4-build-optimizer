@@ -15,6 +15,7 @@ const generationSteps = [
   "build-user-whatif-contract.js",
   "test-user-whatif-import-contract.js",
   "audit-external-evidence-intake.js",
+  "test-delta-evidence-contract.js",
   "test-external-evidence-intake-rejections.js",
   "build-external-evidence-bridge-plan.js",
   "test-external-evidence-bridge.js",
@@ -243,15 +244,22 @@ assertInvariant(reliableGates.summary.canUseForReliableDps === false, "blocked d
 assertInvariant(bucketEngineContract.summary.status === "bucket-engine-contract-ok", "bucket engine contract must pass");
 assertInvariant(bucketEngineContract.summary.failed === 0, "bucket engine contract failed invariants");
 assertInvariant(externalEvidenceIntake.summary.canModifyReliableDps === false, "external evidence intake must not modify reliable DPS");
+assertInvariant(externalEvidenceIntake.requirements?.domainRules?.["delta-1663210"]?.fields?.includes("eAttrib:994 + local-role:949"), "external evidence intake must allow revised SF_32 claim field");
+assertInvariant(!externalEvidenceIntake.requirements?.domainRules?.["delta-1663210"]?.fields?.includes("selector:949"), "external evidence intake must reject direct selector:949 field");
+assertInvariant(externalEvidenceIntake.requirements?.domainRules?.["delta-1663210"]?.claimFieldRules?.["sf32-field-ownership"]?.length === 1, "external evidence intake must expose one canonical SF_32 field");
+assertInvariant(externalEvidenceIntake.requirements?.domainRules?.["delta-1663210"]?.claimFieldRules?.["sf32-field-ownership"]?.[0] === "eAttrib:994 + local-role:949", "external evidence intake must bind SF_32 ownership to the revised field");
 assertInvariant(externalEvidenceBridge.summary.canModifyReliableDps === false, "external evidence bridge must not modify reliable DPS");
 assertInvariant(externalDeltaEvidencePlan.summary.canModifyReliableDps === false, "external delta evidence plan must not modify reliable DPS");
 assertInvariant(externalDeltaEvidencePlan.summary.requiredProofs === 3, "external delta evidence plan must require the three delta proofs");
+assertInvariant(externalDeltaEvidencePlan.requiredProofs?.[0]?.acceptedClaim?.field === "eAttrib:994 + local-role:949", "external delta evidence plan must use revised SF_32 claim field");
+assertInvariant(externalDeltaEvidencePlan.requiredProofs?.[0]?.mustContain?.includes("eAttrib:994"), "external delta evidence plan must require eAttrib:994 proof");
 assertInvariant(externalDeltaEvidenceWorkorder.summary.canModifyReliableDps === false, "external delta evidence workorder must not modify reliable DPS");
 assertInvariant(externalDeltaEvidenceWorkorder.summary.tasks === 3, "external delta evidence workorder must track the three delta tasks");
 assertInvariant(externalEvidenceSubmissionPack.summary.canModifyReliableDps === false, "external evidence submission pack must not modify reliable DPS");
 assertInvariant(externalEvidenceSubmissionPack.summary.writesIntake === false, "external evidence submission pack must not write intake");
 assertInvariant(externalEvidenceSubmissionPack.summary.nextTaskId === "delta-proof-sf32-owner", "external evidence submission pack must target next SF_32 proof");
 assertInvariant(externalEvidenceSubmissionPack.summary.templateNeedsRevision === true, "external evidence submission pack must revise SF_32 template after 949 reparse");
+assertInvariant(externalEvidenceSubmissionPack.summary.claimType === "sf32-field-ownership", "external evidence submission pack must use canonical SF_32 claim type");
 assertInvariant(externalEvidenceSubmissionPack.summary.claimField === "eAttrib:994 + local-role:949", "external evidence submission pack must target revised 994 + local 949 field");
 assertInvariant(externalEvidenceSubmissionGate.summary.canModifyReliableDps === false, "external evidence submission gate must not modify reliable DPS");
 assertInvariant(externalEvidenceSubmissionGate.summary.writesIntake === false, "external evidence submission gate must not write intake");
@@ -339,8 +347,10 @@ assertInvariant(sf32OwnerSourcePacket.requiredClaim?.mustContain?.includes("loca
 assertInvariant(sf32OwnerSourceHuntPlan.summary.canModifyReliableDps === false, "SF_32 source hunt plan must not modify reliable DPS");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.searches === 4, "SF_32 source hunt plan must expose four searches");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetReady === true, "SF_32 source hunt plan must carry the pending candidate snippet");
+assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetUsable === true, "SF_32 source hunt plan must expose a usable revised candidate snippet");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.templateNeedsRevision === true, "SF_32 source hunt plan must require template revision after 949 reparse");
-assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetUsable === false, "SF_32 source hunt plan must supersede old selector 949 candidate");
+assertInvariant(sf32OwnerSourceHuntPlan.supersededSubmission?.obsolete === true, "SF_32 source hunt plan must supersede old selector 949 candidate");
+assertInvariant(sf32OwnerSourceHuntPlan.supersededSubmission?.claim?.field === "selector:949", "SF_32 source hunt plan must identify the superseded direct field");
 assertInvariant(sf32BinarySemanticGapAudit.summary.canModifyReliableDps === false, "SF_32 binary semantic gap audit must not modify reliable DPS");
 assertInvariant(sf32BinarySemanticGapAudit.summary.binaryStructureReady === true, "SF_32 binary semantic gap audit must accept binary structure");
 assertInvariant(sf32BinarySemanticGapAudit.summary.sf32OwnerProven === false, "SF_32 binary semantic gap audit must keep ownership unproven");

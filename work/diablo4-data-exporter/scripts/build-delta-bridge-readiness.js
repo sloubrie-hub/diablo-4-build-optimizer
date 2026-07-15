@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const sf32BridgeFile = process.argv[2] ?? "outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const sf33BridgeFile = process.argv[3] ?? "outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -37,7 +38,7 @@ const gates = [
     id: "sf32-owner",
     title: "Ownership SF_32",
     bridge: sf32Bridge,
-    requiredMapping: "selector:949 -> SF_32",
+    requiredMapping: `${SF32_OWNER_CLAIM.field} -> SF_32`,
   }),
   gateFromBridge({
     id: "sf33-trigger",

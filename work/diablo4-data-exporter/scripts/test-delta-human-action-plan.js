@@ -38,7 +38,8 @@ run("build-delta-human-action-plan.js", [
 const report = readJson(path.join(outDir, "delta-human-action-plan.json"));
 assertInvariant(report.summary.candidateId === "draft-delta-proof-sf32-owner", "action plan should target the SF_32 draft");
 assertInvariant(report.summary.claimType === "sf32-field-ownership", "action plan should target SF_32 ownership");
-assertInvariant(report.summary.claimField === "selector:949", "action plan should target selector:949");
+assertInvariant(report.summary.claimField === "eAttrib:994 + local-role:949", "action plan should target revised SF_32 field");
+assertInvariant(report.fillTasks.find((task) => task.field === "claim.mapping")?.hint.includes("eAttrib:994"), "action plan should guide the revised mapping");
 assertInvariant(report.summary.placeholderFields === 7, "action plan should expose the seven current placeholders");
 assertInvariant(report.fillTasks.length === 7, "action plan should include one fill task per placeholder");
 assertInvariant(report.fillTasks[0].field === "source.title", "first fill task should be source.title");

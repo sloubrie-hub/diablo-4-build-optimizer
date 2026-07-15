@@ -57,7 +57,7 @@ syntheticPack.candidateSnippet.source = {
   capturedAt: "2026-07-15",
 };
 syntheticPack.candidateSnippet.claim = {
-  type: "sf32-field-ownership-revised",
+  type: "sf32-field-ownership",
   field: "eAttrib:994 + local-role:949",
   value: "SF_32 revised owner mapping",
   excerpt: "asset 1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 maps toward SF_32 in the verified test export",

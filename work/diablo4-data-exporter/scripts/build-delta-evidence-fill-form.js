@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const humanActionPlanFile = process.argv[2] ?? "outputs/diablo4-delta-human-action-plan/delta-human-action-plan.json";
 const outDir = process.argv[3] ?? "outputs/diablo4-delta-evidence-fill-form";
@@ -38,8 +39,8 @@ const form = {
     assetId: summary.assetId ?? 1663210,
     entityId: summary.entityId ?? "skill:1663210",
     candidateId: summary.candidateId ?? "draft-delta-proof-sf32-owner",
-    claimType: summary.claimType ?? "sf32-field-ownership",
-    claimField: summary.claimField ?? "selector:949",
+    claimType: summary.claimType ?? SF32_OWNER_CLAIM.type,
+    claimField: summary.claimField ?? SF32_OWNER_CLAIM.field,
     fields: fields.length,
     requiredFields: fields.filter((field) => field.required).length,
     completedFields: 0,

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const manualGateFile = process.argv[2] ?? "outputs/diablo4-delta-manual-promotion-gate/delta-manual-promotion-gate.json";
 const draftFile = process.argv[3] ?? "outputs/diablo4-delta-evidence-draft/delta-evidence-draft.json";
@@ -25,8 +26,8 @@ const fieldHints = {
   "source.version": "Version du build ou du dataset utilise.",
   "source.capturedAt": "Date de capture au format YYYY-MM-DD.",
   "claim.value": "Valeur sourcee qui confirme le mapping attendu.",
-  "claim.excerpt": "Extrait court contenant 1663210, selector:949 et SF_32.",
-  "claim.mapping": "Mapping explicite du type 1663210 -> selector:949 -> SF_32.",
+  "claim.excerpt": "Extrait court contenant 1663210, eAttrib:994, Bonus_Percent_Per_Power, local-role:949 et SF_32.",
+  "claim.mapping": "Mapping explicite du type 1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32.",
   "reviewer.notes[4]": "Remplacer la note placeholder par une note de revue factuelle.",
 };
 
@@ -83,8 +84,8 @@ const report = {
     assetId: manualGate.summary?.assetId ?? 1663210,
     entityId: manualGate.summary?.entityId ?? "skill:1663210",
     candidateId: candidate.id ?? draft.summary?.candidateId ?? "draft-delta-proof-sf32-owner",
-    claimType: candidate.claim?.type ?? draft.summary?.claimType ?? "sf32-field-ownership",
-    claimField: candidate.claim?.field ?? draft.summary?.claimField ?? "selector:949",
+    claimType: candidate.claim?.type ?? draft.summary?.claimType ?? SF32_OWNER_CLAIM.type,
+    claimField: candidate.claim?.field ?? draft.summary?.claimField ?? SF32_OWNER_CLAIM.field,
     placeholderFields: placeholderFields.length,
     failedGateIds,
     actions: orderedActions.length,

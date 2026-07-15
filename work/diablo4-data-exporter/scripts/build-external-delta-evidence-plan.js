@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const externalEvidenceIntakeFile = process.argv[2] ?? "outputs/diablo4-external-evidence-intake/external-evidence-intake.json";
 const externalEvidenceBridgeFile = process.argv[3] ?? "outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json";
@@ -28,13 +29,13 @@ const requiredProofs = [
   {
     id: "delta-proof-sf32-owner",
     gateId: "sf32-field",
-    title: "Prouver l'ownership SF_32 / selector 949",
+    title: "Prouver l'ownership SF_32 / eAttrib 994 + role local 949",
     priority: "high",
-    acceptedClaim: { type: "sf32-field-ownership", field: "selector:949" },
+    acceptedClaim: { type: SF32_OWNER_CLAIM.type, field: SF32_OWNER_CLAIM.field },
     acceptedSourceKinds: ["official", "extracted-game-data", "tool-output", "documented-dataset"],
-    mustContain: ["1663210", "selector:949", "SF_32"],
-    rejects: ["layout-analogy", "metadata 12337 seule", "scale 10 seul", "label UI"],
-    parserBridge: "mapper selector:949 vers le champ proprietaire SF_32 pour asset 1663210",
+    mustContain: [...SF32_OWNER_CLAIM.mustContain],
+    rejects: ["selector:949 direct seul", "layout-analogy", "metadata 12337 seule", "scale 10 seul", "label UI"],
+    parserBridge: "mapper eAttrib:994 + local-role:949 vers le champ proprietaire SF_32 pour asset 1663210",
   },
   {
     id: "delta-proof-sf33-trigger",

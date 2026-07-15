@@ -40,7 +40,7 @@ const markdown = fs.readFileSync(path.join(outDir, "external-evidence-submission
 const intakeAfter = fs.readFileSync(intakeFile, "utf8");
 
 assert(report.summary.nextTaskId === "delta-proof-sf32-owner", "submission pack must focus the next SF_32 proof");
-assert(report.summary.claimType === "sf32-field-ownership-revised", "submission pack must expose revised sf32-field-ownership claim");
+assert(report.summary.claimType === "sf32-field-ownership", "submission pack must expose canonical sf32-field-ownership claim");
 assert(report.summary.claimField === "eAttrib:994 + local-role:949", "submission pack must expose revised 994 + local 949 field");
 assert(report.summary.templateNeedsRevision === true, "submission pack must consume reparse template revision");
 assert(report.summary.priorClaimSuspended === true, "submission pack must suspend prior selector 949 claim");
@@ -60,6 +60,7 @@ assert((report.targetTask.mustContain ?? []).includes("Bonus_Percent_Per_Power")
 assert((report.targetTask.mustContain ?? []).includes("local-role:949"), "target task must require local 949 role evidence");
 assert((report.targetTask.mustContain ?? []).includes("SF_32"), "target task must require SF_32 evidence");
 assert(report.supersededClaim?.obsolete === true, "original selector 949 claim must be superseded");
+assert(report.supersededClaim?.claim?.field === "selector:949", "superseded claim must preserve the old direct field for traceability");
 assert(markdown.includes("draft-delta-proof-sf32-owner"), "markdown must include the draft candidate id");
 assert(intakeAfter === intakeBefore, "submission pack test must not change intake");
 

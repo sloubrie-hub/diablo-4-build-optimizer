@@ -71,10 +71,10 @@ readyCopyGate.candidateToCopy = {
   },
   claim: {
     type: "sf32-field-ownership",
-    field: "selector:949",
+    field: "eAttrib:994 + local-role:949",
     value: "SF_32",
-    excerpt: "1663210 selector:949 SF_32",
-    mapping: "1663210 -> selector:949 -> SF_32",
+    excerpt: "1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 SF_32",
+    mapping: "1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32",
   },
   reviewer: {
     status: "pending",

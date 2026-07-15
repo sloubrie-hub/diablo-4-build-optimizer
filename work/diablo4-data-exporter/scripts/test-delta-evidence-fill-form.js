@@ -38,7 +38,7 @@ const markdown = fs.readFileSync(path.join(outDir, "delta-evidence-fill-form.md"
 
 assertInvariant(form.summary.candidateId === "draft-delta-proof-sf32-owner", "form should target the SF_32 draft");
 assertInvariant(form.summary.claimType === "sf32-field-ownership", "form should target SF_32 ownership");
-assertInvariant(form.summary.claimField === "selector:949", "form should target selector:949");
+assertInvariant(form.summary.claimField === "eAttrib:994 + local-role:949", "form should target revised SF_32 field");
 assertInvariant(form.summary.fields === 7, "form should expose seven fields");
 assertInvariant(form.summary.requiredFields === 7, "all current fields should be required");
 assertInvariant(form.summary.completedFields === 0, "empty form should have no completed fields");

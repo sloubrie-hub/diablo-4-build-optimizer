@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const inputs = {
   nextActionDecision: process.argv[2] ?? "outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json",
@@ -25,12 +26,14 @@ const selector949WindowReparseAudit = readJson(inputs.selector949WindowReparseAu
 const requiredClaim = packet.requiredClaim ?? {};
 const templateNeedsRevision = selector949WindowReparseAudit.summary?.sf32TemplateNeedsRevision === true;
 const mustContain = templateNeedsRevision
-  ? ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"]
-  : requiredClaim.mustContain ?? ["1663210", "selector:949", "SF_32"];
+  ? [...SF32_OWNER_CLAIM.mustContain]
+  : requiredClaim.mustContain ?? [...SF32_OWNER_CLAIM.mustContain];
 const rejectedLocalSignals = packet.rejectedLocalSignals ?? [];
 const recommendedAction = decision.rankedActions?.find((item) => item.id === decision.summary?.recommendedActionId) ?? null;
 const candidateSnippet = submission.candidateSnippet ?? packet.intakeTemplate ?? null;
-const candidateSnippetUsable = Boolean(candidateSnippet) && !templateNeedsRevision;
+const candidateSnippetUsable = Boolean(candidateSnippet)
+  && candidateSnippet.claim?.type === SF32_OWNER_CLAIM.type
+  && candidateSnippet.claim?.field === SF32_OWNER_CLAIM.field;
 
 const searches = [
   action(
@@ -39,13 +42,13 @@ const searches = [
     "extracted-game-data",
     templateNeedsRevision
       ? "\"1663210\" \"eAttrib 994\" \"Bonus_Percent_Per_Power\" \"949\""
-      : "\"1663210\" \"selector:949\" \"SF_32\"",
+      : "\"1663210\" \"eAttrib 994\" \"Bonus_Percent_Per_Power\" \"949\" \"SF_32\"",
     templateNeedsRevision
       ? ["export brut qui relie l'ancre 994 au record 1663210", "structure qui nomme le role local 949"]
-      : ["export brut ou table qui contient les trois termes requis", "mapping explicite asset -> selector -> SF_32"],
+      : ["export brut qui relie l'ancre 994 au record 1663210", "structure qui nomme le role local 949"],
     templateNeedsRevision
       ? ["mapping direct 949 -> Bonus_Percent_Per_Power", "metadata 12337 seule", "scale 10 seul"]
-      : ["resultat qui contient seulement l'asset", "resultat qui contient seulement SF_32"]
+      : ["mapping direct 949 -> Bonus_Percent_Per_Power", "metadata 12337 seule", "scale 10 seul"]
   ),
   action(
     "sf32-source-hunt-02-tool-output",
@@ -67,13 +70,13 @@ const searches = [
     "documented-dataset",
     templateNeedsRevision
       ? "\"eAttrib 994\" \"Bonus_Percent_Per_Power\" \"SF_32\""
-      : "\"selector:949\" \"Bonus_Percent_Per_Power\"",
+      : "\"eAttrib 994\" \"Bonus_Percent_Per_Power\" \"local-role:949\" \"SF_32\"",
     templateNeedsRevision
       ? ["dataset documente qui separe attribut 994 et role local 949", "champ proprietaire nomme"]
-      : ["dataset documente avec dictionnaire de selectors", "champ proprietaire nomme"],
+      : ["dataset documente qui separe attribut 994 et role local 949", "champ proprietaire nomme"],
     templateNeedsRevision
       ? ["ancien template selector:949 -> SF_32", "metadata 12337 seule", "scale 10 seul"]
-      : ["metadata 12337 seule", "scale 10 seul"]
+      : ["mapping direct selector:949 -> SF_32", "metadata 12337 seule", "scale 10 seul"]
   ),
   action(
     "sf32-source-hunt-04-official-or-patch-data",
@@ -81,7 +84,7 @@ const searches = [
     "official",
     templateNeedsRevision
       ? "\"1663210\" \"Spiritborn\" \"Bonus_Percent_Per_Power\" \"994\""
-      : "\"1663210\" \"Spiritborn\" \"SF_32\"",
+      : "\"1663210\" \"Spiritborn\" \"Bonus_Percent_Per_Power\" \"994\" \"SF_32\"",
     ["source officielle ou patch data qui relie l'asset au champ", "preuve citee avec version"],
     ["texte descriptif sans champ source", "guide de build sans mapping donnees"]
   ),
@@ -96,8 +99,9 @@ const report = {
     assetId: packet.summary?.assetId ?? 1663210,
     entityId: packet.summary?.entityId ?? "skill:1663210",
     targetField: templateNeedsRevision ? "Bonus_Percent_Per_Power / SF_32 role unresolved" : packet.summary?.targetField ?? "SF_32",
-    targetSelector: templateNeedsRevision ? "eAttrib:994 + local-role:949" : packet.summary?.targetSelector ?? "selector:949",
+    targetSelector: templateNeedsRevision ? SF32_OWNER_CLAIM.field : packet.summary?.targetSelector ?? SF32_OWNER_CLAIM.field,
     templateNeedsRevision,
+    templateRevisionApplied: candidateSnippetUsable,
     priorClaimSuspended: templateNeedsRevision,
     recommendedActionId: recommendedAction?.id ?? decision.summary?.recommendedActionId ?? null,
     searches: searches.length,
@@ -115,26 +119,25 @@ const report = {
     canUseForRanking: false,
     promotionReady: false,
     assessment: {
-      kind: templateNeedsRevision ? "sf32-owner-source-hunt-template-revision-required" : "sf32-owner-source-hunt-open",
+      kind: candidateSnippetUsable ? "sf32-owner-source-hunt-open" : "sf32-owner-source-hunt-template-revision-required",
       confidence: "high",
       promotionReady: false,
-      finding: templateNeedsRevision
-        ? "La collecte SF_32 ne doit plus demander selector:949 comme preuve directe; elle doit partir de l'ancre 994 et decoder le role local 949."
-        : "La collecte SF_32 doit chercher une source contenant explicitement 1663210, selector:949 et SF_32.",
-      nextAction: templateNeedsRevision
-        ? "Remplacer le brouillon de preuve par une recherche eAttrib 994 + structure locale 949 avant toute soumission."
-        : "Executer les recherches prioritaires, puis coller une source exacte dans le brouillon pending si elle existe.",
+      finding: candidateSnippetUsable
+        ? "Le brouillon applique le contrat revise et la collecte peut chercher la chaine eAttrib 994 + role local 949 + SF_32."
+        : "Le brouillon doit encore etre revise avant toute collecte SF_32.",
+      nextAction: candidateSnippetUsable
+        ? "Executer les recherches prioritaires, puis coller une source exacte dans le brouillon pending si elle existe."
+        : "Regenerer le brouillon avec le contrat eAttrib 994 + role local 949.",
     },
   },
   requiredClaim,
   mustContain,
   searches,
   supersededSubmission: {
-    candidateId: candidateSnippet?.id ?? null,
-    obsolete: templateNeedsRevision,
-    reason: templateNeedsRevision
-      ? "Le brouillon demande selector:949 -> SF_32, mais l'audit DiabloTools/Reparse impose 994 comme ancre bonus et 949 comme role local non decode."
-      : null,
+    candidateId: null,
+    obsolete: true,
+    claim: { type: SF32_OWNER_CLAIM.type, field: SF32_OWNER_CLAIM.supersededField },
+    reason: "L'ancien brouillon selector:949 -> SF_32 est remplace par le contrat eAttrib 994 + role local 949.",
   },
   rejectedLocalSignals: rejectedLocalSignals.map((signal) => ({
     id: signal.id,
@@ -144,16 +147,9 @@ const report = {
   candidateSnippet,
   acceptanceChecklist: [
     "La source contient explicitement 1663210.",
-    ...(templateNeedsRevision
-      ? [
-          "La source contient explicitement eAttrib 994 / Bonus_Percent_Per_Power.",
-          "La source explique le role local 949 sans le confondre avec l'eAttrib bonus.",
-          "La source relie ensuite ce role au champ SF_32 ou au record qui l'alimente.",
-        ]
-      : [
-          "La source contient explicitement selector:949.",
-          "La source nomme SF_32 comme champ proprietaire ou mapping equivalent.",
-        ]),
+    "La source contient explicitement eAttrib 994 / Bonus_Percent_Per_Power.",
+    "La source explique le role local 949 sans le confondre avec l'eAttrib bonus.",
+    "La source relie ensuite ce role au champ SF_32 ou au record qui l'alimente.",
     "La source porte une version, un export, ou une date exploitable.",
     "La preuve reste reviewer.status=pending tant qu'elle n'est pas relue.",
   ],

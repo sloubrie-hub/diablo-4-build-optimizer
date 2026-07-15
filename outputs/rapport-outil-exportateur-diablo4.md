@@ -13079,3 +13079,61 @@ Validation :
 Decision :
 
 Le pipeline n'accepte plus une preuve qui mappe seulement `selector:949` vers `SF_32`. Une preuve recevable doit relier `1663210`, l'ancre `eAttrib:994`, `Bonus_Percent_Per_Power`, le role local `949` et `SF_32`. Meme avec une preuve acceptee, le bridge ne modifiera pas `reliableDps`; `SF_33` et l'uptime devront rester prouves separement.
+
+## Alignement complet du pipeline de preuve SF_32
+
+Le contrat revise a ete propage dans toute la chaine active. Un contrat partage empeche maintenant les plans, formulaires et bridges de revenir silencieusement vers l'ancien mapping direct.
+
+Fichiers structurants :
+
+- `work/diablo4-data-exporter/src/delta-evidence-contract.js`
+- `work/diablo4-data-exporter/scripts/audit-external-evidence-intake.js`
+- `work/diablo4-data-exporter/scripts/build-external-delta-evidence-plan.js`
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-pack.js`
+- `work/diablo4-data-exporter/scripts/build-delta-human-action-plan.js`
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-fill-form.js`
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-source-packet.js`
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-parser-bridge.js`
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-source-hunt-plan.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-contract.js`
+
+Contrat canonique :
+
+- type : `sf32-field-ownership`
+- champ : `eAttrib:994 + local-role:949`
+- termes requis : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+- champ obsolete : `selector:949`
+
+Comportement intake verifie :
+
+- claim canonique avec source et revue synthetiques : `accepted`
+- ancien claim direct `selector:949 -> SF_32` : `pending`
+- blocage ancien claim : `claim-field-not-valid-for-domain`
+- raccourci `sf32-field-ownership / SF_32` : `pending`
+- blocage raccourci : `claim-field-not-valid-for-claim-type`
+- `canModifyReliableDps false`
+
+Sorties regenerees :
+
+- plan externe SF_32 : champ canonique
+- workorder SF_32 : champ canonique et cinq termes requis
+- paquet de soumission : type canonique, champ canonique
+- brouillon, plan d'action humain et formulaire : champ canonique
+- source hunt : `candidateSnippetUsable true`
+- source hunt assessment : `sf32-owner-source-hunt-open`
+- ancien claim conserve uniquement comme `supersededSubmission`
+
+Validation :
+
+- controles syntaxe Node : OK
+- test contrat : `delta-evidence-contract-test-ok`
+- test plan externe : `external-delta-evidence-plan-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `129` etapes
+- parite stricte : `0`
+- DPS strict : `163200`
+- delta bloque : `48960`
+- site et sorties principales sur `http://127.0.0.1:4173` : HTTP `200`
+
+Decision :
+
+Le pipeline de collecte est maintenant coherent et utilisable avec le contrat revise. Il n'existe encore aucune preuve reelle acceptee pour `SF_32`; le bridge reste ferme, `reliableDps` reste strict-only et le delta `48960` reste un candidat what-if bloque. La prochaine avancee utile doit venir d'une source qui relie explicitement l'ancre `994`, le role local `949` et `SF_32`.

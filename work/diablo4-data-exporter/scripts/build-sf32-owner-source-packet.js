@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { SF32_OWNER_CLAIM } = require("../src/delta-evidence-contract");
 
 const sf32LocalConclusionFile = process.argv[2] ?? "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const externalDeltaWorkorderFile = process.argv[3] ?? "outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json";
@@ -18,12 +19,12 @@ const sf32Task = (workorder.tasks ?? []).find((task) => task.id === "delta-proof
 const acceptedEvidence = (intake.candidates ?? []).filter((candidate) =>
   candidate.status === "accepted"
   && candidate.domain === "delta-1663210"
-  && candidate.claim?.type === "sf32-field-ownership"
-  && candidate.claim?.field === "eAttrib:994 + local-role:949");
+  && candidate.claim?.type === SF32_OWNER_CLAIM.type
+  && candidate.claim?.field === SF32_OWNER_CLAIM.field);
 
 const revisedClaim = {
-  field: "eAttrib:994 + local-role:949",
-  mustContain: ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"],
+  field: SF32_OWNER_CLAIM.field,
+  mustContain: [...SF32_OWNER_CLAIM.mustContain],
   rejects: [
     "selector:949 direct seul",
     "layout-analogy",
@@ -63,12 +64,12 @@ const sourcePacket = {
     assetId: 1663210,
     entityId: "skill:1663210",
     targetField: "SF_32",
-    targetSelector: "eAttrib:994 + local-role:949",
+    targetSelector: SF32_OWNER_CLAIM.field,
     acceptedEvidence: acceptedEvidence.length,
     rejectedLocalSignals: rejectedLocalSignals.length,
     localEvidenceExhausted: sf32.summary?.sf32LocalExhausted === true,
     nextTaskId: sf32Task?.id ?? "delta-proof-sf32-owner",
-    nextAcceptedClaimType: sf32Task?.claim?.type ?? "sf32-field-ownership",
+    nextAcceptedClaimType: sf32Task?.claim?.type ?? SF32_OWNER_CLAIM.type,
     nextAcceptedClaimField: revisedClaim.field,
     priorSelector949DirectClaimSuspended: true,
     templateNeedsRevision: true,
@@ -93,7 +94,7 @@ const sourcePacket = {
     domain: "delta-1663210",
     assetId: 1663210,
     entityId: "skill:1663210",
-    type: sf32Task?.claim?.type ?? "sf32-field-ownership",
+    type: sf32Task?.claim?.type ?? SF32_OWNER_CLAIM.type,
     field: revisedClaim.field,
     mustContain: revisedClaim.mustContain,
     acceptedSourceKinds: sf32Task?.requiredSourceKinds ?? ["official", "extracted-game-data", "tool-output", "documented-dataset"],
@@ -101,13 +102,13 @@ const sourcePacket = {
   },
   supersededClaim: {
     obsolete: true,
-    field: "selector:949",
+    field: SF32_OWNER_CLAIM.supersededField,
     reason: "DiabloTools mappe Bonus_Percent_Per_Power vers eAttrib 994; 949 doit etre traite comme role local non nomme.",
   },
   rejectedLocalSignals,
   intakeTemplate: sf32Task?.intakeTemplate ?? null,
   parserBridgeContract: {
-    id: "parser-bridge-sf32-owner-selector-949",
+    id: "parser-bridge-sf32-owner-eattrib-994-local-role-949",
     status: acceptedEvidence.length ? "ready-after-review" : "blocked-waiting-for-source",
     input: "accepted external evidence claim sf32-field-ownership / eAttrib:994 + local-role:949",
     output: "normalized field ownership mapping eAttrib:994 + local-role:949 -> SF_32 for asset 1663210",
