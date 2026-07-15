@@ -790,7 +790,7 @@ function renderTargetOptimizerPlan() {
       ${plan.bestHistoricalStrictBuild && !currentModelReady ? `<span>Meilleure reference historique : ${plan.bestHistoricalStrictBuild.class} - ${formatNumber(plan.bestHistoricalStrictBuild.strictDps)} DPS</span>` : ""}
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
-    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph, plan.currentPowerActivationGraph)}
+    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph, plan.currentPowerActivationGraph, plan.currentAiScheduleBoundaryAudit)}
     ${renderTargetOptimizerSuite(plan.targetOptimizerSuite)}
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine, plan.currentPowerSourceFreshnessAudit)}
     ${renderBucketEngineContract(plan.bucketEngineContract)}
@@ -878,7 +878,7 @@ function renderTargetOptimizerPlan() {
   `;
 }
 
-function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph) {
+function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph, aiBoundaryAudit) {
   if (!audit) return "";
   const summary = audit.summary ?? {};
   const active = audit.activeBinary ?? {};
@@ -890,6 +890,8 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph)
   const damageConsumers = formulaGraph?.damageConsumers ?? [];
   const activationSummary = activationGraph?.summary ?? {};
   const activationChains = activationGraph?.activationChains ?? [];
+  const aiBoundarySummary = aiBoundaryAudit?.summary ?? {};
+  const observationPlan = aiBoundaryAudit?.runtimeObservationPlan ?? {};
   const activationLabels = {
     "default-breath": "Souffle standard",
     "blast-of-bile-breath": "Souffle Blast of Bile",
@@ -957,9 +959,27 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph)
           `).join("")}
         </div>
       ` : ""}
+      ${aiBoundaryAudit ? `
+        <div class="bonus-selector-proof-metrics">
+          ${targetMetric("Registre SNO", formatNumber(aiBoundarySummary.activeCoreTocEntries))}
+          ${targetMetric("Groupes planning", aiBoundarySummary.publishedScheduleGroups)}
+          ${targetMetric("AIBehavior 1858249", aiBoundarySummary.aiBehaviorFileAddressable ? "publie" : "non publie")}
+          ${targetMetric("Observation runtime", aiBoundarySummary.runtimeObservationPlanReady ? "prete" : "a preparer")}
+        </div>
+        <div class="current-formula-consumers">
+          ${(observationPlan.scenarios ?? []).map((scenario) => `
+            <span>
+              <strong>${scenario.label}</strong>
+              ${scenario.minimumCasts ?? `${scenario.minimumCastsPerTier} par etat`} lancers minimum
+            </span>
+          `).join("")}
+        </div>
+        <p>${aiBoundarySummary.assessment?.finding ?? ""}</p>
+        <p>${aiBoundarySummary.assessment?.inference ?? ""}</p>
+      ` : ""}
       <p>${summary.assessment?.finding ?? ""}</p>
       <p><strong>Les valeurs 163 200 / 212 160 / +48 960 sont maintenant des references historiques.</strong></p>
-      <p>${activationSummary.assessment?.nextAction ?? graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
+      <p>${aiBoundarySummary.assessment?.nextAction ?? activationSummary.assessment?.nextAction ?? graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }
@@ -4743,10 +4763,13 @@ function targetCollectionCounts() {
 }
 
 function targetMetric(label, value) {
+  const isNumericValue = typeof value === "number"
+    || (typeof value === "string" && value.trim() !== "" && Number.isFinite(Number(value)));
+  const displayValue = isNumericValue ? formatNumber(value) : String(value ?? "n/a");
   return `
     <article class="target-metric">
       <span>${label}</span>
-      <strong>${formatNumber(value)}</strong>
+      <strong>${displayValue}</strong>
     </article>
   `;
 }

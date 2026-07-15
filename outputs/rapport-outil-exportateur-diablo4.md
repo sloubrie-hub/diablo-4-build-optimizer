@@ -13397,3 +13397,110 @@ Validation :
 Decision :
 
 La prochaine recherche utile porte sur l'ordonnanceur `AIBehavior 1858249`, par extraction d'une ressource encore cachee ou par observation runtime. Tant que l'ordre, les repetitions et la vitesse d'attaque ne sont pas prouves, le graphe reste partiel et aucune valeur ne rejoint le DPS fiable.
+
+## Frontiere client du planning IA
+
+Le registre `CoreTOC.dat` de la build active a ete extrait directement des index CASC locaux. Ce registre associe les identifiants SNO distribues au client a leur groupe et a leur nom de fichier. Il permet donc de distinguer un fichier simplement non encore extrait d'une definition qui n'est pas adressable comme ressource SNO client.
+
+Source active :
+
+- build : `3.1.1.72836`
+- fichier : `outputs/diablo4-current-casc-3.1.1/base/CoreTOC.dat`
+- taille : `40753096` octets
+- SHA256 : `a86f354b94314319c95b77490fd7d30a4f39074c034885d00ae1036196f71642`
+- format CoreTOC recent : `true`
+- slots de groupes : `182`
+- groupes nommes presents : `133`
+- entrees SNO nommees : `862224`
+
+Verification de l'acteur :
+
+- acteur : `Spiritborn_CentipedeRulerHead`, SNO `1858169`
+- champ : `ptMonsterData[0].arAIBehaviors[0]`
+- reference brute : `1858249`
+- groupe : `3 / AIBehavior`
+- nom resolu : `null`
+- fichier cible resolu : `null`
+- `eDefaultBrain = 2`
+- `eBehaviorType = 0`
+- `arAIPropPowerPairings` : tableau vide
+
+Groupes de planning dans le CoreTOC actif et le snapshot de reference :
+
+- `3 / AIBehavior / .aib` : `0 / 0`
+- `4 / AIState / .ais` : `0 / 0`
+- `87 / Schedule / .sch` : `0 / 0`
+- `125 / AIAwareness / .aia` : `0 / 0`
+- `144 / AICoordinator / .aic` : `0 / 0`
+- `163 / GenericNodeGraph / .gng` : `0 / 0`
+
+Controles positifs dans le meme registre actif :
+
+- acteur `1858169` : resolu
+- animset `1858248` : resolu
+- pouvoir spawn `1858114` : resolu
+- pouvoir projectile `1858262` : resolu
+- pouvoir souffle `1859218` : resolu
+- total : `5 / 5`
+
+Ces controles evitent une conclusion fondee sur un registre incomplet : les ressources voisines de l'entite sont bien publiees et nommees, tandis que le planning IA ne l'est pas.
+
+Conclusion de frontiere :
+
+- `AIBehavior 1858249` est reellement reference par l'acteur
+- il n'existe aucun nom ni chemin client permettant d'extraire ce SNO
+- aucun des groupes de planning suivis n'est publie dans le CoreTOC actif
+- l'acteur ne duplique pas la sequence dans ses pairings IA inline
+- la recherche directe d'un fichier client `.aib` est epuisee
+- une definition serveur ou non distribuee est probable, mais sa localisation exacte reste une inference
+- l'absence du fichier ne prouve ni l'ordre, ni les repetitions, ni la cadence runtime
+
+Implementation :
+
+- `work/diablo4-data-exporter/scripts/build-current-ai-schedule-boundary-audit.js`
+- `work/diablo4-data-exporter/scripts/test-current-ai-schedule-boundary-audit.js`
+- `outputs/diablo4-current-ai-schedule-boundary-audit/current-ai-schedule-boundary-audit.json`
+- `outputs/diablo4-current-ai-schedule-boundary-audit/runtime-cadence-observation-template.json`
+- integration dans `build-target-optimizer-plan.js`
+- integration dans `build-target-optimizer-suite.js`
+- affichage dans `site/app.js`
+
+Protocole d'observation prepare :
+
+- sequence standard sur cible unique : `5` lancers minimum
+- `Blast of Bile`, souffle unique puis disparition : `5` lancers minimum
+- comparaison de vitesse : `2` etats stables, `5` lancers par etat
+- total minimum : `20` lancers
+- capture minimale : `60 FPS`
+- evenements : debut du lancer, apparition, debut/contact d'attaque, instances de degats, disparition
+- observations actuellement collectees : `0`
+
+Garde-fous :
+
+- une localisation serveur reste une inference, pas un fait extrait
+- l'absence CoreTOC ne prouve aucune sequence runtime
+- le gabarit ne contient aucun evenement invente
+- les temps d'animation restent nominaux
+- le multiplicateur `x4` ne devient pas quatre touches sans observation
+- le DPS strict courant reste `null`
+- `canModifyReliableDps false`
+
+Validation :
+
+- test : `current-ai-schedule-boundary-audit-test-ok`
+- frontiere SNO client : `clientSnoBoundaryProven true`
+- groupes de planning publies : `0`
+- controles voisins resolus : `5 / 5`
+- protocole runtime : `runtimeObservationPlanReady true`
+- observations : `0`
+- planning IA : `aiScheduleReady false`
+- action numero `1` : `Mesurer la cadence en jeu 3.1.1`
+- suite optimiseur : `target-optimizer-suite-ok`, `137` etapes
+- parite stricte historique : `0`
+- page, plan, audit et gabarit servis en HTTP `200`
+- verification navigateur : `NaN 0`, erreurs console `0`
+- metriques visibles : `Registre SNO 862224`, `Groupes planning 0`, `AIBehavior 1858249 non publie`, `Observation runtime prete`
+
+Decision :
+
+La prochaine etape ne consiste plus a extraire un fichier IA client nomme. Elle consiste a collecter les observations runtime prevues, puis a construire une sequence statistiquement valide pour les attaques, les repetitions et la mise a l'echelle de vitesse. Aucun DPS courant ne sera calcule avant cette collecte.

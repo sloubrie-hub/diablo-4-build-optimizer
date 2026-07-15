@@ -13,6 +13,8 @@ const generationSteps = [
   "test-current-power-formula-graph.js",
   "build-current-power-activation-graph.js",
   "test-current-power-activation-graph.js",
+  "build-current-ai-schedule-boundary-audit.js",
+  "test-current-ai-schedule-boundary-audit.js",
   "build-target-bucket-engine.js",
   "build-fine-bucket-extraction-plan.js",
   "build-delta-promotion-conclusion.js",
@@ -240,6 +242,7 @@ const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-w
 const currentPowerSourceFreshnessAudit = readJson("outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json");
 const currentPowerFormulaGraph = readJson("outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json");
 const currentPowerActivationGraph = readJson("outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json");
+const currentAiScheduleBoundaryAudit = readJson("outputs/diablo4-current-ai-schedule-boundary-audit/current-ai-schedule-boundary-audit.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -555,6 +558,20 @@ assertInvariant(currentPowerActivationGraph.summary.activationGraphPartial === t
 assertInvariant(currentPowerActivationGraph.summary.activationGraphReady === false, "current activation graph must not be promoted prematurely");
 assertInvariant(currentPowerActivationGraph.summary.currentStrictDpsKnown === false, "current activation graph must not invent strict DPS");
 assertInvariant(currentPowerActivationGraph.summary.canModifyReliableDps === false, "current activation graph must not modify reliable DPS");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.currentBuild === "3.1.1.72836", "current AI boundary audit must target the local 3.1.1 build");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.aiBehaviorSnoId === 1858249, "current AI boundary audit must target AIBehavior 1858249");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.activeCoreTocEntries > 800000, "current AI boundary audit must parse the active CoreTOC registry");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.activeAiBehaviorGroupEntries === 0, "active client must publish no AIBehavior entries");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.publishedScheduleGroups === 0, "active client must publish no tracked schedule groups");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.aiBehaviorReferencePresent === true, "current actor must retain the AIBehavior reference");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.activeControlSnosResolved === 5, "current AI boundary audit must resolve five neighboring controls");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.clientSnoBoundaryProven === true, "current AI client SNO boundary must be proven");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.runtimeObservationRequired === true, "runtime cadence observation must be required");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.runtimeObservationPlanReady === true, "runtime cadence observation plan must be ready");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.runtimeObservationsCollected === 0, "current AI boundary audit must not invent runtime observations");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.aiScheduleReady === false, "current AI schedule must remain blocked");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.currentStrictDpsKnown === false, "current AI boundary audit must not invent strict DPS");
+assertInvariant(currentAiScheduleBoundaryAudit.summary.canModifyReliableDps === false, "current AI boundary audit must not modify reliable DPS");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -576,6 +593,11 @@ const summary = {
   activeUnattributedDamageConsumers: currentPowerActivationGraph.summary.unattributedDamageConsumers,
   activeAiScheduleReady: currentPowerActivationGraph.summary.aiScheduleReady,
   activeActivationBlockers: currentPowerActivationGraph.summary.blockers.length,
+  activeAiClientBoundaryProven: currentAiScheduleBoundaryAudit.summary.clientSnoBoundaryProven,
+  activeAiBehaviorPublished: currentAiScheduleBoundaryAudit.summary.aiBehaviorFileAddressable,
+  activeRuntimeObservationRequired: currentAiScheduleBoundaryAudit.summary.runtimeObservationRequired,
+  activeRuntimeObservationPlanReady: currentAiScheduleBoundaryAudit.summary.runtimeObservationPlanReady,
+  activeRuntimeObservationsCollected: currentAiScheduleBoundaryAudit.summary.runtimeObservationsCollected,
   reliableStrictBuilds: 0,
   nextGate: "current-source-model-fresh",
 };
@@ -619,6 +641,13 @@ const report = {
     { id: "active-activation-graph-partial", status: "passed", value: currentPowerActivationGraph.summary.activationGraphPartial },
     { id: "active-ai-schedule-blocked", status: "passed", value: currentPowerActivationGraph.summary.aiScheduleReady },
     { id: "active-activation-strict-dps-unknown", status: "passed", value: currentPowerActivationGraph.summary.currentStrictDpsKnown },
+    { id: "active-coretoc-ai-behavior-empty", status: "passed", value: currentAiScheduleBoundaryAudit.summary.activeAiBehaviorGroupEntries },
+    { id: "active-coretoc-schedule-groups-empty", status: "passed", value: currentAiScheduleBoundaryAudit.summary.publishedScheduleGroups },
+    { id: "active-ai-control-snos-5", status: "passed", value: currentAiScheduleBoundaryAudit.summary.activeControlSnosResolved },
+    { id: "active-ai-client-boundary-proven", status: "passed", value: currentAiScheduleBoundaryAudit.summary.clientSnoBoundaryProven },
+    { id: "active-runtime-observation-required", status: "passed", value: currentAiScheduleBoundaryAudit.summary.runtimeObservationRequired },
+    { id: "active-runtime-observation-plan-ready", status: "passed", value: currentAiScheduleBoundaryAudit.summary.runtimeObservationPlanReady },
+    { id: "active-runtime-observations-empty", status: "passed", value: currentAiScheduleBoundaryAudit.summary.runtimeObservationsCollected },
     { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
     { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
     { id: "external-evidence-intake-safe", status: "passed", value: externalEvidenceIntake.summary.canModifyReliableDps },
@@ -961,9 +990,14 @@ assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.activationGr
 assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.attributedDamageConsumers === 5, "optimizer plan must embed five attributed damage consumers");
 assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.aiScheduleReady === false, "optimizer plan must keep the AI schedule blocked");
 assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.currentStrictDpsKnown === false, "optimizer plan must keep activation strict DPS unknown");
+assertInvariant(optimizerPlan.currentAiScheduleBoundaryAudit?.summary?.clientSnoBoundaryProven === true, "optimizer plan must embed the proven AI client boundary");
+assertInvariant(optimizerPlan.currentAiScheduleBoundaryAudit?.summary?.aiBehaviorFileAddressable === false, "optimizer plan must keep AIBehavior 1858249 unaddressable");
+assertInvariant(optimizerPlan.currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true, "optimizer plan must require runtime cadence observation");
+assertInvariant(optimizerPlan.currentAiScheduleBoundaryAudit?.summary?.runtimeObservationPlanReady === true, "optimizer plan must embed the runtime cadence plan");
+assertInvariant(optimizerPlan.currentAiScheduleBoundaryAudit?.summary?.currentStrictDpsKnown === false, "optimizer plan must keep AI boundary strict DPS unknown");
 assertInvariant(optimizerPlan.summary.currentSourceModelFresh === false, "optimizer plan must expose stale current source model");
 assertInvariant(optimizerPlan.summary.canUseForCurrentBuild === false, "optimizer plan must reject legacy DPS for current build");
-assertInvariant(optimizerPlan.summary.topAction === "Prouver la cadence des attaques 3.1.1", "active AI schedule must be the top optimizer action");
+assertInvariant(optimizerPlan.summary.topAction === "Mesurer la cadence en jeu 3.1.1", "runtime AI cadence observation must be the top optimizer action");
 assertInvariant(optimizerPlan.recommendedStrictByClass
   .find((row) => row.assetIds?.includes(1663210))?.optimizerDecision?.canLoadAsWorkingBase === false, "stale 1663210 plan must not load as a current working base");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");

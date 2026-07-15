@@ -88,6 +88,7 @@ const targetOptimizerSuiteFile = "outputs/diablo4-target-optimizer-suite/target-
 const currentPowerSourceFreshnessAuditFile = "outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json";
 const currentPowerFormulaGraphFile = "outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json";
 const currentPowerActivationGraphFile = "outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json";
+const currentAiScheduleBoundaryAuditFile = "outputs/diablo4-current-ai-schedule-boundary-audit/current-ai-schedule-boundary-audit.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -349,22 +350,37 @@ function actionForGate(gateId, plan, context = {}) {
   const currentSourceFreshness = context.currentSourceFreshness;
   const currentPowerFormulaGraph = context.currentPowerFormulaGraph;
   const currentPowerActivationGraph = context.currentPowerActivationGraph;
+  const currentAiScheduleBoundaryAudit = context.currentAiScheduleBoundaryAudit;
   const gateActions = {
     "current-source-model-fresh": {
       priority: "critical",
       focus: "asset:1663210",
-      title: currentPowerActivationGraph?.summary?.activationGraphPartial === true
+      title: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
+        ? "Mesurer la cadence en jeu 3.1.1"
+        : currentPowerActivationGraph?.summary?.activationGraphPartial === true
         ? "Prouver la cadence des attaques 3.1.1"
         : currentPowerFormulaGraph?.summary?.graphReady === true
         ? "Relier les activations de degats 3.1.1"
         : "Recalculer le modele depuis la source 3.1.1",
-      action: currentPowerActivationGraph?.summary?.activationGraphPartial === true
+      action: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
+        ? "Collecter les sequences standard, Blast of Bile et deux etats stables de vitesse avec le protocole runtime avant de calculer le DPS strict."
+        : currentPowerActivationGraph?.summary?.activationGraphPartial === true
         ? "Resoudre l'ordre et le nombre de repetitions de l'IA 1858249, puis appliquer la vitesse d'attaque avant de calculer le DPS strict."
         : currentPowerFormulaGraph?.summary?.graphReady === true
         ? "Relier les payloads et DOT aux evenements, nombres de touches et cadences avant de calculer le DPS strict."
         : "Reconstruire le graphe de formules actif puis recalculer le DPS strict avant tout classement.",
       expectedImpact: "Remplacer les valeurs historiques par un modele compatible avec la version locale actuelle.",
-      subPlan: currentPowerActivationGraph
+      subPlan: currentAiScheduleBoundaryAudit
+        ? {
+            mode: currentAiScheduleBoundaryAudit.mode,
+            file: currentAiScheduleBoundaryAuditFile,
+            blockedSteps: currentAiScheduleBoundaryAudit.summary?.blockers?.length ?? null,
+            readySteps: currentAiScheduleBoundaryAudit.summary?.runtimeObservationPlanReady === true ? 1 : 0,
+            nextStepId: "collect-runtime-cadence-observations",
+            nextStepTitle: currentAiScheduleBoundaryAudit.summary?.assessment?.nextAction ?? null,
+            assessment: currentAiScheduleBoundaryAudit.summary?.assessment?.kind ?? null,
+          }
+        : currentPowerActivationGraph
         ? {
             mode: currentPowerActivationGraph.mode,
             file: currentPowerActivationGraphFile,
@@ -670,6 +686,7 @@ const targetOptimizerSuite = readOptionalJson(targetOptimizerSuiteFile);
 const currentPowerSourceFreshnessAudit = readOptionalJson(currentPowerSourceFreshnessAuditFile);
 const currentPowerFormulaGraph = readOptionalJson(currentPowerFormulaGraphFile);
 const currentPowerActivationGraph = readOptionalJson(currentPowerActivationGraphFile);
+const currentAiScheduleBoundaryAudit = readOptionalJson(currentAiScheduleBoundaryAuditFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -736,6 +753,7 @@ const actionQueue = buildActionQueue(recommendedStrictByClass, {
   currentSourceFreshness: currentPowerSourceFreshnessAudit,
   currentPowerFormulaGraph,
   currentPowerActivationGraph,
+  currentAiScheduleBoundaryAudit,
 });
 
 const report = {
@@ -828,6 +846,7 @@ const report = {
     currentPowerSourceFreshnessAuditFile: currentPowerSourceFreshnessAudit ? currentPowerSourceFreshnessAuditFile : null,
     currentPowerFormulaGraphFile: currentPowerFormulaGraph ? currentPowerFormulaGraphFile : null,
     currentPowerActivationGraphFile: currentPowerActivationGraph ? currentPowerActivationGraphFile : null,
+    currentAiScheduleBoundaryAuditFile: currentAiScheduleBoundaryAudit ? currentAiScheduleBoundaryAuditFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -856,6 +875,13 @@ const report = {
     activeUnattributedDamageConsumers: currentPowerActivationGraph?.summary?.unattributedDamageConsumers ?? null,
     activeAiScheduleReady: currentPowerActivationGraph?.summary?.aiScheduleReady === true,
     activeActivationBlockers: currentPowerActivationGraph?.summary?.blockers?.length ?? null,
+    activeAiClientBoundaryProven: currentAiScheduleBoundaryAudit?.summary?.clientSnoBoundaryProven === true,
+    activeAiBehaviorPublished: currentAiScheduleBoundaryAudit
+      ? currentAiScheduleBoundaryAudit.summary?.aiBehaviorFileAddressable === true
+      : null,
+    activeRuntimeObservationRequired: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true,
+    activeRuntimeObservationPlanReady: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationPlanReady === true,
+    activeRuntimeObservationsCollected: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationsCollected ?? null,
     legacyDpsHistorical: currentPowerSourceFreshnessAudit?.summary?.legacyDpsHistorical === true,
     canUseForCurrentBuild: currentSourceModelFresh,
     recommendation: currentSourceModelFresh
@@ -864,7 +890,9 @@ const report = {
     promotionReady: false,
     nextAction: currentSourceModelFresh
       ? "Utiliser le meilleur build strict valide comme base de travail, puis debloquer slots et deltas conditionnels avant toute optimisation fiable."
-      : currentPowerActivationGraph?.summary?.activationGraphPartial === true
+      : currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
+        ? currentAiScheduleBoundaryAudit.summary.assessment?.nextAction
+        : currentPowerActivationGraph?.summary?.activationGraphPartial === true
         ? currentPowerActivationGraph.summary.assessment?.nextAction
         : currentPowerFormulaGraph?.summary?.graphReady === true
         ? currentPowerFormulaGraph.summary.assessment?.nextAction
@@ -911,6 +939,20 @@ const report = {
         blockers: currentPowerActivationGraph.blockers,
         evidence: currentPowerActivationGraph.evidence,
         safeguards: currentPowerActivationGraph.safeguards,
+      }
+    : null,
+  currentAiScheduleBoundaryAudit: currentAiScheduleBoundaryAudit
+    ? {
+        file: currentAiScheduleBoundaryAuditFile,
+        summary: currentAiScheduleBoundaryAudit.summary,
+        activeCoreToc: currentAiScheduleBoundaryAudit.activeCoreToc,
+        actorBoundary: currentAiScheduleBoundaryAudit.actorBoundary,
+        scheduleGroups: currentAiScheduleBoundaryAudit.scheduleGroups,
+        controlSnos: currentAiScheduleBoundaryAudit.controlSnos,
+        runtimeObservationPlan: currentAiScheduleBoundaryAudit.runtimeObservationPlan,
+        blockers: currentAiScheduleBoundaryAudit.blockers,
+        evidence: currentAiScheduleBoundaryAudit.evidence,
+        safeguards: currentAiScheduleBoundaryAudit.safeguards,
       }
     : null,
   deltaUnblockPlan: deltaUnblockPlan

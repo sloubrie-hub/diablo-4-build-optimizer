@@ -1878,3 +1878,32 @@ Decision revisee : le graphe de formules est reconstruit. La prochaine etape n'e
 - suite optimiseur : `135` etapes, statut `target-optimizer-suite-ok`, parite stricte historique `0`
 
 Decision revisee : l'attribution statique des attaques et variantes est partiellement prouvee. La prochaine etape prioritaire est d'extraire ou d'observer `AIBehavior 1858249` afin d'etablir l'ordre, les repetitions et la vitesse reelle des attaques. Aucun coefficient ne sera converti en DPS strict avant cette preuve.
+
+### Frontiere client de l'AIBehavior 1858249
+
+- `CoreTOC.dat` actif extrait depuis la build locale `3.1.1.72836`
+- chemin : `outputs/diablo4-current-casc-3.1.1/base/CoreTOC.dat`
+- taille : `40753096` octets
+- SHA256 : `a86f354b94314319c95b77490fd7d30a4f39074c034885d00ae1036196f71642`
+- registre actif : `862224` SNO nommes, `182` slots de groupes, `133` groupes presents
+- acteur `1858169` : reference `1858249` comme groupe `3 / AIBehavior`
+- nom et fichier client de `1858249` : absents dans le CoreTOC actif et le snapshot de reference
+- groupes actifs `AIBehavior`, `AIState`, `Schedule`, `AIAwareness`, `AICoordinator`, `GenericNodeGraph` : `0` entree chacun
+- controles voisins resolus dans le meme CoreTOC : `5 / 5` (acteur, animset, spawn, projectile, souffle)
+- planning inline dans l'acteur : absent; `arAIPropPowerPairings = 0`
+- extraction directe d'un SNO client de planning : epuisee
+- conclusion prudente : la definition est probablement serveur ou non distribuee, sans pretendre prouver sa localisation exacte
+- script ajoute : `work/diablo4-data-exporter/scripts/build-current-ai-schedule-boundary-audit.js`
+- test ajoute : `work/diablo4-data-exporter/scripts/test-current-ai-schedule-boundary-audit.js`
+- rapports generes : `current-ai-schedule-boundary-audit.json` et `runtime-cadence-observation-template.json`
+- protocole runtime : `3` scenarios, `20` lancers minimum, capture `60 FPS` minimum
+- observations collectees : `0`
+- planning IA pret : `false`
+- DPS strict courant : `unknown`
+- reliableDps modifiable : `false`
+- plan optimiseur : action numero `1` = `Mesurer la cadence en jeu 3.1.1`
+- site : frontiere client, groupes de planning, statut de `1858249` et scenarios runtime affiches
+- site : metriques texte/nombre corrigees; verification navigateur `NaN = 0`, erreurs console `0`
+- suite optimiseur : `137` etapes, statut `target-optimizer-suite-ok`, parite stricte historique `0`
+
+Decision revisee : ne plus chercher un fichier `.aib` nomme dans les ressources SNO du client courant. La prochaine preuve utile doit venir d'observations runtime horodatees de la sequence standard, de `Blast of Bile` et de deux etats stables de vitesse. La cadence et le DPS strict restent bloques jusqu'a ces mesures.
