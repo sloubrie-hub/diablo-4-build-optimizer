@@ -3215,6 +3215,7 @@ function renderExternalEvidenceSubmissionPack(report) {
   const summary = report.summary ?? {};
   const targetTask = report.targetTask ?? {};
   const snippet = report.candidateSnippet ?? {};
+  const superseded = report.supersededClaim ?? {};
   const mustContain = targetTask.mustContain ?? [];
   const rejects = targetTask.rejects ?? [];
   return `
@@ -3225,7 +3226,7 @@ function renderExternalEvidenceSubmissionPack(report) {
           <span>${summary.assessment?.kind ?? "n/a"}</span>
         </div>
         <div class="${summary.candidateSnippetReady ? "positive" : "blocked"}">
-          ${summary.candidateSnippetReady ? "brouillon pret" : "bloque"}
+          ${summary.candidateSnippetReady ? summary.templateNeedsRevision ? "brouillon revise" : "brouillon pret" : "bloque"}
         </div>
       </div>
       <div class="bonus-selector-proof-metrics">
@@ -3236,10 +3237,16 @@ function renderExternalEvidenceSubmissionPack(report) {
       </div>
       <div class="bonus-selector-signals">
         <span>Reviewer ${summary.reviewerStatus ?? "n/a"}</span>
+        <span>Template ${summary.templateNeedsRevision ? "revise" : "standard"}</span>
         <span>Ecrit intake ${summary.writesIntake ? "oui" : "non"}</span>
         <span>Bridge ${summary.acceptedForBridge ? "oui" : "non"}</span>
         <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
       </div>
+      ${superseded.obsolete ? `
+        <div class="suite-invariant-list">
+          <span class="failed">Ancien claim suspendu: ${superseded.claim?.field ?? "n/a"}</span>
+        </div>
+      ` : ""}
       <div class="next-evidence-actions">
         <article>
           <span>draft</span>

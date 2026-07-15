@@ -21,6 +21,12 @@ const generationSteps = [
   "build-external-delta-evidence-plan.js",
   "test-external-delta-evidence-plan.js",
   "build-external-delta-evidence-workorder.js",
+  "build-diablo-tools-attribute-source-audit.js",
+  "test-diablo-tools-attribute-source-audit.js",
+  "build-selector-949-reconciliation-audit.js",
+  "test-selector-949-reconciliation-audit.js",
+  "build-selector-949-window-reparse-audit.js",
+  "test-selector-949-window-reparse-audit.js",
   "build-external-evidence-submission-pack.js",
   "test-external-evidence-submission-pack.js",
   "build-external-evidence-submission-gate.js",
@@ -111,12 +117,6 @@ const generationSteps = [
   "test-delta-next-action-decision.js",
   "build-sf32-owner-source-hunt-plan.js",
   "test-sf32-owner-source-hunt-plan.js",
-  "build-diablo-tools-attribute-source-audit.js",
-  "test-diablo-tools-attribute-source-audit.js",
-  "build-selector-949-reconciliation-audit.js",
-  "test-selector-949-reconciliation-audit.js",
-  "build-selector-949-window-reparse-audit.js",
-  "test-selector-949-window-reparse-audit.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -229,6 +229,8 @@ assertInvariant(externalDeltaEvidenceWorkorder.summary.tasks === 3, "external de
 assertInvariant(externalEvidenceSubmissionPack.summary.canModifyReliableDps === false, "external evidence submission pack must not modify reliable DPS");
 assertInvariant(externalEvidenceSubmissionPack.summary.writesIntake === false, "external evidence submission pack must not write intake");
 assertInvariant(externalEvidenceSubmissionPack.summary.nextTaskId === "delta-proof-sf32-owner", "external evidence submission pack must target next SF_32 proof");
+assertInvariant(externalEvidenceSubmissionPack.summary.templateNeedsRevision === true, "external evidence submission pack must revise SF_32 template after 949 reparse");
+assertInvariant(externalEvidenceSubmissionPack.summary.claimField === "eAttrib:994 + local-role:949", "external evidence submission pack must target revised 994 + local 949 field");
 assertInvariant(externalEvidenceSubmissionGate.summary.canModifyReliableDps === false, "external evidence submission gate must not modify reliable DPS");
 assertInvariant(externalEvidenceSubmissionGate.summary.writesIntake === false, "external evidence submission gate must not write intake");
 assertInvariant(externalEvidenceSubmissionGate.summary.readyForIntakeCopy === false, "real external evidence submission gate should remain blocked");
@@ -483,6 +485,8 @@ const report = {
     { id: "external-evidence-submission-pack-safe", status: "passed", value: externalEvidenceSubmissionPack.summary.canModifyReliableDps },
     { id: "external-evidence-submission-pack-no-write", status: "passed", value: externalEvidenceSubmissionPack.summary.writesIntake },
     { id: "external-evidence-submission-pack-next-task", status: "passed", value: externalEvidenceSubmissionPack.summary.nextTaskId },
+    { id: "external-evidence-submission-pack-template-revision", status: "passed", value: externalEvidenceSubmissionPack.summary.templateNeedsRevision },
+    { id: "external-evidence-submission-pack-revised-field", status: "passed", value: externalEvidenceSubmissionPack.summary.claimField },
     { id: "external-evidence-submission-gate-safe", status: "passed", value: externalEvidenceSubmissionGate.summary.canModifyReliableDps },
     { id: "external-evidence-submission-gate-no-write", status: "passed", value: externalEvidenceSubmissionGate.summary.writesIntake },
     { id: "external-evidence-submission-gate-blocked-real", status: "passed", value: externalEvidenceSubmissionGate.summary.readyForIntakeCopy },

@@ -3,7 +3,8 @@ const path = require("path");
 
 const workorderFile = process.argv[2] ?? "outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json";
 const intakeFile = process.argv[3] ?? "inputs/external-evidence-candidates.json";
-const outDir = process.argv[4] ?? "outputs/diablo4-external-evidence-submission-pack";
+const selector949WindowReparseAuditFile = process.argv[4] ?? "outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
+const outDir = process.argv[5] ?? "outputs/diablo4-external-evidence-submission-pack";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -11,6 +12,11 @@ function readJson(filePath) {
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function readOptionalJson(filePath) {
+  if (!fs.existsSync(filePath)) return null;
+  return readJson(filePath);
 }
 
 function candidateIdForTask(taskId) {
@@ -23,12 +29,33 @@ function markdownEscape(value) {
 
 const workorder = readJson(workorderFile);
 const intake = readJson(intakeFile);
+const selector949WindowReparseAudit = readOptionalJson(selector949WindowReparseAuditFile);
 const tasks = workorder.tasks ?? [];
 const nextTask = tasks.find((task) => task.status !== "ready-for-parser-bridge") ?? tasks[0] ?? null;
 const template = nextTask?.intakeTemplate ? clone(nextTask.intakeTemplate) : null;
+const templateNeedsRevision = selector949WindowReparseAudit?.summary?.sf32TemplateNeedsRevision === true
+  && nextTask?.id === "delta-proof-sf32-owner";
+const revisedMustContain = templateNeedsRevision
+  ? ["1663210", "eAttrib:994", "Bonus_Percent_Per_Power", "local-role:949", "SF_32"]
+  : nextTask?.mustContain ?? [];
+const revisedClaim = templateNeedsRevision
+  ? {
+      type: "sf32-field-ownership-revised",
+      field: "eAttrib:994 + local-role:949",
+    }
+  : nextTask?.claim ?? null;
 
 if (template && nextTask?.id) {
   template.id = candidateIdForTask(nextTask.id);
+  if (templateNeedsRevision) {
+    template.claim = {
+      type: revisedClaim.type,
+      field: revisedClaim.field,
+      value: "A REMPLIR",
+      excerpt: "A REMPLIR: extrait court contenant 1663210 + eAttrib 994 + Bonus_Percent_Per_Power + role local 949 + SF_32",
+      mapping: "1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32 A REMPLIR",
+    };
+  }
   template.reviewer = {
     ...(template.reviewer ?? {}),
     status: "pending",
@@ -46,14 +73,17 @@ const report = {
   source: {
     workorderFile,
     intakeFile,
+    selector949WindowReparseAuditFile,
     outDir,
   },
   summary: {
     assetId: workorder.summary?.assetId ?? 1663210,
     entityId: workorder.summary?.entityId ?? "skill:1663210",
     nextTaskId: nextTask?.id ?? null,
-    claimType: nextTask?.claim?.type ?? null,
-    claimField: nextTask?.claim?.field ?? null,
+    claimType: revisedClaim?.type ?? null,
+    claimField: revisedClaim?.field ?? null,
+    templateNeedsRevision,
+    priorClaimSuspended: templateNeedsRevision,
     existingCandidates: (intake.candidates ?? []).length,
     candidateSnippetReady: Boolean(template),
     reviewerStatus: template?.reviewer?.status ?? null,
@@ -66,15 +96,21 @@ const report = {
     promotionReady: false,
     assessment: {
       kind: template
-        ? "external-evidence-submission-pack-ready"
+        ? templateNeedsRevision
+          ? "external-evidence-submission-pack-revised-ready"
+          : "external-evidence-submission-pack-ready"
         : "external-evidence-submission-pack-blocked",
       confidence: "high",
       promotionReady: false,
       finding: template
-        ? "Le prochain brouillon de preuve externe est pret a remplir, mais il n'est pas une preuve acceptee."
+        ? templateNeedsRevision
+          ? "Le brouillon de preuve externe a ete revise: il part de l'ancre 994 et traite 949 comme role local a decoder."
+          : "Le prochain brouillon de preuve externe est pret a remplir, mais il n'est pas une preuve acceptee."
         : "Aucun template de preuve externe n'est disponible.",
       nextAction: template
-        ? "Coller une source exacte dans le brouillon, garder reviewer.status=pending, puis relancer l'audit intake."
+        ? templateNeedsRevision
+          ? "Coller une source exacte qui prouve eAttrib 994 / Bonus_Percent_Per_Power et explique le role local 949 avant SF_32."
+          : "Coller une source exacte dans le brouillon, garder reviewer.status=pending, puis relancer l'audit intake."
         : "Regenerer le workorder delta avant de preparer une soumission.",
     },
   },
@@ -84,13 +120,26 @@ const report = {
         title: nextTask.title,
         priority: nextTask.priority,
         status: nextTask.status,
-        claim: nextTask.claim,
-        mustContain: nextTask.mustContain,
-        rejects: nextTask.rejects,
+        claim: revisedClaim,
+        originalClaim: nextTask.claim,
+        mustContain: revisedMustContain,
+        rejects: templateNeedsRevision
+          ? [
+              "mapping direct selector:949 -> Bonus_Percent_Per_Power",
+              ...(nextTask.rejects ?? []),
+            ]
+          : nextTask.rejects,
         reviewChecklist: nextTask.reviewChecklist,
       }
     : null,
   candidateSnippet: template,
+  supersededClaim: {
+    obsolete: templateNeedsRevision,
+    claim: templateNeedsRevision ? nextTask?.claim ?? null : null,
+    reason: templateNeedsRevision
+      ? "L'audit reparse 949 impose 994 comme ancre bonus; selector:949 ne peut plus etre soumis comme preuve directe SF_32."
+      : null,
+  },
   submissionSteps: [
     "Copier candidateSnippet dans inputs/external-evidence-candidates.json.",
     "Remplacer tous les champs A REMPLIR par la source exacte.",

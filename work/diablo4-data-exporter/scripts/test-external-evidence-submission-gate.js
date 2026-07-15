@@ -45,17 +45,17 @@ assert(realGate.candidateToCopy === null, "blocked gate must not expose candidat
 const syntheticPack = readJson(packFile);
 syntheticPack.candidateSnippet.source = {
   kind: "extracted-game-data",
-  title: "Synthetic verified SF_32 selector export",
+  title: "Synthetic verified SF_32 revised 994 local role export",
   url: "",
   version: "test-build-1",
   capturedAt: "2026-07-15",
 };
 syntheticPack.candidateSnippet.claim = {
-  type: "sf32-field-ownership",
-  field: "selector:949",
-  value: "SF_32 owner mapping",
-  excerpt: "asset 1663210 selector:949 maps to SF_32 in the verified test export",
-  mapping: "1663210 -> selector:949 -> SF_32",
+  type: "sf32-field-ownership-revised",
+  field: "eAttrib:994 + local-role:949",
+  value: "SF_32 revised owner mapping",
+  excerpt: "asset 1663210 eAttrib:994 Bonus_Percent_Per_Power local-role:949 maps toward SF_32 in the verified test export",
+  mapping: "1663210 -> eAttrib:994 / Bonus_Percent_Per_Power -> local-role:949 -> SF_32",
 };
 syntheticPack.candidateSnippet.reviewer = {
   status: "pending",

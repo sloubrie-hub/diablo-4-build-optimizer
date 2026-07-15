@@ -12590,3 +12590,55 @@ Validation :
 Decision :
 
 Le prochain brouillon de preuve ne doit pas chercher `selector:949 -> SF_32`. Il doit prouver d'abord l'ancre `eAttrib 994 / Bonus_Percent_Per_Power`, puis expliquer le role local `949` dans la fenetre `1663210` avant toute tentative de bridge parseur ou de promotion DPS.
+
+## Revision du pack de soumission externe
+
+Le pack de soumission externe a ete aligne sur la revision `949`. La suite genere maintenant les audits DiabloTools/reconciliation/reparse avant le pack, afin qu'un workspace propre produise directement le bon brouillon.
+
+Fichiers modifies :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-pack.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-pack.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-gate.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-intake-preview.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json`
+- `outputs/diablo4-external-evidence-submission-gate/external-evidence-submission-gate.json`
+- `outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- tache : `delta-proof-sf32-owner`
+- claim genere : `sf32-field-ownership-revised`
+- champ genere : `eAttrib:994 + local-role:949`
+- ancien claim suspendu : `selector:949`
+- `templateNeedsRevision true`
+- `priorClaimSuspended true`
+- `supersededClaim.obsolete true`
+- must contain : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+- gate reel : bloque par placeholders, sans copie intake
+- gate synthetique : pret seulement avec le nouveau claim revise
+- preview synthetique : ajoute le candidat revised en pending uniquement
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `113` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test pack soumission : `external-evidence-submission-pack-test-ok`
+- test gate soumission : `external-evidence-submission-gate-test-ok`
+- test preview intake : `external-evidence-submission-intake-preview-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `113` etapes
+- site : panneau `Soumission preuve` affiche `brouillon revise` et l'ancien claim suspendu
+
+Decision :
+
+Le brouillon exploitable ne doit plus copier `selector:949 -> SF_32` dans l'intake. La chaine soumission -> gate -> preview accepte maintenant seulement le claim revise qui part de `eAttrib 994 / Bonus_Percent_Per_Power`, puis demande l'explication du role local `949`.

@@ -1646,3 +1646,16 @@ Build de reference :
   - plan optimiseur et site : panneau `Recherche source SF_32` affiche le candidat comme obsolete
   - reliableDps modifiable : `false`
   - decision : ne plus soumettre de preuve `selector:949 -> SF_32`; remplacer le brouillon par une preuve qui part de `994` puis explique le role local `949`
+- pack soumission preuve externe revise apres reparse `949`
+  - script modifie : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-pack.js`
+  - tests modifies : `test-external-evidence-submission-pack.js`, `test-external-evidence-submission-gate.js`, `test-external-evidence-submission-intake-preview.js`
+  - suite optimiseur : `113` etapes, statut `target-optimizer-suite-ok`
+  - ordre suite : audits DiabloTools/reconciliation/reparse executes avant generation du pack de soumission
+  - claim genere : `sf32-field-ownership-revised`
+  - champ genere : `eAttrib:994 + local-role:949`
+  - ancien claim : `selector:949`, marque `supersededClaim.obsolete true`
+  - must contain : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+  - gate et preview : tests synthetiques alignes sur le nouveau claim
+  - plan optimiseur et site : panneau `Soumission preuve` affiche le brouillon revise et l'ancien claim suspendu
+  - reliableDps modifiable : `false`
+  - decision : le prochain brouillon exploitable part de l'ancre `994`; aucune preuve `selector:949 -> SF_32` directe ne doit etre copiee dans l'intake

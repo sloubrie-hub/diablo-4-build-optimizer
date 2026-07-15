@@ -808,6 +808,7 @@ const report = {
         summary: externalEvidenceSubmissionPack.summary,
         targetTask: externalEvidenceSubmissionPack.targetTask,
         candidateSnippet: externalEvidenceSubmissionPack.candidateSnippet,
+        supersededClaim: externalEvidenceSubmissionPack.supersededClaim,
         submissionSteps: externalEvidenceSubmissionPack.submissionSteps,
         safeguards: externalEvidenceSubmissionPack.safeguards,
       }
