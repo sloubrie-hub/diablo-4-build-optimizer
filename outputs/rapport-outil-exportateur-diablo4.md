@@ -11958,3 +11958,46 @@ Validation :
 Decision :
 
 Le gate bloque le brouillon reel tant que les placeholders restent presents. Meme pret, il autorise seulement une copie manuelle en `pending`; il ne modifie pas l'intake, n'ouvre aucun bridge et ne change aucun score fiable.
+
+## Preview intake soumission preuve externe
+
+Une preview d'intake a ete ajoutee apres le gate de soumission. Elle montre le fichier intake qui resulterait d'une copie manuelle, sans modifier `inputs/external-evidence-candidates.json`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/preview-external-evidence-submission-intake.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-intake-preview.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json`
+- `outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-candidates.submission-preview.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- preview reelle : `previewMergeReady false`
+- candidats ajoutes reel : `0`
+- test synthetique : `previewMergeReady true`, `addedCandidates 1`, reviewer `pending`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `87` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la preview, le test, la suite, le plan optimiseur et le site
+- test preview intake : `external-evidence-submission-intake-preview-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `87` etapes
+- plan optimiseur : section `externalEvidenceSubmissionIntakePreview` presente
+- site : nouveau panneau `Preview intake`
+
+Decision :
+
+La preview reste bloquee tant que le gate de soumission ne passe pas. Meme quand le cas synthetique ajoute un candidat, il reste `pending`, sans bridge, sans promotion et sans ecriture dans l'intake reel.

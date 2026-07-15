@@ -1444,3 +1444,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Gate soumission`
   - reliableDps modifiable : `false`
   - decision : autoriser seulement une future copie manuelle pending quand la source exacte remplace tous les placeholders
+- preview intake soumission preuve externe ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/preview-external-evidence-submission-intake.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-intake-preview.js`
+  - rapports generes : `outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json` et preview `.json`
+  - suite optimiseur : `87` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - preview reelle : `previewMergeReady false`, `addedCandidates 0`, gate bloque
+  - test synthetique : `previewMergeReady true`, `addedCandidates 1`, reviewer `pending`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Preview intake`
+  - reliableDps modifiable : `false`
+  - decision : produire une preview copiable seulement; aucune mutation de `inputs/external-evidence-candidates.json`
