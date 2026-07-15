@@ -12045,3 +12045,45 @@ Validation :
 Decision :
 
 La simulation post-copie garde le candidat en `pending` et exige `manual-review-required`. Elle ne modifie pas l'intake reel, n'ouvre aucun bridge et ne change aucun score fiable.
+
+## Gate revue soumission preuve externe
+
+Une porte de revue manuelle a ete ajoutee apres l'audit post-copie. Elle indique si le candidat de preuve externe peut etre presente a une decision humaine, sans accepter, copier, bridger ni promouvoir automatiquement.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-manual-review-gate.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-manual-review-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-manual-review-gate/external-evidence-submission-manual-review-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- gate reel : `readyForReviewerDecision false`
+- checks echoues : `post-copy-ready-for-review`, `candidate-pending`, `manual-review-required`
+- test synthetique : `readyForReviewerDecision true`, candidat `pending`, decisions `approved / rejected`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `91` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la porte de revue, le test, la suite, le plan optimiseur et le site
+- test revue soumission : `external-evidence-submission-manual-review-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `91` etapes
+- plan optimiseur : section `externalEvidenceSubmissionManualReviewGate` presente
+- site : nouveau panneau `Revue soumission`
+
+Decision :
+
+La decision humaine est separee de la preparation technique. Le cas reel reste bloque, le candidat ne devient pas `approved` automatiquement, et aucune valeur conditionnelle ne peut entrer dans `reliableDps`.

@@ -1472,3 +1472,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Post-copy intake`
   - reliableDps modifiable : `false`
   - decision : simuler la post-copie seulement; pending exige revue humaine et ne devient jamais accepted automatiquement
+- gate revue soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-manual-review-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-manual-review-gate.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-manual-review-gate/external-evidence-submission-manual-review-gate.json`
+  - suite optimiseur : `91` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - gate reel : `readyForReviewerDecision false`, checks echoues `post-copy-ready-for-review`, `candidate-pending`, `manual-review-required`
+  - test synthetique : `readyForReviewerDecision true`, candidat `pending`, decisions `approved / rejected`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Revue soumission`
+  - reliableDps modifiable : `false`
+  - decision : ouvrir seulement une decision humaine separee; pending ne devient jamais approved automatiquement
