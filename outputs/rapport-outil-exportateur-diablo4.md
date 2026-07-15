@@ -12184,3 +12184,48 @@ Validation :
 Decision :
 
 L'audit de promotion externe ne modifie aucun score. Meme dans le cas synthetique pret, il ouvre seulement une future implementation explicite avec recalcul et tests de regression.
+
+## Dry-run implementation soumission preuve externe
+
+Un dry-run d'implementation externe a ete ajoute. Il prepare un patch theorique du target dataset seulement si l'audit de promotion externe est pret, puis expose les regressions requises sans modifier aucun fichier source.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-implementation-dry-run.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-implementation-dry-run.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-implementation-dry-run/external-evidence-submission-implementation-dry-run.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- strict DPS : `163200`
+- delta bloque : `48960`
+- patch theorique synthetique : `163200 -> 212160`
+- dry-run reel : `patchPreviewReady false`
+- check echoue reel : `external-promotion-audit-ready`
+- regressions requises : `asset-1663210`, `build-1461593-plus-1663210`
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `99` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le dry-run externe, le test, la suite, le plan optimiseur et le site
+- test dry-run externe : `external-evidence-submission-implementation-dry-run-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `99` etapes
+- plan optimiseur : section `externalEvidenceSubmissionImplementationDryRun` presente
+- site : nouveau panneau `Dry-run externe`
+
+Decision :
+
+Le dry-run externe ne modifie pas `target-dataset.json`. Meme quand le patch synthetique est pret, `patchPreviewReady` ne vaut pas `promotionReady`; toute application future doit etre separee, testee et revue.

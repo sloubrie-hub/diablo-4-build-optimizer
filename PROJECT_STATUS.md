@@ -1516,3 +1516,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Audit promotion externe`
   - reliableDps modifiable : `false`
   - decision : une preuve externe approuvee ouvre seulement une implementation separee; aucun score fiable n'est modifie ici
+- dry-run implementation soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-implementation-dry-run.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-implementation-dry-run.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-implementation-dry-run/external-evidence-submission-implementation-dry-run.json`
+  - suite optimiseur : `99` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - dry-run reel : `patchPreviewReady false`, check echoue `external-promotion-audit-ready`
+  - patch synthetique : `163200 -> 212160`
+  - regressions conservees : `asset-1663210`, `build-1461593-plus-1663210`
+  - ecriture target dataset : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Dry-run externe`
+  - reliableDps modifiable : `false`
+  - decision : preparer seulement un patch theorique; aucune application ni promotion automatique
