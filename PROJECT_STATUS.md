@@ -1358,3 +1358,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Audit decision`
   - reliableDps modifiable : `false`
   - decision : approved ouvre seulement un audit de promotion separe; rejected garde le delta hors reliableDps
+- audit promotion preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-promotion-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-promotion-audit.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-promotion-audit/delta-evidence-promotion-audit.json`
+  - suite optimiseur : `75` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - audit reel : `readyForPromotionImplementation false`, `3 / 4` checks echoues
+  - checks echoues : `review-decision-approved`, `promotion-review-ready`, `reliable-gates-recomputed-passed`
+  - gates fiables encore bloquees : `sf32-field`, `sf33-trigger`, `uptime`
+  - test synthetique : `readyForPromotionImplementation true`, `proposedReliableDps 212160`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Audit promotion`
+  - reliableDps modifiable : `false`
+  - decision : meme pret, l'audit ouvre seulement une implementation separee; aucun score fiable n'est ecrit ici

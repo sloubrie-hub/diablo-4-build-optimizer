@@ -76,6 +76,8 @@ const generationSteps = [
   "test-delta-evidence-review-decision-package.js",
   "audit-delta-evidence-review-decision.js",
   "test-delta-evidence-review-decision-audit.js",
+  "build-delta-evidence-promotion-audit.js",
+  "test-delta-evidence-promotion-audit.js",
   "build-delta-local-exhaustion-conclusion.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
@@ -147,6 +149,7 @@ const deltaEvidencePostCopyIntake = readJson("outputs/diablo4-delta-evidence-pos
 const deltaEvidenceManualReviewGate = readJson("outputs/diablo4-delta-evidence-manual-review-gate/delta-evidence-manual-review-gate.json");
 const deltaEvidenceReviewDecisionPackage = readJson("outputs/diablo4-delta-evidence-review-decision-package/delta-evidence-review-decision-package.json");
 const deltaEvidenceReviewDecisionAudit = readJson("outputs/diablo4-delta-evidence-review-decision-audit/delta-evidence-review-decision-audit.json");
+const deltaEvidencePromotionAudit = readJson("outputs/diablo4-delta-evidence-promotion-audit/delta-evidence-promotion-audit.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
@@ -293,6 +296,11 @@ assertInvariant(deltaEvidenceReviewDecisionAudit.summary.readyForPromotionAudit 
 assertInvariant(deltaEvidenceReviewDecisionAudit.summary.writesRealIntake === false, "delta evidence review decision audit must not write real intake");
 assertInvariant(deltaEvidenceReviewDecisionAudit.summary.acceptedForBridge === false, "delta evidence review decision audit must not accept for bridge");
 assertInvariant(deltaEvidenceReviewDecisionAudit.summary.promotionReady === false, "delta evidence review decision audit must not auto-promote");
+assertInvariant(deltaEvidencePromotionAudit.summary.canModifyReliableDps === false, "delta evidence promotion audit must not modify reliable DPS");
+assertInvariant(deltaEvidencePromotionAudit.summary.readyForPromotionImplementation === false, "real delta evidence promotion audit should remain blocked");
+assertInvariant(deltaEvidencePromotionAudit.summary.writesRealIntake === false, "delta evidence promotion audit must not write real intake");
+assertInvariant(deltaEvidencePromotionAudit.summary.acceptedForBridge === false, "delta evidence promotion audit must not accept for bridge");
+assertInvariant(deltaEvidencePromotionAudit.summary.promotionReady === false, "delta evidence promotion audit must not auto-promote");
 assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
 assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
 assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
@@ -461,6 +469,11 @@ const report = {
     { id: "delta-evidence-review-decision-audit-no-write", status: "passed", value: deltaEvidenceReviewDecisionAudit.summary.writesRealIntake },
     { id: "delta-evidence-review-decision-audit-not-accepted", status: "passed", value: deltaEvidenceReviewDecisionAudit.summary.acceptedForBridge },
     { id: "delta-evidence-review-decision-audit-not-auto-promoted", status: "passed", value: deltaEvidenceReviewDecisionAudit.summary.promotionReady },
+    { id: "delta-evidence-promotion-audit-safe", status: "passed", value: deltaEvidencePromotionAudit.summary.canModifyReliableDps },
+    { id: "delta-evidence-promotion-audit-blocked-real", status: "passed", value: deltaEvidencePromotionAudit.summary.readyForPromotionImplementation },
+    { id: "delta-evidence-promotion-audit-no-write", status: "passed", value: deltaEvidencePromotionAudit.summary.writesRealIntake },
+    { id: "delta-evidence-promotion-audit-not-accepted", status: "passed", value: deltaEvidencePromotionAudit.summary.acceptedForBridge },
+    { id: "delta-evidence-promotion-audit-not-auto-promoted", status: "passed", value: deltaEvidencePromotionAudit.summary.promotionReady },
     { id: "user-whatif-contract-safe", status: "passed", value: userWhatIfContract.summary.canModifyReliableDps },
     { id: "user-whatif-contract-checks", status: "passed", value: userWhatIfContract.summary.failedChecks },
     { id: "user-whatif-contract-50pct", status: "passed", value: userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps },
@@ -515,6 +528,7 @@ assertInvariant(optimizerPlan.deltaEvidencePostCopyIntake?.summary?.canModifyRel
 assertInvariant(optimizerPlan.deltaEvidenceManualReviewGate?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence manual review gate");
 assertInvariant(optimizerPlan.deltaEvidenceReviewDecisionPackage?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence review decision package");
 assertInvariant(optimizerPlan.deltaEvidenceReviewDecisionAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence review decision audit");
+assertInvariant(optimizerPlan.deltaEvidencePromotionAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta evidence promotion audit");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 

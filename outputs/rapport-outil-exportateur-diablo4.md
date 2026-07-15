@@ -11692,3 +11692,50 @@ Validation :
 Decision :
 
 Une decision `approved` ne modifie rien directement; elle ouvre seulement un audit de promotion separe. Une decision `rejected` documente le refus et garde le delta hors `reliableDps`.
+
+## Audit promotion preuve delta
+
+Un audit de promotion a ete ajoute apres l'audit de decision reviewer. Il exige une decision `approved`, une revue de promotion prete et des gates fiables recalculees avant toute future implementation.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-promotion-audit.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-promotion-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-promotion-audit/delta-evidence-promotion-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- strict : `163200`
+- delta bloque : `48960`
+- reliable propose synthetique : `212160`
+- audit reel : `readyForPromotionImplementation false`
+- checks : `4`
+- checks echoues reel : `3`
+- checks echoues : `review-decision-approved`, `promotion-review-ready`, `reliable-gates-recomputed-passed`
+- gates fiables encore bloquees : `sf32-field`, `sf33-trigger`, `uptime`
+- test synthetique : `readyForPromotionImplementation true`, `proposedReliableDps 212160`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `75` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit, le test, la suite, le plan optimiseur et le site
+- test audit promotion : `delta-evidence-promotion-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `75` etapes
+- plan optimiseur : section `deltaEvidencePromotionAudit` presente
+- site : nouveau panneau `Audit promotion`
+
+Decision :
+
+L'audit de promotion ne modifie aucun score. Meme lorsqu'un cas synthetique est pret, il ouvre seulement une future implementation separee avec recalcul et tests de regression.
