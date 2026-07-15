@@ -11916,3 +11916,45 @@ Validation :
 Decision :
 
 Le paquet produit un brouillon a remplir, pas une preuve acceptee. Il ne modifie pas `inputs/external-evidence-candidates.json`, n'ouvre aucun bridge et ne change aucun score fiable.
+
+## Gate soumission preuve externe
+
+Un gate de soumission a ete ajoute apres le paquet de preuve. Il valide si le brouillon est assez complet pour etre copie manuellement en `pending` dans l'intake, sans effectuer cette copie.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-gate.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-gate/external-evidence-submission-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- gate reel : `readyForIntakeCopy false`
+- check echoue reel : `no-placeholders`
+- test synthetique : `readyForIntakeCopy true`, reviewer `pending`
+- `writesIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `85` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le gate, le test, la suite, le plan optimiseur et le site
+- test gate soumission : `external-evidence-submission-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `85` etapes
+- plan optimiseur : section `externalEvidenceSubmissionGate` presente
+- site : nouveau panneau `Gate soumission`
+
+Decision :
+
+Le gate bloque le brouillon reel tant que les placeholders restent presents. Meme pret, il autorise seulement une copie manuelle en `pending`; il ne modifie pas l'intake, n'ouvre aucun bridge et ne change aucun score fiable.

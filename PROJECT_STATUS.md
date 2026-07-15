@@ -1430,3 +1430,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Soumission preuve`
   - reliableDps modifiable : `false`
   - decision : fournir un brouillon a remplir; aucune preuve n'est acceptee ni promue sans source exacte et revue explicite
+- gate soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-gate.js`
+  - rapport genere : `outputs/diablo4-external-evidence-submission-gate/external-evidence-submission-gate.json`
+  - suite optimiseur : `85` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - gate reel : `readyForIntakeCopy false`, check echoue `no-placeholders`
+  - test synthetique : `readyForIntakeCopy true`, reviewer `pending`, sans ecriture ni promotion
+  - ecriture intake : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Gate soumission`
+  - reliableDps modifiable : `false`
+  - decision : autoriser seulement une future copie manuelle pending quand la source exacte remplace tous les placeholders
