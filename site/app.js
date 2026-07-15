@@ -37,6 +37,7 @@ const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packe
 const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const COMMUNITY_SOURCE_TRIAGE_AUDIT_URL = "../outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
+const D4DATA_PARSER_REFERENCE_AUDIT_URL = "../outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const LOCAL_949_ROLE_DECODE_AUDIT_URL = "../outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -113,6 +114,7 @@ const state = {
   sf32OwnerSourceHuntPlan: null,
   diabloToolsAttributeSourceAudit: null,
   communitySourceTriageAudit: null,
+  d4dataParserReferenceAudit: null,
   selector949ReconciliationAudit: null,
   selector949WindowReparseAudit: null,
   local949RoleDecodeAudit: null,
@@ -224,6 +226,7 @@ async function boot() {
     await loadSf32OwnerSourceHuntPlan();
     await loadDiabloToolsAttributeSourceAudit();
     await loadCommunitySourceTriageAudit();
+    await loadD4dataParserReferenceAudit();
     await loadSelector949ReconciliationAudit();
     await loadSelector949WindowReparseAudit();
     await loadLocal949RoleDecodeAudit();
@@ -579,6 +582,10 @@ async function loadCommunitySourceTriageAudit() {
   state.communitySourceTriageAudit = await fetchOptionalJson(COMMUNITY_SOURCE_TRIAGE_AUDIT_URL);
 }
 
+async function loadD4dataParserReferenceAudit() {
+  state.d4dataParserReferenceAudit = await fetchOptionalJson(D4DATA_PARSER_REFERENCE_AUDIT_URL);
+}
+
 async function loadSelector949ReconciliationAudit() {
   state.selector949ReconciliationAudit = await fetchOptionalJson(SELECTOR_949_RECONCILIATION_AUDIT_URL);
 }
@@ -797,6 +804,7 @@ function renderTargetOptimizerPlan() {
     ${renderSf32OwnerSourceHuntPlan(state.sf32OwnerSourceHuntPlan ?? plan.sf32OwnerSourceHuntPlan)}
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
     ${renderCommunitySourceTriageAudit(state.communitySourceTriageAudit ?? plan.communitySourceTriageAudit)}
+    ${renderD4dataParserReferenceAudit(state.d4dataParserReferenceAudit ?? plan.d4dataParserReferenceAudit)}
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
     ${renderLocal949RoleDecodeAudit(state.local949RoleDecodeAudit ?? plan.local949RoleDecodeAudit)}
@@ -1758,6 +1766,56 @@ function renderCommunitySourceTriageAudit(report) {
       </div>
       <div class="suite-invariant-list">
         ${blockers.map((item) => `<span class="failed">${item.id}: ${item.status}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderD4dataParserReferenceAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const referenceFiles = report.referenceFiles ?? [];
+  const checks = report.checks ?? [];
+  const implementationPlan = report.parserImplementationPlan ?? [];
+  return `
+    <div class="bonus-selector-proof d4data-parser-reference-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>d4data parser reference</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.d4dataReferenceReady ? "positive" : "blocked"}">
+          ${summary.d4dataReferenceReady ? "pret read-only" : "incomplet"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Fichiers", summary.referenceFiles ?? 0)}
+        ${targetMetric("Checks", `${(summary.checks ?? 0) - (summary.failedChecks ?? 0)}/${summary.checks ?? 0}`)}
+        ${targetMetric("Contrat", summary.parserContractCompatible ? "compatible" : "bloque")}
+        ${targetMetric("Bridge", summary.semanticBridgeReady ? "ouvert" : "ferme")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Parser ${summary.canImplementReadOnlyParser ? "implementable" : "bloque"}</span>
+        <span>Dataset ${summary.writesTargetDataset ? "modifiable" : "protege"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Promotion ${summary.promotionReady ? "prete" : "non"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${checks.map((item) => `<span class="${item.status === "passed" ? "passed" : "failed"}">${item.id}: ${item.status}</span>`).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${implementationPlan.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.id}</strong>
+            <p>${item.output}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${referenceFiles.map((item) => `<span class="neutral">${item.path}: ${item.role}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

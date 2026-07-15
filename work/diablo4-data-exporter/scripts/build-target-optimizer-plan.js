@@ -44,6 +44,7 @@ const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32
 const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const communitySourceTriageAuditFile = "outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
+const d4dataParserReferenceAuditFile = "outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
 const selector949ReconciliationAuditFile = "outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const selector949WindowReparseAuditFile = "outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const local949RoleDecodeAuditFile = "outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -546,6 +547,7 @@ const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
 const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
 const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
 const communitySourceTriageAudit = readOptionalJson(communitySourceTriageAuditFile);
+const d4dataParserReferenceAudit = readOptionalJson(d4dataParserReferenceAuditFile);
 const selector949ReconciliationAudit = readOptionalJson(selector949ReconciliationAuditFile);
 const selector949WindowReparseAudit = readOptionalJson(selector949WindowReparseAuditFile);
 const local949RoleDecodeAudit = readOptionalJson(local949RoleDecodeAuditFile);
@@ -671,6 +673,7 @@ const report = {
     sf32OwnerSourceHuntPlanFile: sf32OwnerSourceHuntPlan ? sf32OwnerSourceHuntPlanFile : null,
     diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
     communitySourceTriageAuditFile: communitySourceTriageAudit ? communitySourceTriageAuditFile : null,
+    d4dataParserReferenceAuditFile: d4dataParserReferenceAudit ? d4dataParserReferenceAuditFile : null,
     selector949ReconciliationAuditFile: selector949ReconciliationAudit ? selector949ReconciliationAuditFile : null,
     selector949WindowReparseAuditFile: selector949WindowReparseAudit ? selector949WindowReparseAuditFile : null,
     local949RoleDecodeAuditFile: local949RoleDecodeAudit ? local949RoleDecodeAuditFile : null,
@@ -1076,6 +1079,17 @@ const report = {
         recommendedUse: communitySourceTriageAudit.recommendedUse,
         blockers: communitySourceTriageAudit.blockers,
         safeguards: communitySourceTriageAudit.safeguards,
+      }
+    : null,
+  d4dataParserReferenceAudit: d4dataParserReferenceAudit
+    ? {
+        file: d4dataParserReferenceAuditFile,
+        source: d4dataParserReferenceAudit.source,
+        summary: d4dataParserReferenceAudit.summary,
+        referenceFiles: d4dataParserReferenceAudit.referenceFiles,
+        checks: d4dataParserReferenceAudit.checks,
+        parserImplementationPlan: d4dataParserReferenceAudit.parserImplementationPlan,
+        safeguards: d4dataParserReferenceAudit.safeguards,
       }
     : null,
   selector949ReconciliationAudit: selector949ReconciliationAudit

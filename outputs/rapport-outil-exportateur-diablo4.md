@@ -12799,3 +12799,53 @@ Validation :
 Decision :
 
 Ces sources sont utiles pour cadrer le parser read-only `selector-asset-record`, notamment via `DiabloTools/d4data` (`parse.js`, `definitions.json`, `field_types.txt`). Elles ne prouvent pas encore le champ exact `SF_32`, le trigger `SF_33` ni l'uptime. Elles ne doivent donc ouvrir aucun bridge semantique et ne peuvent pas modifier `reliableDps`.
+
+## Audit reference parser DiabloTools/d4data
+
+Un audit de reference parser a ete ajoute pour relier explicitement la source prioritaire `DiabloTools/d4data` au contrat `selector-asset-record`. L'objectif est de preparer l'implementation read-only du parser sans introduire de bridge DPS.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-d4data-parser-reference-audit.js`
+- `work/diablo4-data-exporter/scripts/test-d4data-parser-reference-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- source : `diablotools-d4data`
+- fichiers reference : `4`
+- fichiers retenus : `parse.js`, `definitions.json`, `field_types.txt`, `attributeList.json`
+- checks : `6`
+- checks echoues : `0`
+- parser root : `selector-asset-record`
+- contrat compatible : `true`
+- reference d4data prete : `true`
+- parser read-only implementable : `true`
+- `semanticBridgeReady false`
+- `acceptedForBridge false`
+- `writesTargetDataset false`
+- `writesRealIntake false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `121` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test audit reference parser d4data : `d4data-parser-reference-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `121` etapes
+- plan optimiseur : section `d4dataParserReferenceAudit` presente
+- site : nouveau panneau `d4data parser reference`
+
+Decision :
+
+`DiabloTools/d4data` est maintenant exploitable comme reference d'implementation pour emettre des records read-only : `selector`, `assetRef`, `layoutId`, payload fields et `evidence`. Le parser pourra etiqueter `994` comme ancre `Bonus_Percent_Per_Power` et conserver `949` comme role local/payload non resolu. Aucune semantique `SF_32`, `SF_33` ou uptime ne doit etre promue sans preuve source-backed separee.

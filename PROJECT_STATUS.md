@@ -1703,3 +1703,17 @@ Build de reference :
   - reliableDps modifiable : `false`
   - bridge semantique : `false`
   - decision : utiliser ces sources pour cadrer le parser read-only, pas pour promouvoir `SF_32`, `SF_33` ou l'uptime
+- audit reference parser `DiabloTools/d4data` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-d4data-parser-reference-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-d4data-parser-reference-audit.js`
+  - rapport genere : `outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json`
+  - suite optimiseur : `121` etapes, statut `target-optimizer-suite-ok`
+  - source : `diablotools-d4data`
+  - fichiers reference : `parse.js`, `definitions.json`, `field_types.txt`, `attributeList.json`
+  - checks : `6`, echecs `0`
+  - contrat parser : `selector-asset-record`, compatible `true`
+  - parser read-only implementable : `true`
+  - bridge semantique : `false`
+  - reliableDps modifiable : `false`
+  - plan optimiseur et site : nouveau panneau `d4data parser reference`
+  - decision : prochaine etape = emettre des records `selector/asset/layout/payload/evidence` read-only; aucune promotion DPS sans preuve `SF_32`, `SF_33`, uptime
