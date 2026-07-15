@@ -11,6 +11,8 @@ const generationSteps = [
   "test-current-power-source-freshness-audit.js",
   "build-current-power-formula-graph.js",
   "test-current-power-formula-graph.js",
+  "build-current-power-activation-graph.js",
+  "test-current-power-activation-graph.js",
   "build-target-bucket-engine.js",
   "build-fine-bucket-extraction-plan.js",
   "build-delta-promotion-conclusion.js",
@@ -237,6 +239,7 @@ const deltaPromotionApplyPlan = readJson("outputs/diablo4-delta-promotion-apply-
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
 const currentPowerSourceFreshnessAudit = readJson("outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json");
 const currentPowerFormulaGraph = readJson("outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json");
+const currentPowerActivationGraph = readJson("outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
@@ -540,6 +543,18 @@ assertInvariant(currentPowerFormulaGraph.summary.graphReady === true, "current f
 assertInvariant(currentPowerFormulaGraph.summary.activationGraphReady === false, "activation graph must remain blocked");
 assertInvariant(currentPowerFormulaGraph.summary.currentStrictDpsKnown === false, "current formula graph must not invent strict DPS");
 assertInvariant(currentPowerFormulaGraph.summary.canModifyReliableDps === false, "current formula graph must not modify reliable DPS");
+assertInvariant(currentPowerActivationGraph.summary.currentBuild === "3.1.1.72836", "current activation graph must target the local 3.1.1 build");
+assertInvariant(currentPowerActivationGraph.summary.gameplaySources === 14, "current activation graph must track fourteen gameplay sources");
+assertInvariant(currentPowerActivationGraph.summary.gameplaySourcesSemanticallyMatched === 14, "current activation sources must match the reference semantics");
+assertInvariant(currentPowerActivationGraph.summary.activationChains === 5, "current activation graph must expose five activation chains");
+assertInvariant(currentPowerActivationGraph.summary.attributedDamageConsumers === 5, "current activation graph must attribute five damage consumers");
+assertInvariant(currentPowerActivationGraph.summary.unattributedDamageConsumers === 5, "current activation graph must keep five consumers unattributed");
+assertInvariant(currentPowerActivationGraph.summary.aiBehaviorSnoIds.includes(1858249), "current activation graph must expose AIBehavior 1858249");
+assertInvariant(currentPowerActivationGraph.summary.aiScheduleReady === false, "current activation graph must keep the AI schedule blocked");
+assertInvariant(currentPowerActivationGraph.summary.activationGraphPartial === true, "current activation graph must expose partial progress");
+assertInvariant(currentPowerActivationGraph.summary.activationGraphReady === false, "current activation graph must not be promoted prematurely");
+assertInvariant(currentPowerActivationGraph.summary.currentStrictDpsKnown === false, "current activation graph must not invent strict DPS");
+assertInvariant(currentPowerActivationGraph.summary.canModifyReliableDps === false, "current activation graph must not modify reliable DPS");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -556,6 +571,11 @@ const summary = {
   activeFormulaGraphReady: currentPowerFormulaGraph.summary.graphReady,
   activeDamageConsumers: currentPowerFormulaGraph.summary.damageConsumers,
   activeDpsBlockers: currentPowerFormulaGraph.summary.blockers.length,
+  activeActivationGraphPartial: currentPowerActivationGraph.summary.activationGraphPartial,
+  activeAttributedDamageConsumers: currentPowerActivationGraph.summary.attributedDamageConsumers,
+  activeUnattributedDamageConsumers: currentPowerActivationGraph.summary.unattributedDamageConsumers,
+  activeAiScheduleReady: currentPowerActivationGraph.summary.aiScheduleReady,
+  activeActivationBlockers: currentPowerActivationGraph.summary.blockers.length,
   reliableStrictBuilds: 0,
   nextGate: "current-source-model-fresh",
 };
@@ -592,6 +612,13 @@ const report = {
     { id: "active-sf32-sf33-consumers-zero", status: "passed", value: currentPowerFormulaGraph.summary.legacySf32Sf33DamageConsumers },
     { id: "active-activation-graph-blocked", status: "passed", value: currentPowerFormulaGraph.summary.activationGraphReady },
     { id: "active-strict-dps-unknown", status: "passed", value: currentPowerFormulaGraph.summary.currentStrictDpsKnown },
+    { id: "active-gameplay-sources-matched-14", status: "passed", value: currentPowerActivationGraph.summary.gameplaySourcesSemanticallyMatched },
+    { id: "active-attribution-consumers-5", status: "passed", value: currentPowerActivationGraph.summary.attributedDamageConsumers },
+    { id: "active-unattributed-consumers-5", status: "passed", value: currentPowerActivationGraph.summary.unattributedDamageConsumers },
+    { id: "active-ai-behavior-1858249", status: "passed", value: currentPowerActivationGraph.summary.aiBehaviorSnoIds },
+    { id: "active-activation-graph-partial", status: "passed", value: currentPowerActivationGraph.summary.activationGraphPartial },
+    { id: "active-ai-schedule-blocked", status: "passed", value: currentPowerActivationGraph.summary.aiScheduleReady },
+    { id: "active-activation-strict-dps-unknown", status: "passed", value: currentPowerActivationGraph.summary.currentStrictDpsKnown },
     { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
     { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
     { id: "external-evidence-intake-safe", status: "passed", value: externalEvidenceIntake.summary.canModifyReliableDps },
@@ -930,9 +957,13 @@ assertInvariant(optimizerPlan.currentPowerSourceFreshnessAudit?.summary?.current
 assertInvariant(optimizerPlan.currentPowerFormulaGraph?.summary?.graphReady === true, "optimizer plan must embed active formula graph");
 assertInvariant(optimizerPlan.currentPowerFormulaGraph?.summary?.damageConsumers === 10, "optimizer plan must embed active damage consumers");
 assertInvariant(optimizerPlan.currentPowerFormulaGraph?.summary?.currentStrictDpsKnown === false, "optimizer plan must keep active strict DPS unknown");
+assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.activationGraphPartial === true, "optimizer plan must embed partial active activation graph");
+assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.attributedDamageConsumers === 5, "optimizer plan must embed five attributed damage consumers");
+assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.aiScheduleReady === false, "optimizer plan must keep the AI schedule blocked");
+assertInvariant(optimizerPlan.currentPowerActivationGraph?.summary?.currentStrictDpsKnown === false, "optimizer plan must keep activation strict DPS unknown");
 assertInvariant(optimizerPlan.summary.currentSourceModelFresh === false, "optimizer plan must expose stale current source model");
 assertInvariant(optimizerPlan.summary.canUseForCurrentBuild === false, "optimizer plan must reject legacy DPS for current build");
-assertInvariant(optimizerPlan.summary.topAction === "Relier les activations de degats 3.1.1", "active payload dispatch must be the top optimizer action");
+assertInvariant(optimizerPlan.summary.topAction === "Prouver la cadence des attaques 3.1.1", "active AI schedule must be the top optimizer action");
 assertInvariant(optimizerPlan.recommendedStrictByClass
   .find((row) => row.assetIds?.includes(1663210))?.optimizerDecision?.canLoadAsWorkingBase === false, "stale 1663210 plan must not load as a current working base");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");

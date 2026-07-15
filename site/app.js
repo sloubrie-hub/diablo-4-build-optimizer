@@ -790,7 +790,7 @@ function renderTargetOptimizerPlan() {
       ${plan.bestHistoricalStrictBuild && !currentModelReady ? `<span>Meilleure reference historique : ${plan.bestHistoricalStrictBuild.class} - ${formatNumber(plan.bestHistoricalStrictBuild.strictDps)} DPS</span>` : ""}
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
-    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph)}
+    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph, plan.currentPowerActivationGraph)}
     ${renderTargetOptimizerSuite(plan.targetOptimizerSuite)}
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine, plan.currentPowerSourceFreshnessAudit)}
     ${renderBucketEngineContract(plan.bucketEngineContract)}
@@ -878,7 +878,7 @@ function renderTargetOptimizerPlan() {
   `;
 }
 
-function renderCurrentPowerSourceFreshness(audit, formulaGraph) {
+function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph) {
   if (!audit) return "";
   const summary = audit.summary ?? {};
   const active = audit.activeBinary ?? {};
@@ -888,6 +888,20 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph) {
   const currentModelReady = summary.currentModelReady === true;
   const graphSummary = formulaGraph?.summary ?? {};
   const damageConsumers = formulaGraph?.damageConsumers ?? [];
+  const activationSummary = activationGraph?.summary ?? {};
+  const activationChains = activationGraph?.activationChains ?? [];
+  const activationLabels = {
+    "default-breath": "Souffle standard",
+    "blast-of-bile-breath": "Souffle Blast of Bile",
+    "default-projectile": "Projectile standard",
+    "spew-putrefaction-dot": "Spew Putrefaction",
+    "sky-and-soil-dot": "Sky and Soil",
+  };
+  const activationStatus = activationSummary.activationGraphReady
+    ? "reliee"
+    : activationSummary.activationGraphPartial
+      ? "partielle"
+      : "a relier";
   return `
     <div class="bonus-selector-proof current-power-source-freshness">
       <div class="bonus-selector-proof-head">
@@ -916,7 +930,7 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph) {
           ${targetMetric("Formules actives", graphSummary.formulaNodes)}
           ${targetMetric("Sources de degats", graphSummary.damageConsumers)}
           ${targetMetric("Structures resolues", graphSummary.normalizedRankOneConsumers)}
-          ${targetMetric("Activation", graphSummary.activationGraphReady ? "reliee" : "a relier")}
+          ${targetMetric("Activation", activationStatus)}
         </div>
         <div class="current-formula-consumers">
           ${damageConsumers.slice(0, 10).map((consumer) => `
@@ -924,12 +938,28 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph) {
           `).join("")}
         </div>
         <div class="target-bucket-class-gates">
-          ${(graphSummary.blockers ?? []).map((blocker) => `<span class="failed">${blocker}</span>`).join("")}
+          ${((activationSummary.blockers ?? graphSummary.blockers) ?? []).map((blocker) => `<span class="failed">${blocker}</span>`).join("")}
+        </div>
+      ` : ""}
+      ${activationGraph ? `
+        <div class="bonus-selector-proof-metrics">
+          ${targetMetric("Sources verifiees", `${formatNumber(activationSummary.gameplaySourcesSemanticallyMatched)}/${formatNumber(activationSummary.gameplaySources)}`)}
+          ${targetMetric("Degats attribues", `${formatNumber(activationSummary.attributedDamageConsumers)}/${formatNumber(graphSummary.damageConsumers)}`)}
+          ${targetMetric("Chaines reliees", activationSummary.activationChains)}
+          ${targetMetric("Cadence IA", activationSummary.aiScheduleReady ? "prouvee" : "a prouver")}
+        </div>
+        <div class="current-formula-consumers">
+          ${activationChains.map((chain) => `
+            <span>
+              <strong>${activationLabels[chain.id] ?? chain.id}</strong>
+              ${chain.parent?.symbolicName ?? "source"} - attribution prouvee, cadence bloquee
+            </span>
+          `).join("")}
         </div>
       ` : ""}
       <p>${summary.assessment?.finding ?? ""}</p>
       <p><strong>Les valeurs 163 200 / 212 160 / +48 960 sont maintenant des references historiques.</strong></p>
-      <p>${graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
+      <p>${activationSummary.assessment?.nextAction ?? graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }

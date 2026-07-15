@@ -13315,3 +13315,85 @@ Validation :
 Decision :
 
 La prochaine etape est maintenant precise : retrouver dans la ressource active les chemins de dispatch qui declenchent les `payloadId 0/1/2/3/4/6` et les buffs DOT, puis etablir nombre de touches, cadence et duree. Ce n'est qu'apres cette liaison que les coefficients pourront etre sommes en DPS strict.
+
+## Graphe d'activation des attaques 3.1.1
+
+L'extraction a ete etendue aux pouvoirs enfants, a l'acteur du familier, a son ensemble d'animations, aux animations d'attaque et aux groupes d'effets conditionnels. Les quatorze ressources de gameplay actives ont ete parsees avec les definitions locales puis comparees au snapshot d4data `3.1.0` : leur parite semantique est de `14 / 14`.
+
+Fichiers ajoutes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-current-power-activation-graph.js`
+- `work/diablo4-data-exporter/scripts/test-current-power-activation-graph.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json`
+
+Ressources runtime principales :
+
+- spawn : `Spiritborn_CentipedeRuler_Spawn`, SNO `1858114`
+- projectile : `Spiritborn_CentipedeRuler_ProjectileAttack`, SNO `1858262`
+- souffle : `Spiritborn_CentipedeRuler_BreathAttack`, SNO `1859218`
+- acteur : `Spiritborn_CentipedeRulerHead`
+- ensemble d'animations : `Spiritborn_CentipedeRuler_Base`
+- ordonnanceur reference par l'acteur : `AIBehavior 1858249`
+
+Attribution des degats :
+
+- `payload:1`, label hash `SPIT_PAYLOAD_TOOLTIP` : `SF_13 * 4`, relie au souffle enfant
+- `payload:2`, label hash `SPIT_PAYLOAD_B_TOOLTIP` : `SF_42 * 4`, relie a la variante `Blast of Bile` du souffle enfant
+- `payload:3`, label hash `PROJ_PAYLOAD_TOOLTIP` : `SF_18`, relie au projectile enfant
+- `buff-dot:3`, label hash `UPGRADE_POISON_DOT` : relie a `Spew Putrefaction`
+- `buff-dot:10`, label hash `UPGRADE_C_DOT` : relie a `Sky and Soil`
+- chaines reliees : `5`
+- consommateurs attribues : `5 / 10`
+- consommateurs encore sans activation : `5 / 10`
+
+Les pouvoirs enfants prouvent les ponts de formules suivants :
+
+- souffle par defaut : formule enfant vers `SF_13`
+- souffle `Blast of Bile` : formule enfant vers `SF_42`
+- projectile : formule enfant vers `SF_18`
+
+Temps d'animation observes :
+
+- projectile : `46` frames a `30 FPS`, contact frame `8`, soit `0.2667 s` nominal
+- souffle : `74` frames a `30 FPS`, contact frame `15`, soit `0.5 s` nominal
+- spawn : `55` frames a `30 FPS`, contact frame `3`, soit `0.1 s` nominal
+
+Ces temps ne sont pas une cadence de combat. Le runtime applique encore `Attacks_Per_Second_Total`, et le nombre de repetitions ainsi que l'ordre de selection des attaques ne sont pas visibles sans l'ordonnanceur IA.
+
+Conditions reliees :
+
+- `Spew Putrefaction` : `SF_5 = Mod.SoilRuler_B`, groupe d'effet persistant et DOT `UPGRADE_POISON_DOT`
+- `Blast of Bile` : `SF_41 = Mod.UpgradeB`, payload alternatif du souffle; branche runtime encore masquee
+- `Sky and Soil` : `SF_35 = Mod.UpgradeC`, groupe d'effet tempete et DOT `UPGRADE_C_DOT`; le texte de reference indique une seconde, sans preuve runtime d'uptime
+
+Limite de localisation :
+
+La StringList active n'a pas pu etre extraite individuellement depuis CASC, car son entree est packee ou chiffree. Les libelles du snapshot d4data ne sont donc utilises que lorsque leur hash correspond exactement aux definitions actives. Ils servent a nommer les chaines, pas a prouver une cadence ou une activation courante.
+
+Blocage principal :
+
+- `AIBehavior 1858249` est reference par l'acteur, mais son nom client et son planning ne sont pas disponibles
+- ordre de selection et nombre de repetitions inconnus
+- mise a l'echelle par vitesse d'attaque inconnue
+- multiplicateur `x4` du souffle prouve comme coefficient agrege, pas comme quatre evenements runtime
+- ticks, chevauchement et uptime des DOT encore partiels
+
+Validation :
+
+- test : `current-power-activation-graph-test-ok`
+- sources semantiquement identiques : `14 / 14`
+- activation : `activationGraphPartial true`, `activationGraphReady false`
+- plan optimiseur : `activeAttributedDamageConsumers 5`, `activeUnattributedDamageConsumers 5`
+- cadence IA : `activeAiScheduleReady false`
+- action numero `1` : `Prouver la cadence des attaques 3.1.1`
+- suite optimiseur : `target-optimizer-suite-ok`, `135` etapes
+- parite stricte historique : `0`
+- DPS strict courant : `null`
+- `canModifyReliableDps false`
+
+Decision :
+
+La prochaine recherche utile porte sur l'ordonnanceur `AIBehavior 1858249`, par extraction d'une ressource encore cachee ou par observation runtime. Tant que l'ordre, les repetitions et la vitesse d'attaque ne sont pas prouves, le graphe reste partiel et aucune valeur ne rejoint le DPS fiable.

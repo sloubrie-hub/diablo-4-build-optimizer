@@ -87,6 +87,7 @@ const bucketEngineContractFile = "outputs/diablo4-bucket-engine-contract/bucket-
 const targetOptimizerSuiteFile = "outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json";
 const currentPowerSourceFreshnessAuditFile = "outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json";
 const currentPowerFormulaGraphFile = "outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json";
+const currentPowerActivationGraphFile = "outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -347,18 +348,33 @@ function actionForGate(gateId, plan, context = {}) {
   const aspectSlotPlan = context.aspectSlotNextSourcePlan;
   const currentSourceFreshness = context.currentSourceFreshness;
   const currentPowerFormulaGraph = context.currentPowerFormulaGraph;
+  const currentPowerActivationGraph = context.currentPowerActivationGraph;
   const gateActions = {
     "current-source-model-fresh": {
       priority: "critical",
       focus: "asset:1663210",
-      title: currentPowerFormulaGraph?.summary?.graphReady === true
+      title: currentPowerActivationGraph?.summary?.activationGraphPartial === true
+        ? "Prouver la cadence des attaques 3.1.1"
+        : currentPowerFormulaGraph?.summary?.graphReady === true
         ? "Relier les activations de degats 3.1.1"
         : "Recalculer le modele depuis la source 3.1.1",
-      action: currentPowerFormulaGraph?.summary?.graphReady === true
+      action: currentPowerActivationGraph?.summary?.activationGraphPartial === true
+        ? "Resoudre l'ordre et le nombre de repetitions de l'IA 1858249, puis appliquer la vitesse d'attaque avant de calculer le DPS strict."
+        : currentPowerFormulaGraph?.summary?.graphReady === true
         ? "Relier les payloads et DOT aux evenements, nombres de touches et cadences avant de calculer le DPS strict."
         : "Reconstruire le graphe de formules actif puis recalculer le DPS strict avant tout classement.",
       expectedImpact: "Remplacer les valeurs historiques par un modele compatible avec la version locale actuelle.",
-      subPlan: currentPowerFormulaGraph
+      subPlan: currentPowerActivationGraph
+        ? {
+            mode: currentPowerActivationGraph.mode,
+            file: currentPowerActivationGraphFile,
+            blockedSteps: currentPowerActivationGraph.summary?.blockers?.length ?? null,
+            readySteps: currentPowerActivationGraph.summary?.attributedDamageConsumers ?? 0,
+            nextStepId: "resolve-ai-behavior-1858249",
+            nextStepTitle: currentPowerActivationGraph.summary?.assessment?.nextAction ?? null,
+            assessment: currentPowerActivationGraph.summary?.assessment?.kind ?? null,
+          }
+        : currentPowerFormulaGraph
         ? {
             mode: currentPowerFormulaGraph.mode,
             file: currentPowerFormulaGraphFile,
@@ -653,6 +669,7 @@ const bucketEngineContract = readOptionalJson(bucketEngineContractFile);
 const targetOptimizerSuite = readOptionalJson(targetOptimizerSuiteFile);
 const currentPowerSourceFreshnessAudit = readOptionalJson(currentPowerSourceFreshnessAuditFile);
 const currentPowerFormulaGraph = readOptionalJson(currentPowerFormulaGraphFile);
+const currentPowerActivationGraph = readOptionalJson(currentPowerActivationGraphFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -718,6 +735,7 @@ const actionQueue = buildActionQueue(recommendedStrictByClass, {
   aspectSlotNextSourcePlan,
   currentSourceFreshness: currentPowerSourceFreshnessAudit,
   currentPowerFormulaGraph,
+  currentPowerActivationGraph,
 });
 
 const report = {
@@ -809,6 +827,7 @@ const report = {
     targetOptimizerSuiteFile: targetOptimizerSuite ? targetOptimizerSuiteFile : null,
     currentPowerSourceFreshnessAuditFile: currentPowerSourceFreshnessAudit ? currentPowerSourceFreshnessAuditFile : null,
     currentPowerFormulaGraphFile: currentPowerFormulaGraph ? currentPowerFormulaGraphFile : null,
+    currentPowerActivationGraphFile: currentPowerActivationGraph ? currentPowerActivationGraphFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -832,6 +851,11 @@ const report = {
     activeFormulaGraphReady: currentPowerFormulaGraph?.summary?.graphReady === true,
     activeDamageConsumers: currentPowerFormulaGraph?.summary?.damageConsumers ?? null,
     activeDpsBlockers: currentPowerFormulaGraph?.summary?.blockers?.length ?? null,
+    activeActivationGraphPartial: currentPowerActivationGraph?.summary?.activationGraphPartial === true,
+    activeAttributedDamageConsumers: currentPowerActivationGraph?.summary?.attributedDamageConsumers ?? null,
+    activeUnattributedDamageConsumers: currentPowerActivationGraph?.summary?.unattributedDamageConsumers ?? null,
+    activeAiScheduleReady: currentPowerActivationGraph?.summary?.aiScheduleReady === true,
+    activeActivationBlockers: currentPowerActivationGraph?.summary?.blockers?.length ?? null,
     legacyDpsHistorical: currentPowerSourceFreshnessAudit?.summary?.legacyDpsHistorical === true,
     canUseForCurrentBuild: currentSourceModelFresh,
     recommendation: currentSourceModelFresh
@@ -840,7 +864,9 @@ const report = {
     promotionReady: false,
     nextAction: currentSourceModelFresh
       ? "Utiliser le meilleur build strict valide comme base de travail, puis debloquer slots et deltas conditionnels avant toute optimisation fiable."
-      : currentPowerFormulaGraph?.summary?.graphReady === true
+      : currentPowerActivationGraph?.summary?.activationGraphPartial === true
+        ? currentPowerActivationGraph.summary.assessment?.nextAction
+        : currentPowerFormulaGraph?.summary?.graphReady === true
         ? currentPowerFormulaGraph.summary.assessment?.nextAction
         : "Recalculer le graphe de formules et le DPS strict depuis la source active avant de reprendre le classement.",
   },
@@ -870,6 +896,21 @@ const report = {
         unresolvedConsumers: currentPowerFormulaGraph.unresolvedConsumers,
         blockers: currentPowerFormulaGraph.blockers,
         safeguards: currentPowerFormulaGraph.safeguards,
+      }
+    : null,
+  currentPowerActivationGraph: currentPowerActivationGraph
+    ? {
+        file: currentPowerActivationGraphFile,
+        summary: currentPowerActivationGraph.summary,
+        symbolicDefinitions: currentPowerActivationGraph.symbolicDefinitions,
+        referenceTextEvidence: currentPowerActivationGraph.referenceTextEvidence,
+        petDispatch: currentPowerActivationGraph.petDispatch,
+        activationChains: currentPowerActivationGraph.activationChains,
+        consumerUpdates: currentPowerActivationGraph.consumerUpdates,
+        unattributedConsumers: currentPowerActivationGraph.unattributedConsumers,
+        blockers: currentPowerActivationGraph.blockers,
+        evidence: currentPowerActivationGraph.evidence,
+        safeguards: currentPowerActivationGraph.safeguards,
       }
     : null,
   deltaUnblockPlan: deltaUnblockPlan

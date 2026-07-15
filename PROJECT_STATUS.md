@@ -1846,3 +1846,35 @@ Decision actuelle : interrompre la promotion de l'ancien delta `48960`. La proch
 - action prioritaire : `Relier les activations de degats 3.1.1`
 
 Decision revisee : le graphe de formules est reconstruit. La prochaine etape n'est plus de rechercher l'ancien `SF_32`, mais de relier `payloadId`, buffs et DOT aux evenements reels, nombres de touches et cadences avant toute somme DPS.
+
+### Graphe d'activation courant 3.1.1
+
+- script ajoute : `work/diablo4-data-exporter/scripts/build-current-power-activation-graph.js`
+- test ajoute : `work/diablo4-data-exporter/scripts/test-current-power-activation-graph.js`
+- rapport genere : `outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json`
+- ressources de gameplay extraites depuis la build active : `14`
+- parite semantique avec le snapshot d4data `3.1.0` : `14 / 14`
+- pouvoirs enfants : spawn `1858114`, projectile `1858262`, souffle `1859218`
+- pouvoirs enfants de degats runtime : `2`
+- chaines d'activation reliees : `5`
+- consommateurs payload relies : `3`
+- consommateurs DOT relies : `2`
+- consommateurs de degats attribues : `5 / 10`
+- liens parents/enfants prouves : `SF_13`, `SF_42`, `SF_18`
+- labels hash relies : `SPIT_PAYLOAD_TOOLTIP`, `SPIT_PAYLOAD_B_TOOLTIP`, `PROJ_PAYLOAD_TOOLTIP`, `UPGRADE_POISON_DOT`, `UPGRADE_C_DOT`
+- animations d'attaque reliees : `2`
+- contact projectile : frame `8 / 30`, soit `0.2667 s` nominal
+- contact souffle : frame `15 / 30`, soit `0.5 s` nominal
+- ces temps d'animation ne prouvent pas la cadence runtime, qui depend encore de `Attacks_Per_Second_Total`
+- conditions reliees : `Spew Putrefaction -> SF_5 / Mod.SoilRuler_B`, `Blast of Bile -> SF_41 / Mod.UpgradeB`, `Sky and Soil -> SF_35 / Mod.UpgradeC`
+- localisation active individuelle non extraite : la ressource est packee ou chiffree; les textes d4data restent des references compatibles par hash, pas des preuves locales actives
+- ordonnanceur detecte : `AIBehavior 1858249`
+- nom client, ordre des attaques, repetitions et mise a l'echelle de vitesse : non disponibles
+- graphe d'activation : `partial true`, `ready false`
+- DPS strict courant : `unknown`
+- reliableDps modifiable : `false`
+- plan optimiseur : action numero `1` = `Prouver la cadence des attaques 3.1.1`
+- site : panneau source enrichi avec activation partielle, `14 / 14` sources, `5 / 10` degats attribues et blocage de cadence IA
+- suite optimiseur : `135` etapes, statut `target-optimizer-suite-ok`, parite stricte historique `0`
+
+Decision revisee : l'attribution statique des attaques et variantes est partiellement prouvee. La prochaine etape prioritaire est d'extraire ou d'observer `AIBehavior 1858249` afin d'etablir l'ordre, les repetitions et la vitesse reelle des attaques. Aucun coefficient ne sera converti en DPS strict avant cette preuve.
