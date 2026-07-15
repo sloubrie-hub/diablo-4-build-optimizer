@@ -1373,3 +1373,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Audit promotion`
   - reliableDps modifiable : `false`
   - decision : meme pret, l'audit ouvre seulement une implementation separee; aucun score fiable n'est ecrit ici
+- dry-run implementation promotion delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-promotion-implementation-dry-run.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-promotion-implementation-dry-run.js`
+  - rapport genere : `outputs/diablo4-delta-promotion-implementation-dry-run/delta-promotion-implementation-dry-run.json`
+  - suite optimiseur : `77` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - dry-run reel : `patchPreviewReady false`, check echoue `promotion-audit-ready`
+  - patch preview : `reliable 163200 -> 212160`
+  - test synthetique : `patchPreviewReady true`, `patchBefore 163200`, `patchAfter 212160`
+  - ecriture target dataset : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Dry-run promotion`
+  - reliableDps modifiable : `false`
+  - decision : produire une preview de patch seulement; aucune application ni promotion sans etape separee

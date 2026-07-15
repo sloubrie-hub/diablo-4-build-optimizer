@@ -11739,3 +11739,48 @@ Validation :
 Decision :
 
 L'audit de promotion ne modifie aucun score. Meme lorsqu'un cas synthetique est pret, il ouvre seulement une future implementation separee avec recalcul et tests de regression.
+
+## Dry-run implementation promotion delta
+
+Un dry-run d'implementation a ete ajoute apres l'audit de promotion. Il prepare une preview de patch sur le DPS fiable cible, sans modifier le target dataset.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-promotion-implementation-dry-run.js`
+- `work/diablo4-data-exporter/scripts/test-delta-promotion-implementation-dry-run.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-promotion-implementation-dry-run/delta-promotion-implementation-dry-run.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- strict : `163200`
+- delta bloque : `48960`
+- reliable propose : `212160`
+- dry-run reel : `patchPreviewReady false`
+- check echoue reel : `promotion-audit-ready`
+- patch preview : `entities.*[].dps.reliable 163200 -> 212160`
+- test synthetique : `patchPreviewReady true`, `patchBefore 163200`, `patchAfter 212160`
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `77` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le dry-run, le test, la suite, le plan optimiseur et le site
+- test dry-run : `delta-promotion-implementation-dry-run-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `77` etapes
+- plan optimiseur : section `deltaPromotionImplementationDryRun` presente
+- site : nouveau panneau `Dry-run promotion`
+
+Decision :
+
+Le dry-run produit seulement une preview de patch. Il ne modifie pas `target-dataset.json`, n'active pas le ranking fiable et ne promeut pas le delta.

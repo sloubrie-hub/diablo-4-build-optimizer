@@ -53,6 +53,7 @@ const deltaEvidenceManualReviewGateFile = "outputs/diablo4-delta-evidence-manual
 const deltaEvidenceReviewDecisionPackageFile = "outputs/diablo4-delta-evidence-review-decision-package/delta-evidence-review-decision-package.json";
 const deltaEvidenceReviewDecisionAuditFile = "outputs/diablo4-delta-evidence-review-decision-audit/delta-evidence-review-decision-audit.json";
 const deltaEvidencePromotionAuditFile = "outputs/diablo4-delta-evidence-promotion-audit/delta-evidence-promotion-audit.json";
+const deltaPromotionImplementationDryRunFile = "outputs/diablo4-delta-promotion-implementation-dry-run/delta-promotion-implementation-dry-run.json";
 const userWhatIfScenariosFile = "outputs/diablo4-user-whatif-scenarios/user-whatif-scenarios.json";
 const userWhatIfContractFile = "outputs/diablo4-user-whatif-contract/user-whatif-contract.json";
 const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-gates.json";
@@ -533,6 +534,7 @@ const deltaEvidenceManualReviewGate = readOptionalJson(deltaEvidenceManualReview
 const deltaEvidenceReviewDecisionPackage = readOptionalJson(deltaEvidenceReviewDecisionPackageFile);
 const deltaEvidenceReviewDecisionAudit = readOptionalJson(deltaEvidenceReviewDecisionAuditFile);
 const deltaEvidencePromotionAudit = readOptionalJson(deltaEvidencePromotionAuditFile);
+const deltaPromotionImplementationDryRun = readOptionalJson(deltaPromotionImplementationDryRunFile);
 const userWhatIfScenarios = readOptionalJson(userWhatIfScenariosFile);
 const userWhatIfContract = readOptionalJson(userWhatIfContractFile);
 const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
@@ -635,6 +637,7 @@ const report = {
     deltaEvidenceReviewDecisionPackageFile: deltaEvidenceReviewDecisionPackage ? deltaEvidenceReviewDecisionPackageFile : null,
     deltaEvidenceReviewDecisionAuditFile: deltaEvidenceReviewDecisionAudit ? deltaEvidenceReviewDecisionAuditFile : null,
     deltaEvidencePromotionAuditFile: deltaEvidencePromotionAudit ? deltaEvidencePromotionAuditFile : null,
+    deltaPromotionImplementationDryRunFile: deltaPromotionImplementationDryRun ? deltaPromotionImplementationDryRunFile : null,
     userWhatIfScenariosFile: userWhatIfScenarios ? userWhatIfScenariosFile : null,
     reliableDpsGatesFile: reliableDpsGates ? reliableDpsGatesFile : null,
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
@@ -1096,6 +1099,16 @@ const report = {
         gateRows: deltaEvidencePromotionAudit.gateRows,
         implementationContract: deltaEvidencePromotionAudit.implementationContract,
         safeguards: deltaEvidencePromotionAudit.safeguards,
+      }
+    : null,
+  deltaPromotionImplementationDryRun: deltaPromotionImplementationDryRun
+    ? {
+        file: deltaPromotionImplementationDryRunFile,
+        summary: deltaPromotionImplementationDryRun.summary,
+        dryRunChecks: deltaPromotionImplementationDryRun.dryRunChecks,
+        patchPreview: deltaPromotionImplementationDryRun.patchPreview,
+        regressionTargets: deltaPromotionImplementationDryRun.regressionTargets,
+        safeguards: deltaPromotionImplementationDryRun.safeguards,
       }
     : null,
   userWhatIfScenarios: userWhatIfScenarios
