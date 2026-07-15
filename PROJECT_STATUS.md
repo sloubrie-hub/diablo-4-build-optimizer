@@ -1284,3 +1284,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Preview patch`
   - reliableDps modifiable : `false`
   - decision : produire une preview pending separee uniquement apres patch et audit complets; aucune copie, approbation ou promotion automatique
+- porte copie intake preuve delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-intake-copy-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-intake-copy-gate.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-intake-copy-gate/delta-evidence-intake-copy-gate.json`
+  - suite optimiseur : `65` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - porte reelle : `readyForManualCopy false`, `3 / 6` checks echoues
+  - checks echoues : `preview-merge-ready`, `candidate-present`, `candidate-pending`
+  - test synthetique : `readyForManualCopy true`, `reviewer.status pending`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Copie intake`
+  - reliableDps modifiable : `false`
+  - decision : rendre la copie manuelle explicite et non destructive; copiable ne vaut pas approved, bridge ou promotion fiable

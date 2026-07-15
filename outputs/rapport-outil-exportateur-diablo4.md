@@ -11468,3 +11468,47 @@ Validation :
 Decision :
 
 La preview du brouillon patch est une sortie non destructive. Elle force le candidat ajoute en `pending`, retire les marqueurs de brouillon, et ne modifie jamais l'intake reel. Elle ne vaut pas approbation, n'accepte aucun bridge et ne change pas `reliableDps`.
+
+## Porte copie intake preuve delta
+
+Une porte de copie manuelle a ete ajoutee pour expliciter quand une preview patch peut etre copiee dans l'intake reel.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-evidence-intake-copy-gate.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-intake-copy-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-intake-copy-gate/delta-evidence-intake-copy-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- porte reelle : `readyForManualCopy false`
+- checks : `6`
+- checks echoues reel : `3`
+- checks echoues : `preview-merge-ready`, `candidate-present`, `candidate-pending`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- test synthetique : `readyForManualCopy true`, `reviewer.status pending`, mais bridge/DPS fiable/ranking/promotion restent `false`
+- suite optimiseur : `target-optimizer-suite-ok`, `65` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la porte, le test, la suite, le plan optimiseur et le site
+- test porte : `delta-evidence-intake-copy-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `65` etapes
+- plan optimiseur : section `deltaEvidenceIntakeCopyGate` presente
+- site : nouveau panneau `Copie intake`
+
+Decision :
+
+La porte de copie rend l'action humaine explicite sans l'executer. Meme quand la preview synthetique est copiable, la sortie reste `pending`, n'ecrit pas dans l'intake reel, n'accepte aucun bridge et ne change pas `reliableDps`.
