@@ -11784,3 +11784,46 @@ Validation :
 Decision :
 
 Le dry-run produit seulement une preview de patch. Il ne modifie pas `target-dataset.json`, n'active pas le ranking fiable et ne promeut pas le delta.
+
+## Porte application promotion delta
+
+Une porte d'application a ete ajoutee apres le dry-run. Elle verifie si une application manuelle separee peut etre preparee, sans appliquer le patch.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-promotion-application-gate.js`
+- `work/diablo4-data-exporter/scripts/test-delta-promotion-application-gate.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-promotion-application-gate/delta-promotion-application-gate.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- reliable propose : `212160`
+- porte reelle : `manualApplyAllowed false`
+- check echoue reel : `dry-run-ready`
+- patch conserve : `163200 -> 212160`
+- test synthetique : `manualApplyAllowed true`, `patchBefore 163200`, `patchAfter 212160`
+- `writesTargetDataset false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `79` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la porte, le test, la suite, le plan optimiseur et le site
+- test porte application : `delta-promotion-application-gate-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `79` etapes
+- plan optimiseur : section `deltaPromotionApplicationGate` presente
+- site : nouveau panneau `Porte application`
+
+Decision :
+
+La porte d'application ne modifie aucun fichier. Meme quand le cas synthetique autorise une application manuelle, l'application doit rester une etape explicite avec sauvegarde, diff et regressions.

@@ -1387,3 +1387,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Dry-run promotion`
   - reliableDps modifiable : `false`
   - decision : produire une preview de patch seulement; aucune application ni promotion sans etape separee
+- porte application promotion delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-promotion-application-gate.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-promotion-application-gate.js`
+  - rapport genere : `outputs/diablo4-delta-promotion-application-gate/delta-promotion-application-gate.json`
+  - suite optimiseur : `79` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - porte reelle : `manualApplyAllowed false`, check echoue `dry-run-ready`
+  - patch conserve : `163200 -> 212160`
+  - test synthetique : `manualApplyAllowed true`, sans ecriture ni promotion
+  - ecriture target dataset : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Porte application`
+  - reliableDps modifiable : `false`
+  - decision : autoriser seulement une future application explicite avec sauvegarde, diff et regressions; rien n'est applique ici
