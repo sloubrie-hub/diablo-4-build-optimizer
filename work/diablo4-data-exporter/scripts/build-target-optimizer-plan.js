@@ -17,6 +17,7 @@ const externalEvidenceIntakeFile = "outputs/diablo4-external-evidence-intake/ext
 const externalEvidenceBridgePlanFile = "outputs/diablo4-external-evidence-bridge-plan/external-evidence-bridge-plan.json";
 const externalDeltaEvidencePlanFile = "outputs/diablo4-external-delta-evidence-plan/external-delta-evidence-plan.json";
 const externalDeltaEvidenceWorkorderFile = "outputs/diablo4-external-delta-evidence-workorder/external-delta-evidence-workorder.json";
+const externalEvidenceSubmissionPackFile = "outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json";
 const newBinaryFamilyPlanFile = "outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json";
 const newBinaryFamilyDeltaParentAuditFile = "outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json";
 const deltaParentConsumerCorpusScanFile = "outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json";
@@ -500,6 +501,7 @@ const externalEvidenceIntake = readOptionalJson(externalEvidenceIntakeFile);
 const externalEvidenceBridgePlan = readOptionalJson(externalEvidenceBridgePlanFile);
 const externalDeltaEvidencePlan = readOptionalJson(externalDeltaEvidencePlanFile);
 const externalDeltaEvidenceWorkorder = readOptionalJson(externalDeltaEvidenceWorkorderFile);
+const externalEvidenceSubmissionPack = readOptionalJson(externalEvidenceSubmissionPackFile);
 const newBinaryFamilyPlan = readOptionalJson(newBinaryFamilyPlanFile);
 const newBinaryFamilyDeltaParentAudit = readOptionalJson(newBinaryFamilyDeltaParentAuditFile);
 const deltaParentConsumerCorpusScan = readOptionalJson(deltaParentConsumerCorpusScanFile);
@@ -605,6 +607,8 @@ const report = {
     externalEvidenceIntakeFile: externalEvidenceIntake ? externalEvidenceIntakeFile : null,
     externalEvidenceBridgePlanFile: externalEvidenceBridgePlan ? externalEvidenceBridgePlanFile : null,
     externalDeltaEvidencePlanFile: externalDeltaEvidencePlan ? externalDeltaEvidencePlanFile : null,
+    externalDeltaEvidenceWorkorderFile: externalDeltaEvidenceWorkorder ? externalDeltaEvidenceWorkorderFile : null,
+    externalEvidenceSubmissionPackFile: externalEvidenceSubmissionPack ? externalEvidenceSubmissionPackFile : null,
     newBinaryFamilyPlanFile: newBinaryFamilyPlan ? newBinaryFamilyPlanFile : null,
     newBinaryFamilyDeltaParentAuditFile: newBinaryFamilyDeltaParentAudit ? newBinaryFamilyDeltaParentAuditFile : null,
     deltaParentConsumerCorpusScanFile: deltaParentConsumerCorpusScan ? deltaParentConsumerCorpusScanFile : null,
@@ -750,6 +754,17 @@ const report = {
         tasks: externalDeltaEvidenceWorkorder.tasks,
         intakeAppendix: externalDeltaEvidenceWorkorder.intakeAppendix,
         safeguards: externalDeltaEvidenceWorkorder.safeguards,
+      }
+    : null,
+  externalEvidenceSubmissionPack: externalEvidenceSubmissionPack
+    ? {
+        file: externalEvidenceSubmissionPackFile,
+        markdownFile: "outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.md",
+        summary: externalEvidenceSubmissionPack.summary,
+        targetTask: externalEvidenceSubmissionPack.targetTask,
+        candidateSnippet: externalEvidenceSubmissionPack.candidateSnippet,
+        submissionSteps: externalEvidenceSubmissionPack.submissionSteps,
+        safeguards: externalEvidenceSubmissionPack.safeguards,
       }
     : null,
   newBinaryFamilyPlan: newBinaryFamilyPlan

@@ -1415,3 +1415,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Plan application`
   - reliableDps modifiable : `false`
   - decision : documenter les etapes d'application explicite; aucune mutation sans confirmation humaine finale
+- paquet soumission preuve externe ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-pack.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-pack.js`
+  - rapports generes : `outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json` et `.md`
+  - suite optimiseur : `83` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - prochaine preuve : `delta-proof-sf32-owner`
+  - claim : `sf32-field-ownership`, champ `selector:949`
+  - brouillon : `draft-delta-proof-sf32-owner`, statut reviewer `pending`
+  - must contain : `1663210`, `selector:949`, `SF_32`
+  - ecriture intake : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Soumission preuve`
+  - reliableDps modifiable : `false`
+  - decision : fournir un brouillon a remplir; aucune preuve n'est acceptee ni promue sans source exacte et revue explicite

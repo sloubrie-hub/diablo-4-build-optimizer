@@ -11871,3 +11871,48 @@ Validation :
 Decision :
 
 Le plan d'application documente la procedure future, mais ne l'execute pas. Aucune mutation de `target-dataset.json`, aucun bridge et aucune promotion reliableDps ne sont autorises sans confirmation humaine finale et regression complete.
+
+## Paquet soumission preuve externe
+
+Un paquet de soumission a ete ajoute pour isoler le prochain geste utile : remplir une preuve externe source-backed pour `delta-proof-sf32-owner`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-pack.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-pack.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json`
+- `outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.md`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- prochaine tache : `delta-proof-sf32-owner`
+- claim : `sf32-field-ownership`
+- champ : `selector:949`
+- brouillon candidat : `draft-delta-proof-sf32-owner`
+- reviewer : `pending`
+- must contain : `1663210`, `selector:949`, `SF_32`
+- `writesIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `83` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le paquet, le test, la suite, le plan optimiseur et le site
+- test paquet soumission : `external-evidence-submission-pack-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `83` etapes
+- plan optimiseur : section `externalEvidenceSubmissionPack` presente
+- site : nouveau panneau `Soumission preuve`
+
+Decision :
+
+Le paquet produit un brouillon a remplir, pas une preuve acceptee. Il ne modifie pas `inputs/external-evidence-candidates.json`, n'ouvre aucun bridge et ne change aucun score fiable.
