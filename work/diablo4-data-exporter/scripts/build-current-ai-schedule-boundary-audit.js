@@ -376,15 +376,17 @@ const report = {
 };
 
 const observationTemplate = {
+  "$schema": "https://local.diablo4-build-optimizer/schemas/runtime-cadence-observations.schema.json",
   schemaVersion: 1,
   mode: runtimeObservationPlan.mode,
   currentBuild: report.summary.currentBuild,
   assetId: report.summary.assetId,
   actorSnoId: TARGET_ACTOR,
   aiBehaviorSnoId: TARGET_AI_BEHAVIOR,
-  minimumCaptureFps: runtimeObservationPlan.minimumCaptureFps,
-  scenarios: observationScenarios,
-  eventSchema,
+  notes: [
+    "Ce modele doit contenir uniquement des observations runtime reelles du client actif.",
+    "Les fixtures synthetiques de test ne doivent jamais etre copiees dans ce fichier.",
+  ],
   sessions: [],
 };
 

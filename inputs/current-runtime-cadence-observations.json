@@ -1,0 +1,15 @@
+{
+  "$schema": "https://local.diablo4-build-optimizer/schemas/runtime-cadence-observations.schema.json",
+  "schemaVersion": 1,
+  "mode": "runtime-cadence-observation-v1",
+  "currentBuild": "3.1.1.72836",
+  "assetId": 1663210,
+  "actorSnoId": 1858169,
+  "aiBehaviorSnoId": 1858249,
+  "notes": [
+    "Ce fichier reste vide tant qu'aucune capture runtime reelle n'a ete annotee.",
+    "Les jeux synthetiques des tests ne doivent jamais etre copies dans cette entree.",
+    "Aucune session ne peut modifier reliableDps directement."
+  ],
+  "sessions": []
+}

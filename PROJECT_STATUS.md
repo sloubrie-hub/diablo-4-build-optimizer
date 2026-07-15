@@ -1907,3 +1907,31 @@ Decision revisee : l'attribution statique des attaques et variantes est partiell
 - suite optimiseur : `137` etapes, statut `target-optimizer-suite-ok`, parite stricte historique `0`
 
 Decision revisee : ne plus chercher un fichier `.aib` nomme dans les ressources SNO du client courant. La prochaine preuve utile doit venir d'observations runtime horodatees de la sequence standard, de `Blast of Bile` et de deux etats stables de vitesse. La cadence et le DPS strict restent bloques jusqu'a ces mesures.
+
+### Analyse canonique des observations runtime
+
+- schema ajoute : `work/diablo4-data-exporter/schema/runtime-cadence-observations.schema.json`
+- entree reelle canonique : `inputs/current-runtime-cadence-observations.json`
+- analyseur ajoute : `work/diablo4-data-exporter/src/runtime-cadence-analyzer.js`
+- constructeur ajoute : `work/diablo4-data-exporter/scripts/build-current-runtime-cadence-analysis.js`
+- test ajoute : `work/diablo4-data-exporter/scripts/test-current-runtime-cadence-analysis.js`
+- rapport genere : `outputs/diablo4-current-runtime-cadence-analysis/current-runtime-cadence-analysis.json`
+- version cible : `3.1.1.72836`
+- sessions reelles : `0 / 20`
+- sessions completes : `0`
+- couverture : `0 %`
+- erreurs de validation : `0`
+- portes de cadence franchies : `1 / 7`
+- planning runtime prouve : `false`
+- vitesse d'attaque mesuree : `false`
+- DPS strict courant : `null`
+- reliableDps modifiable : `false`
+- test synthetique temporaire : `20 / 20` sessions, `7 / 7` portes, planning de cadence exercite
+- le test synthetique conserve `currentStrictDpsKnown false` et ne touche jamais l'entree reelle
+- plan optimiseur : action numero `1` = `Collecter les observations en jeu 3.1.1`
+- site : suivi ajoute pour sessions, completes, couverture, cadence et erreurs
+- suite optimiseur : `139` etapes, statut `target-optimizer-suite-ok`, parite stricte historique `0`
+- HTTP : page, application, plan, audit de frontiere et analyse runtime servis en `200`
+- navigateur : action prioritaire et cinq metriques runtime visibles, `NaN = 0`, erreurs console `0`
+
+Decision revisee : le pipeline de collecte et d'analyse est pret. La prochaine donnee utile est une observation runtime reelle; les fixtures synthetiques valident uniquement l'analyseur et ne constituent aucune preuve de gameplay ni de DPS.

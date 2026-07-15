@@ -790,7 +790,7 @@ function renderTargetOptimizerPlan() {
       ${plan.bestHistoricalStrictBuild && !currentModelReady ? `<span>Meilleure reference historique : ${plan.bestHistoricalStrictBuild.class} - ${formatNumber(plan.bestHistoricalStrictBuild.strictDps)} DPS</span>` : ""}
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
-    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph, plan.currentPowerActivationGraph, plan.currentAiScheduleBoundaryAudit)}
+    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph, plan.currentPowerActivationGraph, plan.currentAiScheduleBoundaryAudit, plan.currentRuntimeCadenceAnalysis)}
     ${renderTargetOptimizerSuite(plan.targetOptimizerSuite)}
     ${renderTargetBucketEnginePlan(plan.targetBucketEngine, plan.currentPowerSourceFreshnessAudit)}
     ${renderBucketEngineContract(plan.bucketEngineContract)}
@@ -878,7 +878,7 @@ function renderTargetOptimizerPlan() {
   `;
 }
 
-function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph, aiBoundaryAudit) {
+function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph, aiBoundaryAudit, runtimeCadenceAnalysis) {
   if (!audit) return "";
   const summary = audit.summary ?? {};
   const active = audit.activeBinary ?? {};
@@ -892,6 +892,16 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph,
   const activationChains = activationGraph?.activationChains ?? [];
   const aiBoundarySummary = aiBoundaryAudit?.summary ?? {};
   const observationPlan = aiBoundaryAudit?.runtimeObservationPlan ?? {};
+  const runtimeSummary = runtimeCadenceAnalysis?.summary ?? {};
+  const runtimeSessions = Number.isFinite(runtimeSummary.totalSessions) ? runtimeSummary.totalSessions : 0;
+  const runtimeCompleteSessions = Number.isFinite(runtimeSummary.completeSessions) ? runtimeSummary.completeSessions : 0;
+  const runtimeMinimumCasts = Number.isFinite(runtimeSummary.minimumTotalCasts) ? runtimeSummary.minimumTotalCasts : 20;
+  const runtimeCoverage = Number.isFinite(runtimeSummary.collectionCoveragePct) ? runtimeSummary.collectionCoveragePct : 0;
+  const runtimeCadenceStatus = runtimeSummary.runtimeScheduleEvidenceReady
+    ? "prouvee"
+    : runtimeSessions > 0
+      ? "partielle"
+      : "en attente";
   const activationLabels = {
     "default-breath": "Souffle standard",
     "blast-of-bile-breath": "Souffle Blast of Bile",
@@ -977,9 +987,19 @@ function renderCurrentPowerSourceFreshness(audit, formulaGraph, activationGraph,
         <p>${aiBoundarySummary.assessment?.finding ?? ""}</p>
         <p>${aiBoundarySummary.assessment?.inference ?? ""}</p>
       ` : ""}
+      ${runtimeCadenceAnalysis ? `
+        <div class="bonus-selector-proof-metrics">
+          ${targetMetric("Sessions", `${formatNumber(runtimeCompleteSessions)}/${formatNumber(runtimeMinimumCasts)}`)}
+          ${targetMetric("Completes", runtimeCompleteSessions)}
+          ${targetMetric("Couverture", `${formatNumber(runtimeCoverage)} %`)}
+          ${targetMetric("Cadence", runtimeCadenceStatus)}
+          ${targetMetric("Erreurs", runtimeSummary.validationIssues ?? 0)}
+        </div>
+        <p>${runtimeSummary.assessment?.finding ?? ""}</p>
+      ` : ""}
       <p>${summary.assessment?.finding ?? ""}</p>
       <p><strong>Les valeurs 163 200 / 212 160 / +48 960 sont maintenant des references historiques.</strong></p>
-      <p>${aiBoundarySummary.assessment?.nextAction ?? activationSummary.assessment?.nextAction ?? graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
+      <p>${runtimeSummary.assessment?.nextAction ?? aiBoundarySummary.assessment?.nextAction ?? activationSummary.assessment?.nextAction ?? graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
     </div>
   `;
 }

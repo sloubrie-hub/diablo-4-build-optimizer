@@ -13504,3 +13504,53 @@ Validation :
 Decision :
 
 La prochaine etape ne consiste plus a extraire un fichier IA client nomme. Elle consiste a collecter les observations runtime prevues, puis a construire une sequence statistiquement valide pour les attaques, les repetitions et la mise a l'echelle de vitesse. Aucun DPS courant ne sera calcule avant cette collecte.
+
+## 2026-07-15 - Pipeline d'analyse de cadence runtime
+
+Contrat et implementation :
+
+- schema strict : `work/diablo4-data-exporter/schema/runtime-cadence-observations.schema.json`
+- entree reelle : `inputs/current-runtime-cadence-observations.json`
+- analyseur : `work/diablo4-data-exporter/src/runtime-cadence-analyzer.js`
+- generation : `work/diablo4-data-exporter/scripts/build-current-runtime-cadence-analysis.js`
+- test : `work/diablo4-data-exporter/scripts/test-current-runtime-cadence-analysis.js`
+- sortie : `outputs/diablo4-current-runtime-cadence-analysis/current-runtime-cadence-analysis.json`
+
+Etat reel `3.1.1.72836` :
+
+- sessions : `0 / 20`
+- sessions completes : `0`
+- evenements : `0`
+- couverture : `0 %`
+- erreurs de contrat ou chronologie : `0`
+- portes franchies : `1 / 7`
+- statut : `waiting-for-runtime-observations`
+- cadence IA : non prouvee
+- DPS strict courant : `null`
+- classement courant : interdit
+- `canModifyReliableDps false`
+
+Validation isolee :
+
+- le test fabrique `20` sessions temporaires hors du projet
+- `5` sequences standard
+- `5` lancers Blast of Bile avec un souffle
+- `5` lancers a `1.0` attaque/seconde
+- `5` lancers a `2.0` attaques/seconde
+- resultat synthetique : `20 / 20` sessions completes et `7 / 7` portes
+- le sens de variation de vitesse est detecte
+- le DPS strict reste inconnu meme lorsque toutes les portes de cadence sont exercees
+- l'entree reelle est reverifiee vide apres le test
+
+Integration :
+
+- le plan embarque le resume, la validation, les portes, les scenarios, les preuves et les garde-fous
+- l'action prioritaire devient `Collecter les observations en jeu 3.1.1`
+- le site affiche `Sessions 0/20`, `Completes 0`, `Couverture 0 %`, `Cadence en attente` et `Erreurs 0`
+- la suite complete passe avec `139` etapes et une parite stricte historique de `0`
+- la page, l'application, le plan, l'audit de frontiere et l'analyse runtime repondent en HTTP `200`
+- verification navigateur : action prioritaire visible, cinq metriques runtime visibles, `NaN 0`, erreurs console `0`
+
+Decision :
+
+Le pipeline est pret a recevoir les captures reelles. Les donnees synthetiques servent uniquement a tester le comportement de l'analyseur; elles ne doivent jamais etre copiees dans `inputs/current-runtime-cadence-observations.json` ni promouvoir un DPS.

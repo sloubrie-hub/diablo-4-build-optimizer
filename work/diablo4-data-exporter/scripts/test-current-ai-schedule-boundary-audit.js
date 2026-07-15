@@ -57,8 +57,9 @@ assertInvariant(report.scheduleGroups.every((group) => group.activeEntries === 0
 assertInvariant(report.runtimeObservationPlan.scenarios.length === 3, "observation plan should expose three scenarios");
 assertInvariant(report.runtimeObservationPlan.minimumTotalCasts === 20, "observation plan should require twenty casts");
 assertInvariant(report.safeguards.serverSideLocationIsInferenceNotFact === true, "server-side inference safeguard should remain active");
+assertInvariant(template.$schema === "https://local.diablo4-build-optimizer/schemas/runtime-cadence-observations.schema.json", "observation template should reference the canonical schema");
 assertInvariant(template.sessions.length === 0, "observation template should start empty");
-assertInvariant(template.eventSchema.eventKind.includes("attack-contact"), "observation template should support attack contact events");
+assertInvariant(Array.isArray(template.notes) && template.notes.length === 2, "observation template should retain real-data safeguards");
 
 console.log(JSON.stringify({
   status: "current-ai-schedule-boundary-audit-test-ok",

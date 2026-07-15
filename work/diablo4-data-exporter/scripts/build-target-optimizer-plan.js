@@ -89,6 +89,7 @@ const currentPowerSourceFreshnessAuditFile = "outputs/diablo4-current-power-sour
 const currentPowerFormulaGraphFile = "outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json";
 const currentPowerActivationGraphFile = "outputs/diablo4-current-power-activation-graph/current-power-activation-graph.json";
 const currentAiScheduleBoundaryAuditFile = "outputs/diablo4-current-ai-schedule-boundary-audit/current-ai-schedule-boundary-audit.json";
+const currentRuntimeCadenceAnalysisFile = "outputs/diablo4-current-runtime-cadence-analysis/current-runtime-cadence-analysis.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -351,18 +352,35 @@ function actionForGate(gateId, plan, context = {}) {
   const currentPowerFormulaGraph = context.currentPowerFormulaGraph;
   const currentPowerActivationGraph = context.currentPowerActivationGraph;
   const currentAiScheduleBoundaryAudit = context.currentAiScheduleBoundaryAudit;
+  const currentRuntimeCadenceAnalysis = context.currentRuntimeCadenceAnalysis;
+  const runtimeSummary = currentRuntimeCadenceAnalysis?.summary;
+  const runtimeActionTitle = currentRuntimeCadenceAnalysis
+    ? runtimeSummary?.totalSessions === 0
+      ? "Collecter les observations en jeu 3.1.1"
+      : runtimeSummary?.runtimeScheduleEvidenceReady === true
+        ? "Relier la cadence au modele DPS 3.1.1"
+        : "Completer les observations en jeu 3.1.1"
+    : null;
+  const runtimeNextStepId = runtimeSummary?.totalSessions === 0
+    ? "collect-runtime-cadence-observations"
+    : runtimeSummary?.runtimeScheduleEvidenceReady === true
+      ? "connect-runtime-cadence-to-damage-model"
+      : "complete-runtime-cadence-observations";
   const gateActions = {
     "current-source-model-fresh": {
       priority: "critical",
       focus: "asset:1663210",
-      title: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
+      title: runtimeActionTitle
+        ?? (currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
         ? "Mesurer la cadence en jeu 3.1.1"
         : currentPowerActivationGraph?.summary?.activationGraphPartial === true
         ? "Prouver la cadence des attaques 3.1.1"
         : currentPowerFormulaGraph?.summary?.graphReady === true
         ? "Relier les activations de degats 3.1.1"
-        : "Recalculer le modele depuis la source 3.1.1",
-      action: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
+        : "Recalculer le modele depuis la source 3.1.1"),
+      action: currentRuntimeCadenceAnalysis
+        ? runtimeSummary?.assessment?.nextAction
+        : currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
         ? "Collecter les sequences standard, Blast of Bile et deux etats stables de vitesse avec le protocole runtime avant de calculer le DPS strict."
         : currentPowerActivationGraph?.summary?.activationGraphPartial === true
         ? "Resoudre l'ordre et le nombre de repetitions de l'IA 1858249, puis appliquer la vitesse d'attaque avant de calculer le DPS strict."
@@ -370,7 +388,20 @@ function actionForGate(gateId, plan, context = {}) {
         ? "Relier les payloads et DOT aux evenements, nombres de touches et cadences avant de calculer le DPS strict."
         : "Reconstruire le graphe de formules actif puis recalculer le DPS strict avant tout classement.",
       expectedImpact: "Remplacer les valeurs historiques par un modele compatible avec la version locale actuelle.",
-      subPlan: currentAiScheduleBoundaryAudit
+      subPlan: currentRuntimeCadenceAnalysis
+        ? {
+            mode: currentRuntimeCadenceAnalysis.mode,
+            file: currentRuntimeCadenceAnalysisFile,
+            blockedSteps: runtimeSummary?.failedGates ?? null,
+            readySteps: runtimeSummary?.passedGates ?? null,
+            nextStepId: runtimeNextStepId,
+            nextStepTitle: runtimeSummary?.assessment?.nextAction ?? null,
+            assessment: runtimeSummary?.assessment?.kind ?? null,
+            sessions: runtimeSummary?.totalSessions ?? null,
+            completeSessions: runtimeSummary?.completeSessions ?? null,
+            collectionCoveragePct: runtimeSummary?.collectionCoveragePct ?? null,
+          }
+        : currentAiScheduleBoundaryAudit
         ? {
             mode: currentAiScheduleBoundaryAudit.mode,
             file: currentAiScheduleBoundaryAuditFile,
@@ -687,6 +718,7 @@ const currentPowerSourceFreshnessAudit = readOptionalJson(currentPowerSourceFres
 const currentPowerFormulaGraph = readOptionalJson(currentPowerFormulaGraphFile);
 const currentPowerActivationGraph = readOptionalJson(currentPowerActivationGraphFile);
 const currentAiScheduleBoundaryAudit = readOptionalJson(currentAiScheduleBoundaryAuditFile);
+const currentRuntimeCadenceAnalysis = readOptionalJson(currentRuntimeCadenceAnalysisFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -754,6 +786,7 @@ const actionQueue = buildActionQueue(recommendedStrictByClass, {
   currentPowerFormulaGraph,
   currentPowerActivationGraph,
   currentAiScheduleBoundaryAudit,
+  currentRuntimeCadenceAnalysis,
 });
 
 const report = {
@@ -847,6 +880,7 @@ const report = {
     currentPowerFormulaGraphFile: currentPowerFormulaGraph ? currentPowerFormulaGraphFile : null,
     currentPowerActivationGraphFile: currentPowerActivationGraph ? currentPowerActivationGraphFile : null,
     currentAiScheduleBoundaryAuditFile: currentAiScheduleBoundaryAudit ? currentAiScheduleBoundaryAuditFile : null,
+    currentRuntimeCadenceAnalysisFile: currentRuntimeCadenceAnalysis ? currentRuntimeCadenceAnalysisFile : null,
   },
   summary: {
     scoredEntities: scored.length,
@@ -873,7 +907,9 @@ const report = {
     activeActivationGraphPartial: currentPowerActivationGraph?.summary?.activationGraphPartial === true,
     activeAttributedDamageConsumers: currentPowerActivationGraph?.summary?.attributedDamageConsumers ?? null,
     activeUnattributedDamageConsumers: currentPowerActivationGraph?.summary?.unattributedDamageConsumers ?? null,
-    activeAiScheduleReady: currentPowerActivationGraph?.summary?.aiScheduleReady === true,
+    activeAiScheduleReady: currentRuntimeCadenceAnalysis
+      ? currentRuntimeCadenceAnalysis.summary?.aiScheduleReady === true
+      : currentPowerActivationGraph?.summary?.aiScheduleReady === true,
     activeActivationBlockers: currentPowerActivationGraph?.summary?.blockers?.length ?? null,
     activeAiClientBoundaryProven: currentAiScheduleBoundaryAudit?.summary?.clientSnoBoundaryProven === true,
     activeAiBehaviorPublished: currentAiScheduleBoundaryAudit
@@ -882,6 +918,12 @@ const report = {
     activeRuntimeObservationRequired: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true,
     activeRuntimeObservationPlanReady: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationPlanReady === true,
     activeRuntimeObservationsCollected: currentAiScheduleBoundaryAudit?.summary?.runtimeObservationsCollected ?? null,
+    activeRuntimeSessions: currentRuntimeCadenceAnalysis?.summary?.totalSessions ?? null,
+    activeRuntimeCompleteSessions: currentRuntimeCadenceAnalysis?.summary?.completeSessions ?? null,
+    activeRuntimeCoveragePct: currentRuntimeCadenceAnalysis?.summary?.collectionCoveragePct ?? null,
+    activeRuntimeValidationIssues: currentRuntimeCadenceAnalysis?.summary?.validationIssues ?? null,
+    activeRuntimeScheduleEvidenceReady: currentRuntimeCadenceAnalysis?.summary?.runtimeScheduleEvidenceReady === true,
+    activeAttackSpeedScalingMeasured: currentRuntimeCadenceAnalysis?.summary?.attackSpeedScalingMeasured === true,
     legacyDpsHistorical: currentPowerSourceFreshnessAudit?.summary?.legacyDpsHistorical === true,
     canUseForCurrentBuild: currentSourceModelFresh,
     recommendation: currentSourceModelFresh
@@ -890,6 +932,8 @@ const report = {
     promotionReady: false,
     nextAction: currentSourceModelFresh
       ? "Utiliser le meilleur build strict valide comme base de travail, puis debloquer slots et deltas conditionnels avant toute optimisation fiable."
+      : currentRuntimeCadenceAnalysis
+        ? currentRuntimeCadenceAnalysis.summary?.assessment?.nextAction
       : currentAiScheduleBoundaryAudit?.summary?.runtimeObservationRequired === true
         ? currentAiScheduleBoundaryAudit.summary.assessment?.nextAction
         : currentPowerActivationGraph?.summary?.activationGraphPartial === true
@@ -953,6 +997,18 @@ const report = {
         blockers: currentAiScheduleBoundaryAudit.blockers,
         evidence: currentAiScheduleBoundaryAudit.evidence,
         safeguards: currentAiScheduleBoundaryAudit.safeguards,
+      }
+    : null,
+  currentRuntimeCadenceAnalysis: currentRuntimeCadenceAnalysis
+    ? {
+        file: currentRuntimeCadenceAnalysisFile,
+        summary: currentRuntimeCadenceAnalysis.summary,
+        validation: currentRuntimeCadenceAnalysis.validation,
+        gates: currentRuntimeCadenceAnalysis.gates,
+        scenarioAnalysis: currentRuntimeCadenceAnalysis.scenarioAnalysis,
+        blockers: currentRuntimeCadenceAnalysis.blockers,
+        evidence: currentRuntimeCadenceAnalysis.evidence,
+        safeguards: currentRuntimeCadenceAnalysis.safeguards,
       }
     : null,
   deltaUnblockPlan: deltaUnblockPlan
