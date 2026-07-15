@@ -764,6 +764,8 @@ function renderTargetOptimizerPlan() {
   const current = plan.currentBuild ?? {};
   const recommendations = plan.recommendedStrictByClass ?? [];
   const readiness = current.readiness ?? {};
+  const sourceFreshness = plan.currentPowerSourceFreshnessAudit?.summary ?? {};
+  const currentModelReady = sourceFreshness.currentModelReady === true;
   byId("targetOptimizerPlan").innerHTML = `
     <div class="target-optimizer-grid">
       ${targetMetric("Entites scorees", summary.scoredEntities)}
@@ -775,19 +777,22 @@ function renderTargetOptimizerPlan() {
       ${targetMetric("Plans valides", summary.validStrictBuilds)}
       ${targetMetric("Fiables", summary.reliableStrictBuilds)}
       ${targetMetric("Actions", summary.actionQueueSize)}
+      ${targetMetric("Source locale", currentModelReady ? "actuelle" : "a recalculer")}
     </div>
     <div class="target-optimizer-gate-summary">
       ${(summary.reliabilityGateFailures ?? []).map((gate) => `<span>${gate}</span>`).join("") || `<span>Toutes les portes de fiabilite sont ouvertes.</span>`}
     </div>
     <div class="target-optimizer-current">
       <strong>Build courant ${current.assetIds?.join(" + ") || "n/a"}</strong>
-      <span>Strict ${formatNumber(current.strictDps)} - what-if ${formatNumber(current.whatIfDps)} - delta bloque +${formatNumber(current.candidateDelta)}</span>
+      <span>${currentModelReady ? "DPS courant" : "Reference historique"} : strict ${formatNumber(current.strictDps)} - what-if ${formatNumber(current.whatIfDps)} - delta +${formatNumber(current.candidateDelta)}</span>
       <span>Qualite ${current.quality?.level ?? "n/a"} ${current.quality?.score != null ? `${formatNumber(current.quality.score)}/100` : ""}</span>
       ${plan.bestValidStrictBuild ? `<span>Meilleur plan strict valide : ${plan.bestValidStrictBuild.class} - ${formatNumber(plan.bestValidStrictBuild.strictDps)} DPS strict</span>` : `<span>Aucun plan strict valide pour le moment.</span>`}
+      ${plan.bestHistoricalStrictBuild && !currentModelReady ? `<span>Meilleure reference historique : ${plan.bestHistoricalStrictBuild.class} - ${formatNumber(plan.bestHistoricalStrictBuild.strictDps)} DPS</span>` : ""}
       <span>${(readiness.nextMilestones ?? []).slice(0, 2).join(" - ")}</span>
     </div>
+    ${renderCurrentPowerSourceFreshness(plan.currentPowerSourceFreshnessAudit, plan.currentPowerFormulaGraph)}
     ${renderTargetOptimizerSuite(plan.targetOptimizerSuite)}
-    ${renderTargetBucketEnginePlan(plan.targetBucketEngine)}
+    ${renderTargetBucketEnginePlan(plan.targetBucketEngine, plan.currentPowerSourceFreshnessAudit)}
     ${renderBucketEngineContract(plan.bucketEngineContract)}
     ${renderWorkingBaseContract(plan.workingBaseContract)}
     ${renderDeltaPromotionConclusion(state.deltaPromotionConclusion ?? plan.deltaPromotionConclusion)}
@@ -873,6 +878,62 @@ function renderTargetOptimizerPlan() {
   `;
 }
 
+function renderCurrentPowerSourceFreshness(audit, formulaGraph) {
+  if (!audit) return "";
+  const summary = audit.summary ?? {};
+  const active = audit.activeBinary ?? {};
+  const legacy = audit.legacyBinary ?? {};
+  const formulas = audit.formulaSlots ?? {};
+  const usage = audit.formulaUsage ?? {};
+  const currentModelReady = summary.currentModelReady === true;
+  const graphSummary = formulaGraph?.summary ?? {};
+  const damageConsumers = formulaGraph?.damageConsumers ?? [];
+  return `
+    <div class="bonus-selector-proof current-power-source-freshness">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Source de calcul locale</strong>
+          <span>${summary.currentBuild ?? "version inconnue"} - asset ${summary.assetId ?? "n/a"}</span>
+        </div>
+        <div class="${currentModelReady ? "positive" : "blocked"}">
+          ${currentModelReady ? "modele actuel" : "recalcul requis"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Payload actif", `${formatNumber(active.size)} octets`)}
+        ${targetMetric("Ancien payload", `${formatNumber(legacy.size)} octets`)}
+        ${targetMetric("Source changee", summary.sourceChangedSinceLegacyModel ? "oui" : "non")}
+        ${targetMetric("Parite d4data", summary.activeMatchesReferenceSnapshot ? "oui" : "non")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>SF_27 ${formulas.SF_27 ?? "n/a"}</span>
+        <span>SF_32 ${formulas.SF_32 ?? "n/a"}</span>
+        <span>SF_33 ${formulas.SF_33 ?? "n/a"}</span>
+        <span>${usage.finding ?? "Usage des formules non determine."}</span>
+      </div>
+      ${formulaGraph ? `
+        <div class="bonus-selector-proof-metrics">
+          ${targetMetric("Formules actives", graphSummary.formulaNodes)}
+          ${targetMetric("Sources de degats", graphSummary.damageConsumers)}
+          ${targetMetric("Structures resolues", graphSummary.normalizedRankOneConsumers)}
+          ${targetMetric("Activation", graphSummary.activationGraphReady ? "reliee" : "a relier")}
+        </div>
+        <div class="current-formula-consumers">
+          ${damageConsumers.slice(0, 10).map((consumer) => `
+            <span><strong>${consumer.id}</strong> ${consumer.expression} - ${consumer.normalizedRankOne?.status ?? "n/a"}</span>
+          `).join("")}
+        </div>
+        <div class="target-bucket-class-gates">
+          ${(graphSummary.blockers ?? []).map((blocker) => `<span class="failed">${blocker}</span>`).join("")}
+        </div>
+      ` : ""}
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p><strong>Les valeurs 163 200 / 212 160 / +48 960 sont maintenant des references historiques.</strong></p>
+      <p>${graphSummary.assessment?.nextAction ?? summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
 function renderBucketEngineContract(contract) {
   if (!contract) return "";
   const summary = contract.summary ?? {};
@@ -946,6 +1007,7 @@ function renderWorkingBaseContract(contract) {
   const summary = contract.summary ?? {};
   const base = contract.workingBase ?? {};
   const policy = contract.reliableDpsPolicy ?? {};
+  const sourceModelFresh = summary.sourceModelFresh === true;
   return `
     <div class="bonus-selector-proof working-base-contract">
       <div class="bonus-selector-proof-head">
@@ -959,9 +1021,9 @@ function renderWorkingBaseContract(contract) {
       </div>
       <div class="bonus-selector-proof-metrics">
         ${targetMetric("Classe", summary.class ?? "n/a")}
-        ${targetMetric("Strict", formatNumber(summary.strictDps))}
-        ${targetMetric("Delta bloque", `+${formatNumber(summary.blockedDeltaDps)}`)}
-        ${targetMetric("What-if", formatNumber(summary.whatIfDps))}
+        ${targetMetric(sourceModelFresh ? "Strict" : "Strict historique", formatNumber(summary.strictDps))}
+        ${targetMetric(sourceModelFresh ? "Delta bloque" : "Delta historique", `+${formatNumber(summary.blockedDeltaDps)}`)}
+        ${targetMetric(sourceModelFresh ? "What-if" : "What-if historique", formatNumber(summary.whatIfDps))}
       </div>
       <div class="working-base-actions">
         <div>
@@ -4266,13 +4328,18 @@ function renderBonusSelectorFamily(family) {
   `;
 }
 
-function renderTargetBucketEnginePlan(bucketEngine) {
+function renderTargetBucketEnginePlan(bucketEngine, sourceFreshnessAudit) {
   if (!bucketEngine) return "";
   const summary = bucketEngine.summary ?? {};
   const buckets = bucketEngine.buckets ?? {};
   const gates = bucketEngine.gates ?? [];
   const classPlans = bucketEngine.classPlans ?? [];
   const bestStrictClassPlan = bucketEngine.bestStrictClassPlan ?? null;
+  const sourceSummary = sourceFreshnessAudit?.summary ?? {};
+  const auditedAssetId = Number(sourceSummary.assetId ?? 1663210);
+  const sourceModelReady = sourceSummary.currentModelReady === true;
+  const currentLoadablePlans = classPlans.filter((plan) => plan.canLoadAsWorkingBase === true
+    && (!(plan.assetIds ?? []).some((assetId) => Number(assetId) === auditedAssetId) || sourceModelReady));
   return `
     <div class="target-bucket-engine-plan">
       <div>
@@ -4287,9 +4354,9 @@ function renderTargetBucketEnginePlan(bucketEngine) {
       </div>
       <div class="target-bucket-class-summary">
         <span>Plans classe ${formatNumber(summary.classPlans)}</span>
-        <span>Chargeables ${formatNumber(summary.loadableClassPlans)}</span>
+        <span>Chargeables actuellement ${formatNumber(currentLoadablePlans.length)}</span>
         <span>Fiables ${formatNumber(summary.reliableClassPlans)}</span>
-        <span>Base ${bestStrictClassPlan ? `${bestStrictClassPlan.class} ${formatNumber(bestStrictClassPlan.reliableDps)}` : "aucune"}</span>
+        <span>${sourceModelReady ? "Base" : "Reference historique"} ${bestStrictClassPlan ? `${bestStrictClassPlan.class} ${formatNumber(bestStrictClassPlan.reliableDps)}` : "aucune"}</span>
       </div>
       <div class="target-bucket-breakdown">
         <span>Base ${formatNumber(buckets.strictBase)}</span>
@@ -4302,16 +4369,18 @@ function renderTargetBucketEnginePlan(bucketEngine) {
         ${gates.map((gate) => `<span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}</span>`).join("")}
       </div>
       <div class="target-bucket-class-plans">
-        ${classPlans.map(renderBucketClassPlan).join("")}
+        ${classPlans.map((plan) => renderBucketClassPlan(plan, { auditedAssetId, sourceModelReady })).join("")}
       </div>
     </div>
   `;
 }
 
-function renderBucketClassPlan(plan) {
+function renderBucketClassPlan(plan, sourceFreshness = {}) {
   const failed = plan.failedGateIds ?? [];
-  const loadable = plan.canLoadAsWorkingBase === true;
-  const reliable = plan.reliableOptimizerReady === true;
+  const sourceAuditApplies = (plan.assetIds ?? []).some((assetId) => Number(assetId) === Number(sourceFreshness.auditedAssetId));
+  const sourceModelFresh = !sourceAuditApplies || sourceFreshness.sourceModelReady === true;
+  const loadable = plan.canLoadAsWorkingBase === true && sourceModelFresh;
+  const reliable = plan.reliableOptimizerReady === true && sourceModelFresh;
   return `
     <article class="${loadable ? "loadable" : "blocked"}">
       <div>
@@ -4319,14 +4388,15 @@ function renderBucketClassPlan(plan) {
         <span>${plan.status}</span>
       </div>
       <div class="target-bucket-class-metrics">
-        <span>Strict ${formatNumber(plan.reliableDps)}</span>
+        <span>${sourceModelFresh ? "Strict" : "Strict historique"} ${formatNumber(plan.reliableDps)}</span>
         <span>Delta +${formatNumber(plan.blockedCandidateDelta)}</span>
         <span>Assets ${(plan.assetIds ?? []).join(", ")}</span>
       </div>
       <div class="target-bucket-class-gates">
+        ${sourceAuditApplies ? `<span class="${sourceModelFresh ? "passed" : "failed"}">current-source-model-fresh</span>` : ""}
         ${(plan.gates ?? []).map((gate) => `<span class="${gate.status === "passed" ? "passed" : "failed"}">${gate.id}</span>`).join("")}
       </div>
-      <p>${failed.length ? `Bloque: ${failed.join(", ")}` : "Toutes les portes classe sont ouvertes."}</p>
+      <p>${!sourceModelFresh ? "Bloque: source locale changee, recalcul requis" : failed.length ? `Bloque: ${failed.join(", ")}` : "Toutes les portes classe sont ouvertes."}</p>
       <button
         class="ghost-button target-bucket-class-apply"
         type="button"

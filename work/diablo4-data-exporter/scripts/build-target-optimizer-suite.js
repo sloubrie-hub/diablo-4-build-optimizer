@@ -7,6 +7,10 @@ const scriptDir = path.join(rootDir, "work", "diablo4-data-exporter", "scripts")
 const outDir = process.argv[2] ?? "outputs/diablo4-target-optimizer-suite";
 
 const generationSteps = [
+  "build-current-power-source-freshness-audit.js",
+  "test-current-power-source-freshness-audit.js",
+  "build-current-power-formula-graph.js",
+  "test-current-power-formula-graph.js",
   "build-target-bucket-engine.js",
   "build-fine-bucket-extraction-plan.js",
   "build-delta-promotion-conclusion.js",
@@ -231,14 +235,19 @@ const deltaPromotionImplementationDryRun = readJson("outputs/diablo4-delta-promo
 const deltaPromotionApplicationGate = readJson("outputs/diablo4-delta-promotion-application-gate/delta-promotion-application-gate.json");
 const deltaPromotionApplyPlan = readJson("outputs/diablo4-delta-promotion-apply-plan/delta-promotion-apply-plan.json");
 const userWhatIfContract = readJson("outputs/diablo4-user-whatif-contract/user-whatif-contract.json");
+const currentPowerSourceFreshnessAudit = readJson("outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json");
+const currentPowerFormulaGraph = readJson("outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json");
 
 assertInvariant(bucketEngine.summary.parityDelta === 0, "bucket strict parity must remain zero");
 assertInvariant(bucketEngine.summary.bestStrictClass === "spiritborn", "best strict class must remain spiritborn");
 assertInvariant(bucketEngine.summary.reliableClassPlans === 0, "no reliable class plan should be promoted yet");
 assertInvariant(workingBase.summary.class === "spiritborn", "working base must remain spiritborn");
-assertInvariant(workingBase.summary.strictDps === 163200, "working base strict DPS drifted");
-assertInvariant(workingBase.summary.blockedDeltaDps === 48960, "working base blocked delta drifted");
-assertInvariant(workingBase.summary.canLoadAsWorkingBase === true, "working base should be loadable");
+assertInvariant(workingBase.summary.strictDps === 163200, "historical working base strict DPS drifted");
+assertInvariant(workingBase.summary.blockedDeltaDps === 48960, "historical working base blocked delta drifted");
+assertInvariant(workingBase.summary.canLoadAsWorkingBase === false, "historical working base must not be loadable for the current build");
+assertInvariant(workingBase.summary.sourceModelFresh === false, "working base must expose stale source model");
+assertInvariant(workingBase.summary.currentStrictDps === null, "current strict DPS must remain unknown in the working base");
+assertInvariant(workingBase.summary.dpsScope === "historical-reference", "working base must be labelled historical");
 assertInvariant(workingBase.summary.reliableOptimizerReady === false, "working base should not be reliable yet");
 assertInvariant(reliableGates.summary.canUseForReliableDps === false, "blocked delta must not enter reliable DPS");
 assertInvariant(bucketEngineContract.summary.status === "bucket-engine-contract-ok", "bucket engine contract must pass");
@@ -508,6 +517,29 @@ assertInvariant(deltaPromotionApplyPlan.summary.promotionReady === false, "delta
 assertInvariant(userWhatIfContract.summary.canModifyReliableDps === false, "user what-if contract must not modify reliable DPS");
 assertInvariant(userWhatIfContract.summary.failedChecks === 0, "user what-if contract checks must pass");
 assertInvariant(userWhatIfContract.samples.find((sample) => sample.uptime === 0.5)?.configuredWhatIfDps === 187680, "user what-if 50pct sample drifted");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.currentBuild === "3.1.1.72836", "current source audit must target the local 3.1.1 build");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.sourceChangedSinceLegacyModel === true, "current source audit must detect the active payload change");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.activeMatchesReferenceSnapshot === true, "current source semantics must match the 3.1.0 d4data reference");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.legacyConditionalBranchActive === false, "legacy SF_32/SF_33 branch must be absent from the active formulas");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.currentModelReady === false, "current model must remain closed until recalculated");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.legacyDpsHistorical === true, "legacy DPS must be explicitly historical");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.canUseForCurrentBuild === false, "legacy DPS must not be usable for the current build");
+assertInvariant(currentPowerSourceFreshnessAudit.summary.canModifyReliableDps === false, "source freshness audit must not modify reliable DPS");
+assertInvariant(currentPowerSourceFreshnessAudit.failedChecks.length === 0, "current source freshness checks must pass");
+assertInvariant(currentPowerFormulaGraph.summary.currentBuild === "3.1.1.72836", "current formula graph must target the local 3.1.1 build");
+assertInvariant(currentPowerFormulaGraph.summary.formulaNodes === 49, "current formula graph must expose 49 formula slots");
+assertInvariant(currentPowerFormulaGraph.summary.payloadDamageConsumers === 6, "current formula graph must expose six payload consumers");
+assertInvariant(currentPowerFormulaGraph.summary.dotDamageConsumers === 4, "current formula graph must expose four DOT consumers");
+assertInvariant(currentPowerFormulaGraph.summary.damageConsumers === 10, "current formula graph must expose ten damage consumers");
+assertInvariant(currentPowerFormulaGraph.summary.normalizedRankOneConsumers === 8, "current formula graph must resolve eight rank-one structures");
+assertInvariant(currentPowerFormulaGraph.summary.unresolvedConsumers === 2, "current formula graph must keep two consumers unresolved");
+assertInvariant(currentPowerFormulaGraph.summary.buildStateSlots === 4, "current formula graph must expose four build-state slots");
+assertInvariant(currentPowerFormulaGraph.summary.connectedBuildStateSlots === 0, "current formula graph must not invent build-state damage links");
+assertInvariant(currentPowerFormulaGraph.summary.legacySf32Sf33DamageConsumers === 0, "active damage consumers must not depend on legacy SF_32/SF_33");
+assertInvariant(currentPowerFormulaGraph.summary.graphReady === true, "current formula graph must be structurally ready");
+assertInvariant(currentPowerFormulaGraph.summary.activationGraphReady === false, "activation graph must remain blocked");
+assertInvariant(currentPowerFormulaGraph.summary.currentStrictDpsKnown === false, "current formula graph must not invent strict DPS");
+assertInvariant(currentPowerFormulaGraph.summary.canModifyReliableDps === false, "current formula graph must not modify reliable DPS");
 
 const summary = {
   generatedAt: new Date().toISOString(),
@@ -517,8 +549,15 @@ const summary = {
   workingBaseClass: workingBase.summary.class,
   workingBaseStrictDps: workingBase.summary.strictDps,
   blockedDeltaDps: workingBase.summary.blockedDeltaDps,
+  legacyDpsHistorical: currentPowerSourceFreshnessAudit.summary.legacyDpsHistorical,
+  currentBuildVersion: currentPowerSourceFreshnessAudit.summary.currentBuild,
+  currentSourceModelFresh: currentPowerSourceFreshnessAudit.summary.currentModelReady,
+  canUseForCurrentBuild: currentPowerSourceFreshnessAudit.summary.canUseForCurrentBuild,
+  activeFormulaGraphReady: currentPowerFormulaGraph.summary.graphReady,
+  activeDamageConsumers: currentPowerFormulaGraph.summary.damageConsumers,
+  activeDpsBlockers: currentPowerFormulaGraph.summary.blockers.length,
   reliableStrictBuilds: 0,
-  nextGate: workingBase.summary.nextGate,
+  nextGate: "current-source-model-fresh",
 };
 
 const report = {
@@ -536,8 +575,23 @@ const report = {
     { id: "best-strict-class-spiritborn", status: "passed", value: bucketEngine.summary.bestStrictClass },
     { id: "no-reliable-class-plan", status: "passed", value: bucketEngine.summary.reliableClassPlans },
     { id: "working-base-spiritborn", status: "passed", value: workingBase.summary.class },
-    { id: "working-base-strict-163200", status: "passed", value: workingBase.summary.strictDps },
-    { id: "blocked-delta-48960", status: "passed", value: workingBase.summary.blockedDeltaDps },
+    { id: "legacy-working-base-strict-163200", status: "passed", value: workingBase.summary.strictDps },
+    { id: "legacy-blocked-delta-48960", status: "passed", value: workingBase.summary.blockedDeltaDps },
+    { id: "historical-working-base-not-loadable", status: "passed", value: workingBase.summary.canLoadAsWorkingBase },
+    { id: "working-base-source-model-stale", status: "passed", value: workingBase.summary.sourceModelFresh },
+    { id: "current-source-build-3.1.1", status: "passed", value: currentPowerSourceFreshnessAudit.summary.currentBuild },
+    { id: "current-source-payload-changed", status: "passed", value: currentPowerSourceFreshnessAudit.summary.sourceChangedSinceLegacyModel },
+    { id: "current-source-semantic-reference-match", status: "passed", value: currentPowerSourceFreshnessAudit.summary.activeMatchesReferenceSnapshot },
+    { id: "legacy-conditional-branch-absent", status: "passed", value: currentPowerSourceFreshnessAudit.summary.legacyConditionalBranchActive },
+    { id: "current-model-refresh-required", status: "passed", value: currentPowerSourceFreshnessAudit.summary.currentModelReady },
+    { id: "legacy-dps-historical", status: "passed", value: currentPowerSourceFreshnessAudit.summary.legacyDpsHistorical },
+    { id: "legacy-dps-not-current-build-ready", status: "passed", value: currentPowerSourceFreshnessAudit.summary.canUseForCurrentBuild },
+    { id: "active-formula-graph-ready", status: "passed", value: currentPowerFormulaGraph.summary.graphReady },
+    { id: "active-damage-consumers-10", status: "passed", value: currentPowerFormulaGraph.summary.damageConsumers },
+    { id: "active-normalized-consumers-8", status: "passed", value: currentPowerFormulaGraph.summary.normalizedRankOneConsumers },
+    { id: "active-sf32-sf33-consumers-zero", status: "passed", value: currentPowerFormulaGraph.summary.legacySf32Sf33DamageConsumers },
+    { id: "active-activation-graph-blocked", status: "passed", value: currentPowerFormulaGraph.summary.activationGraphReady },
+    { id: "active-strict-dps-unknown", status: "passed", value: currentPowerFormulaGraph.summary.currentStrictDpsKnown },
     { id: "blocked-delta-not-reliable", status: "passed", value: reliableGates.summary.canUseForReliableDps },
     { id: "bucket-engine-contract-ok", status: "passed", value: bucketEngineContract.summary.status },
     { id: "external-evidence-intake-safe", status: "passed", value: externalEvidenceIntake.summary.canModifyReliableDps },
@@ -871,6 +925,16 @@ assertInvariant(optimizerPlan.deltaPromotionImplementationDryRun?.summary?.canMo
 assertInvariant(optimizerPlan.deltaPromotionApplicationGate?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta promotion application gate");
 assertInvariant(optimizerPlan.deltaPromotionApplyPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta promotion apply plan");
 assertInvariant(optimizerPlan.userWhatIfContract?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe user what-if contract");
+assertInvariant(optimizerPlan.currentPowerSourceFreshnessAudit?.summary?.currentBuild === "3.1.1.72836", "optimizer plan must embed current source freshness audit");
+assertInvariant(optimizerPlan.currentPowerSourceFreshnessAudit?.summary?.currentModelReady === false, "optimizer plan must keep current model closed");
+assertInvariant(optimizerPlan.currentPowerFormulaGraph?.summary?.graphReady === true, "optimizer plan must embed active formula graph");
+assertInvariant(optimizerPlan.currentPowerFormulaGraph?.summary?.damageConsumers === 10, "optimizer plan must embed active damage consumers");
+assertInvariant(optimizerPlan.currentPowerFormulaGraph?.summary?.currentStrictDpsKnown === false, "optimizer plan must keep active strict DPS unknown");
+assertInvariant(optimizerPlan.summary.currentSourceModelFresh === false, "optimizer plan must expose stale current source model");
+assertInvariant(optimizerPlan.summary.canUseForCurrentBuild === false, "optimizer plan must reject legacy DPS for current build");
+assertInvariant(optimizerPlan.summary.topAction === "Relier les activations de degats 3.1.1", "active payload dispatch must be the top optimizer action");
+assertInvariant(optimizerPlan.recommendedStrictByClass
+  .find((row) => row.assetIds?.includes(1663210))?.optimizerDecision?.canLoadAsWorkingBase === false, "stale 1663210 plan must not load as a current working base");
 assertInvariant(optimizerPlan.summary.reliableStrictBuilds === 0, "no reliable strict build should exist yet");
 
 console.log(JSON.stringify({ outFile, summary }, null, 2));

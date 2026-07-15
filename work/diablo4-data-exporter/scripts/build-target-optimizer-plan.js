@@ -85,6 +85,8 @@ const reliableDpsGatesFile = "outputs/diablo4-reliable-dps-gates/reliable-dps-ga
 const workingBaseContractFile = "outputs/diablo4-working-base-contract/working-base-contract.json";
 const bucketEngineContractFile = "outputs/diablo4-bucket-engine-contract/bucket-engine-contract.json";
 const targetOptimizerSuiteFile = "outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json";
+const currentPowerSourceFreshnessAuditFile = "outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json";
+const currentPowerFormulaGraphFile = "outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json";
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -216,9 +218,11 @@ function buildConstraintIssues(className, entities, aspectSlots) {
   return issues;
 }
 
-function buildReliabilityGates({ className, entities, issues, blockedCandidateDelta, readiness, blockerSummary }) {
+function buildReliabilityGates({ className, entities, issues, blockedCandidateDelta, readiness, blockerSummary, currentSourceFreshness }) {
   const issueKinds = new Set(issues.map((issue) => issue.kind));
   const entityClasses = Array.from(new Set(entities.map((entity) => entity.class).filter(isKnownHeroClass)));
+  const auditedAssetId = Number(currentSourceFreshness?.summary?.assetId ?? 1663210);
+  const sourceAuditApplies = entities.some((entity) => Number(entity.assetId) === auditedAssetId);
   const gates = [
     {
       id: "hero-class-known",
@@ -251,6 +255,15 @@ function buildReliabilityGates({ className, entities, issues, blockedCandidateDe
       reason: (blockerSummary?.blocked ?? 0) === 0 ? "aucun blocage global actif" : `${blockerSummary?.blocked ?? 0} blocage(s) global(aux) actif(s)`,
     },
   ];
+  if (sourceAuditApplies) {
+    gates.unshift({
+      id: "current-source-model-fresh",
+      status: currentSourceFreshness?.summary?.currentModelReady === true ? "passed" : "failed",
+      reason: currentSourceFreshness?.summary?.currentModelReady === true
+        ? `modele recalcule pour ${currentSourceFreshness.summary.currentBuild}`
+        : `source ${currentSourceFreshness?.summary?.currentBuild ?? "courante"} changee; DPS historique a recalculer`,
+    });
+  }
   return {
     gates,
     passed: gates.filter((gate) => gate.status === "passed").length,
@@ -259,11 +272,14 @@ function buildReliabilityGates({ className, entities, issues, blockedCandidateDe
   };
 }
 
-function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
+function buildStrictPlan(row, aspectSlots, readiness, blockerSummary, currentSourceFreshness) {
   const entities = row.topStrictChoices;
   const issues = buildConstraintIssues(row.class, entities, aspectSlots);
   const blockedCandidateDelta = roundDps(row.blockedCandidateDelta);
   const strictConstraintValid = issues.length === 0;
+  const auditedAssetId = Number(currentSourceFreshness?.summary?.assetId ?? 1663210);
+  const sourceAuditApplies = entities.some((entity) => Number(entity.assetId) === auditedAssetId);
+  const sourceModelFresh = !sourceAuditApplies || currentSourceFreshness?.summary?.currentModelReady === true;
   const reliability = buildReliabilityGates({
     className: row.class,
     entities,
@@ -271,8 +287,10 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
     blockedCandidateDelta,
     readiness,
     blockerSummary,
+    currentSourceFreshness,
   });
   const reliableOptimizerReady = strictConstraintValid && reliability.failed === 0;
+  const canLoadAsWorkingBase = strictConstraintValid && sourceModelFresh;
   return {
     class: row.class,
     assetIds: entities.map((entity) => entity.assetId),
@@ -280,10 +298,16 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
     blockedCandidateDelta,
     reliableDps: roundDps(row.strictDps),
     whatIfDps: roundDps(row.strictDps + blockedCandidateDelta),
+    legacyStrictDps: roundDps(row.strictDps),
+    currentStrictDps: sourceModelFresh ? roundDps(row.strictDps) : null,
+    dpsScope: sourceModelFresh ? "current-source" : "historical-reference",
+    sourceModelFresh,
     strictConstraintValid,
     reliableOptimizerReady,
     status: !strictConstraintValid
       ? "blocked-by-constraints"
+      : !sourceModelFresh
+        ? "historical-source-refresh-required"
       : blockedCandidateDelta > 0
         ? "strict-valid-with-blocked-delta"
         : reliableOptimizerReady
@@ -294,7 +318,7 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
       reliableDps: roundDps(row.strictDps),
       rankingMode: "strict-only",
       canRankAsReliable: reliableOptimizerReady,
-      canLoadAsWorkingBase: strictConstraintValid,
+      canLoadAsWorkingBase,
       blockedWhatIfDelta: blockedCandidateDelta,
       nextGate: reliability.failedGateIds[0] ?? null,
     },
@@ -306,9 +330,11 @@ function buildStrictPlan(row, aspectSlots, readiness, blockerSummary) {
     },
     issues,
     topStrictChoices: entities,
-    note: blockedCandidateDelta
-      ? "Le build strict est evalue sans le delta bloque; le what-if reste explicatif."
-      : "Le build strict ne depend pas d'un candidat conditionnel bloque.",
+    note: !sourceModelFresh
+      ? "Les valeurs affichees sont historiques; la source active doit etre recalculee avant chargement ou classement."
+      : blockedCandidateDelta
+        ? "Le build strict est evalue sans le delta bloque; le what-if reste explicatif."
+        : "Le build strict ne depend pas d'un candidat conditionnel bloque.",
   };
 }
 
@@ -319,7 +345,41 @@ function actionForGate(gateId, plan, context = {}) {
   const fineBucketPlan = context.fineBucketExtractionPlan;
   const additiveBucketConclusion = context.additiveBucketSourceConclusion;
   const aspectSlotPlan = context.aspectSlotNextSourcePlan;
+  const currentSourceFreshness = context.currentSourceFreshness;
+  const currentPowerFormulaGraph = context.currentPowerFormulaGraph;
   const gateActions = {
+    "current-source-model-fresh": {
+      priority: "critical",
+      focus: "asset:1663210",
+      title: currentPowerFormulaGraph?.summary?.graphReady === true
+        ? "Relier les activations de degats 3.1.1"
+        : "Recalculer le modele depuis la source 3.1.1",
+      action: currentPowerFormulaGraph?.summary?.graphReady === true
+        ? "Relier les payloads et DOT aux evenements, nombres de touches et cadences avant de calculer le DPS strict."
+        : "Reconstruire le graphe de formules actif puis recalculer le DPS strict avant tout classement.",
+      expectedImpact: "Remplacer les valeurs historiques par un modele compatible avec la version locale actuelle.",
+      subPlan: currentPowerFormulaGraph
+        ? {
+            mode: currentPowerFormulaGraph.mode,
+            file: currentPowerFormulaGraphFile,
+            blockedSteps: currentPowerFormulaGraph.summary?.blockers?.length ?? null,
+            readySteps: currentPowerFormulaGraph.summary?.graphReady === true ? 1 : 0,
+            nextStepId: "map-active-payload-dispatch",
+            nextStepTitle: currentPowerFormulaGraph.summary?.assessment?.nextAction ?? null,
+            assessment: currentPowerFormulaGraph.summary?.assessment?.kind ?? null,
+          }
+        : currentSourceFreshness
+        ? {
+            mode: currentSourceFreshness.mode,
+            file: currentPowerSourceFreshnessAuditFile,
+            blockedSteps: 1,
+            readySteps: currentSourceFreshness.summary?.sourceEvidenceReady === true ? 1 : 0,
+            nextStepId: "rebuild-active-formula-graph",
+            nextStepTitle: currentSourceFreshness.summary?.assessment?.nextAction ?? null,
+            assessment: currentSourceFreshness.summary?.assessment?.kind ?? null,
+          }
+        : null,
+    },
     "blocked-delta-cleared": {
       priority: "high",
       focus: "asset:1663210",
@@ -468,7 +528,7 @@ function actionForGate(gateId, plan, context = {}) {
 }
 
 function priorityRank(priority) {
-  return { high: 3, medium: 2, low: 1 }[priority] ?? 0;
+  return { critical: 4, high: 3, medium: 2, low: 1 }[priority] ?? 0;
 }
 
 function buildActionQueue(plans, context = {}) {
@@ -591,6 +651,8 @@ const reliableDpsGates = readOptionalJson(reliableDpsGatesFile);
 const workingBaseContract = readOptionalJson(workingBaseContractFile);
 const bucketEngineContract = readOptionalJson(bucketEngineContractFile);
 const targetOptimizerSuite = readOptionalJson(targetOptimizerSuiteFile);
+const currentPowerSourceFreshnessAudit = readOptionalJson(currentPowerSourceFreshnessAuditFile);
+const currentPowerFormulaGraph = readOptionalJson(currentPowerFormulaGraphFile);
 const aspectSlots = slotReadinessByAsset(aspectSlotReadiness);
 const scored = allEntities(targetDataset)
   .map(scoreEntity)
@@ -606,6 +668,12 @@ const byClass = Array.from(groupBy(scored, (entity) => entity.class).entries())
     topStrictChoices: entities.slice(0, 5),
   }));
 
+const auditedAssetId = Number(currentPowerSourceFreshnessAudit?.summary?.assetId ?? 1663210);
+const sourceAuditAppliesToCurrentBuild = (composition.input?.assetIds ?? [])
+  .some((assetId) => Number(assetId) === auditedAssetId);
+const currentSourceModelFresh = !sourceAuditAppliesToCurrentBuild
+  || currentPowerSourceFreshnessAudit?.summary?.currentModelReady === true;
+
 const currentBuild = {
   assetIds: composition.input?.assetIds ?? [],
   strictDps: composition.totals?.strict ?? 0,
@@ -615,13 +683,31 @@ const currentBuild = {
   constraints: composition.constraints ?? null,
   readiness: composition.bucketEngine?.readiness ?? null,
   blockers: blockerResolution.summary ?? null,
+  sourceModelFresh: currentSourceModelFresh,
+  dpsScope: currentSourceModelFresh ? "current-source" : "historical-reference",
+  currentStrictDps: currentSourceModelFresh ? composition.totals?.strict ?? 0 : null,
+  currentWhatIfDps: currentSourceModelFresh ? composition.totals?.whatIf ?? 0 : null,
+  legacySnapshot: currentSourceModelFresh
+    ? null
+    : {
+        strictDps: composition.totals?.strict ?? 0,
+        whatIfDps: composition.totals?.whatIf ?? 0,
+        candidateDelta: composition.totals?.candidateDelta ?? 0,
+      },
 };
 
 const recommendedStrictByClass = byClass
   .filter((row) => isKnownHeroClass(row.class))
-  .map((row) => buildStrictPlan(row, aspectSlots, composition.bucketEngine?.readiness ?? null, blockerResolution.summary ?? null));
+  .map((row) => buildStrictPlan(
+    row,
+    aspectSlots,
+    composition.bucketEngine?.readiness ?? null,
+    blockerResolution.summary ?? null,
+    currentPowerSourceFreshnessAudit,
+  ));
 
-const validStrictBuilds = recommendedStrictByClass.filter((row) => row.strictConstraintValid);
+const historicalConstraintValidBuilds = recommendedStrictByClass.filter((row) => row.strictConstraintValid);
+const validStrictBuilds = recommendedStrictByClass.filter((row) => row.optimizerDecision?.canLoadAsWorkingBase === true);
 const reliableStrictBuilds = recommendedStrictByClass.filter((row) => row.reliableOptimizerReady);
 const actionQueue = buildActionQueue(recommendedStrictByClass, {
   blockerResolution,
@@ -630,6 +716,8 @@ const actionQueue = buildActionQueue(recommendedStrictByClass, {
   fineBucketExtractionPlan,
   additiveBucketSourceConclusion,
   aspectSlotNextSourcePlan,
+  currentSourceFreshness: currentPowerSourceFreshnessAudit,
+  currentPowerFormulaGraph,
 });
 
 const report = {
@@ -719,26 +807,71 @@ const report = {
     workingBaseContractFile: workingBaseContract ? workingBaseContractFile : null,
     bucketEngineContractFile: bucketEngineContract ? bucketEngineContractFile : null,
     targetOptimizerSuiteFile: targetOptimizerSuite ? targetOptimizerSuiteFile : null,
+    currentPowerSourceFreshnessAuditFile: currentPowerSourceFreshnessAudit ? currentPowerSourceFreshnessAuditFile : null,
+    currentPowerFormulaGraphFile: currentPowerFormulaGraph ? currentPowerFormulaGraphFile : null,
   },
   summary: {
     scoredEntities: scored.length,
     classes: byClass.length,
-    reliableOptimizerReady: targetBucketEngine?.summary?.reliableOptimizerReady === true || composition.bucketEngine?.readiness?.reliableOptimizerReady === true,
-    currentBuildValid: composition.constraints?.valid === true,
-    strictOnlyReady: targetBucketEngine?.summary?.strictOnlyReady === true || composition.bucketEngine?.readiness?.strictOnlyReady === true,
+    reliableOptimizerReady: currentSourceModelFresh && (targetBucketEngine?.summary?.reliableOptimizerReady === true || composition.bucketEngine?.readiness?.reliableOptimizerReady === true),
+    currentBuildValid: currentSourceModelFresh && composition.constraints?.valid === true,
+    structuralBuildValid: composition.constraints?.valid === true,
+    strictOnlyReady: currentSourceModelFresh && (targetBucketEngine?.summary?.strictOnlyReady === true || composition.bucketEngine?.readiness?.strictOnlyReady === true),
+    legacyStrictOnlyReady: targetBucketEngine?.summary?.strictOnlyReady === true || composition.bucketEngine?.readiness?.strictOnlyReady === true,
     fineBucketsReady: targetBucketEngine?.summary?.fineBucketsReady === true || composition.bucketEngine?.readiness?.fineBucketsReady === true,
     blockedCandidates: composition.totals?.blockedCandidates ?? 0,
     constrainedPlans: recommendedStrictByClass.length,
     validStrictBuilds: validStrictBuilds.length,
+    historicalConstraintValidBuilds: historicalConstraintValidBuilds.length,
     reliableStrictBuilds: reliableStrictBuilds.length,
     reliabilityGateFailures: Array.from(new Set(recommendedStrictByClass.flatMap((row) => row.reliability?.failedGateIds ?? []))).sort(),
     actionQueueSize: actionQueue.length,
     topAction: actionQueue[0]?.title ?? null,
-    recommendation: "strict-only-class-constrained-plan",
+    currentBuildVersion: currentPowerSourceFreshnessAudit?.summary?.currentBuild ?? null,
+    currentSourceModelFresh,
+    activeFormulaGraphReady: currentPowerFormulaGraph?.summary?.graphReady === true,
+    activeDamageConsumers: currentPowerFormulaGraph?.summary?.damageConsumers ?? null,
+    activeDpsBlockers: currentPowerFormulaGraph?.summary?.blockers?.length ?? null,
+    legacyDpsHistorical: currentPowerSourceFreshnessAudit?.summary?.legacyDpsHistorical === true,
+    canUseForCurrentBuild: currentSourceModelFresh,
+    recommendation: currentSourceModelFresh
+      ? "strict-only-class-constrained-plan"
+      : "historical-plan-source-refresh-required",
     promotionReady: false,
-    nextAction: "Utiliser le meilleur build strict valide comme base de travail, puis debloquer slots et deltas conditionnels avant toute optimisation fiable.",
+    nextAction: currentSourceModelFresh
+      ? "Utiliser le meilleur build strict valide comme base de travail, puis debloquer slots et deltas conditionnels avant toute optimisation fiable."
+      : currentPowerFormulaGraph?.summary?.graphReady === true
+        ? currentPowerFormulaGraph.summary.assessment?.nextAction
+        : "Recalculer le graphe de formules et le DPS strict depuis la source active avant de reprendre le classement.",
   },
   currentBuild,
+  currentPowerSourceFreshnessAudit: currentPowerSourceFreshnessAudit
+    ? {
+        file: currentPowerSourceFreshnessAuditFile,
+        summary: currentPowerSourceFreshnessAudit.summary,
+        activeBinary: currentPowerSourceFreshnessAudit.activeBinary,
+        legacyBinary: currentPowerSourceFreshnessAudit.legacyBinary,
+        semanticComparison: currentPowerSourceFreshnessAudit.semanticComparison,
+        formulaSlots: currentPowerSourceFreshnessAudit.formulaSlots,
+        formulaUsage: currentPowerSourceFreshnessAudit.formulaUsage,
+        legacyModelSnapshot: currentPowerSourceFreshnessAudit.legacyModelSnapshot,
+        currentModelValues: currentPowerSourceFreshnessAudit.currentModelValues,
+        checks: currentPowerSourceFreshnessAudit.checks,
+        safeguards: currentPowerSourceFreshnessAudit.safeguards,
+      }
+    : null,
+  currentPowerFormulaGraph: currentPowerFormulaGraph
+    ? {
+        file: currentPowerFormulaGraphFile,
+        summary: currentPowerFormulaGraph.summary,
+        buildStateSlots: currentPowerFormulaGraph.buildStateSlots,
+        damageConsumers: currentPowerFormulaGraph.damageConsumers,
+        normalizedRankOneConsumers: currentPowerFormulaGraph.normalizedRankOneConsumers,
+        unresolvedConsumers: currentPowerFormulaGraph.unresolvedConsumers,
+        blockers: currentPowerFormulaGraph.blockers,
+        safeguards: currentPowerFormulaGraph.safeguards,
+      }
+    : null,
   deltaUnblockPlan: deltaUnblockPlan
     ? {
         file: deltaUnblockPlanFile,
@@ -1495,6 +1628,8 @@ const report = {
   actionQueue,
   bestValidStrictBuild: validStrictBuilds
     .sort((a, b) => b.reliableDps - a.reliableDps || b.blockedCandidateDelta - a.blockedCandidateDelta)[0] ?? null,
+  bestHistoricalStrictBuild: historicalConstraintValidBuilds
+    .sort((a, b) => b.reliableDps - a.reliableDps || b.blockedCandidateDelta - a.blockedCandidateDelta)[0] ?? null,
   bestReliableStrictBuild: reliableStrictBuilds
     .sort((a, b) => b.reliableDps - a.reliableDps)[0] ?? null,
   safeguards: [
@@ -1502,6 +1637,7 @@ const report = {
     "Les deltas bloques restent visibles mais exclus du score fiable.",
     "Les builds mixtes de classes ne sont pas proposes comme optimisation valide.",
     "Les slots/conflits/uniques restent bloquants tant que leurs donnees ne sont pas normalisees.",
+    "Un changement du payload actif rend les DPS precedents historiques jusqu'au recalcul complet du modele.",
   ],
 };
 

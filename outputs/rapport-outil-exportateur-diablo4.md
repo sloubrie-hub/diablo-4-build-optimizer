@@ -13137,3 +13137,181 @@ Validation :
 Decision :
 
 Le pipeline de collecte est maintenant coherent et utilisable avec le contrat revise. Il n'existe encore aucune preuve reelle acceptee pour `SF_32`; le bridge reste ferme, `reliableDps` reste strict-only et le delta `48960` reste un candidat what-if bloque. La prochaine avancee utile doit venir d'une source qui relie explicitement l'ancre `994`, le role local `949` et `SF_32`.
+
+## Verification de la version locale et rupture du modele historique
+
+La version installee a ete reverifiee directement depuis les fichiers locaux. Cette verification change la priorite du projet : le payload historique de `1663210` est encore physiquement lisible, mais la ressource active referencee par CASC a change.
+
+Installation detectee :
+
+- version : `3.1.1.72836`
+- build : `72836_Win64Client_3_1_1`
+- build key : `496687621725871af9a5637063974fbd`
+- CDN key : `8ae9b8439e76684919791aedac88d204`
+- file index : `e5528be6ce0db61720498e8b214046b1`
+- patch file index : `9d7cc0a16f4448662e9e7a54e329533f`
+- manifest : `outputs/diablo4-current-install-scan-3.1.1/manifest.json`
+
+Extraction active :
+
+- chemin CASC : `base/meta/Power/Spiritborn_Centipede_Ultimate.pow`
+- sortie locale : `outputs/diablo4-current-casc-3.1.1/base/meta/Power/Spiritborn_Centipede_Ultimate.pow`
+- asset id : `1663210`
+- signature : `0xdeadbeef`
+- taille : `25200` octets
+- SHA256 : `3a9b518d692ec7da4f555e860c8a68dab956ca75a5de140d7dcd61a7a3277b54`
+
+Comparaison historique :
+
+- ancien payload : `outputs/diablo4-source-asset-1663210-payload/data.007.8265002.decoded.bin`
+- taille historique : `23808` octets
+- SHA256 historique : `b74e11467f25ed4b05ca741ca8e50916a80c80f5aadb2a401a1172cd65d7b1eb`
+- payload identique : `false`
+- delta de taille : `+1392` octets
+- premier octet different : offset `120`
+- dernier octet different : offset `25199`
+- octets differents observes : `8504`
+
+Correction d'interpretation :
+
+L'ancien BLTE a `data.007 / 8265002` se decode toujours et restitue exactement le payload historique. Cela prouve seulement que les donnees physiques residuelles sont encore presentes. La resolution par les index CASC actifs montre que la ressource utilisee par `3.1.1.72836` est le nouveau payload de `25200` octets.
+
+Parsing semantique :
+
+- reference : `https://github.com/DiabloTools/d4data`
+- snapshot de definitions : `3.1.0.72592`
+- commit local : `6de4d97763be573773bb2512c9439f3b73502a31`
+- type parse : `PowerDefinition`
+- asset parse : `1663210`
+- formules : `49`
+- hash semantique actif : `1847e3c3216136655b9cc88641d8099aeb1c659f6eb96c319a61425ad9a88128`
+- parite semantique avec le snapshot d4data : `true`, apres exclusion de `__fileName__`
+
+Slots actifs utiles :
+
+- `SF_27 = Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate`
+- `SF_32 = 0.2`
+- `SF_33 = Mod.Side2`
+- references actives a `SF_32` ou `SF_33` dans les autres formules : `0`
+
+Conclusion modele :
+
+- la branche historique `(SF_33 == 0) ? ... (1 + SF_32)` n'est plus active
+- le candidat historique `+30 %`, soit `48960`, n'est pas un candidat courant `3.1.1`
+- `strict 163200`, `what-if 212160` et `delta 48960` restent conserves comme cas de regression historique
+- le DPS strict courant est `null`
+- le what-if courant est `null`
+- le delta courant est `null`
+- aucune valeur historique ne peut etre chargee ou classee comme valeur courante
+
+Implementation ajoutee :
+
+- `work/diablo4-data-exporter/scripts/build-current-power-source-freshness-audit.js`
+- `work/diablo4-data-exporter/scripts/test-current-power-source-freshness-audit.js`
+- porte `current-source-model-fresh` dans `build-target-optimizer-plan.js`
+- propagation a `build-working-base-contract.js`
+- panneau `Source de calcul locale` dans `site/app.js`
+- styles d'alerte et action critique dans `site/styles.css`
+
+Validation :
+
+- audit reel : `sourceEvidenceReady true`
+- audit reel : `sourceChangedSinceLegacyModel true`
+- audit reel : `activeMatchesReferenceSnapshot true`
+- audit reel : `legacyConditionalBranchActive false`
+- audit reel : `currentModelReady false`
+- test audit : `current-power-source-freshness-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `131` etapes
+- base de travail historique : `canLoadAsWorkingBase false`
+- plan optimiseur : `canUseForCurrentBuild false`
+- action numero `1` : `Recalculer le modele depuis la source 3.1.1`
+- page, JavaScript et plan servis sur `http://127.0.0.1:4173` : HTTP `200`
+
+Decision :
+
+La recherche de promotion de l'ancien delta `48960` est suspendue comme axe courant. La suite prioritaire consiste a reconstruire le graphe de formules du payload actif `3.1.1`, identifier les composantes de degats encore consommees, puis recalculer le DPS strict avant de reprendre le moteur par buckets et le ranking.
+
+## Graphe actif des formules et consommateurs de degats
+
+Le payload parse `3.1.1` est maintenant converti en graphe read-only. Le graphe relie chaque formule `SF_*` a ses dependances, puis recense les champs de degats qui consomment ces formules dans `arPayloads` et `arBuffs[].tDOT`.
+
+Fichiers ajoutes ou modifies :
+
+- `work/diablo4-data-exporter/scripts/build-current-power-formula-graph.js`
+- `work/diablo4-data-exporter/scripts/test-current-power-formula-graph.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `site/styles.css`
+- `outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json`
+
+Resultat structurel :
+
+- asset : `1663210`
+- build : `3.1.1.72836`
+- formules : `49`
+- liens entre slots : `13`
+- consommateurs `arPayloads[].tDamage` : `6`
+- consommateurs `arBuffs[].tDOT.tDamage` : `4`
+- consommateurs totaux : `10`
+- consommateurs normalisables avec `Table(34/35, rang 1) = 1` : `8`
+- consommateurs non resolus : `2`
+- slots build-state : `4`
+- build-state directement relie a un consommateur : `0`
+- consommateurs dependant de `SF_32` ou `SF_33` : `0`
+
+Consommateurs payload detectes :
+
+- `payload:0` : `SF_2`
+- `payload:1` : `SF_13 * 4`
+- `payload:2` : `SF_42 * 4`
+- `payload:3` : `SF_18`
+- `payload:4` : `SF_26`, formule vide donc non resolue
+- `payload:5` : `SF_10`, dependance externe de duree poison donc non resolue
+
+Consommateurs DOT detectes :
+
+- `buff-dot:2` : `SF_1`
+- `buff-dot:3` : `SF_11`
+- `buff-dot:7` : `4`
+- `buff-dot:10` : `SF_38`
+
+Slots build-state detectes mais non relies par les expressions :
+
+- `SF_5 = Mod.SoilRuler_B`
+- `SF_33 = Mod.Side2`
+- `SF_35 = Mod.UpgradeC`
+- `SF_41 = Mod.UpgradeB`
+
+Cette absence de lien direct est importante : elle interdit d'inventer qu'un payload est actif ou inactif uniquement parce qu'un slot `Mod.*` est voisin. La liaison se trouve probablement dans le dispatch runtime ou dans une autre structure de la ressource.
+
+Blocages DPS actifs :
+
+- `payload-dispatch-activation-unmapped`
+- `hit-count-and-cadence-unmapped`
+- `dot-tick-rate-and-duration-unmapped`
+- `table-34-source-values-unproven`
+- `class-base-damage-scalar-semantics-unmapped`
+- `build-state-to-payload-bridge-unmapped`
+
+Garde-fous :
+
+- les valeurs normalisees de formules ne sont pas du DPS
+- aucun consommateur n'est somme sans preuve d'activation
+- aucun lien historique `SF_32/SF_33` n'est reporte dans le graphe actif
+- le DPS strict courant reste `null`
+- aucune ecriture du target dataset
+- `canModifyReliableDps false`
+
+Validation :
+
+- test : `current-power-formula-graph-test-ok`
+- graphe reel : `graphReady true`
+- activation : `activationGraphReady false`
+- plan optimiseur : `activeFormulaGraphReady true`, `activeDamageConsumers 10`, `activeDpsBlockers 6`
+- action numero `1` : `Relier les activations de degats 3.1.1`
+- suite optimiseur : `target-optimizer-suite-ok`, `133` etapes
+
+Decision :
+
+La prochaine etape est maintenant precise : retrouver dans la ressource active les chemins de dispatch qui declenchent les `payloadId 0/1/2/3/4/6` et les buffs DOT, puis etablir nombre de touches, cadence et duree. Ce n'est qu'apres cette liaison que les coefficients pourront etre sommes en DPS strict.

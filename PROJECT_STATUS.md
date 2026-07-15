@@ -1791,3 +1791,58 @@ Build de reference :
   - reliableDps modifiable : `false`
   - serveur local et sorties principales : HTTP `200`
   - decision : la collecte SF_32 peut utiliser le brouillon revise; la prochaine avancee exige une source qui explique reellement le role local `949`, sans promotion automatique du delta
+
+## Rupture de version locale 3.1.1 - 2026-07-15
+
+- installation locale rescanee : `3.1.1.72836`, build `72836_Win64Client_3_1_1`
+- manifest courant : `outputs/diablo4-current-install-scan-3.1.1/manifest.json`
+- extraction active realisee via les index CASC, et non via un ancien offset physique
+- ressource active : `base/meta/Power/Spiritborn_Centipede_Ultimate.pow`
+- payload actif `1663210` : `25200` octets, SHA256 `3a9b518d692ec7da4f555e860c8a68dab956ca75a5de140d7dcd61a7a3277b54`
+- payload historique encore present dans `data.007` : `23808` octets, SHA256 `b74e11467f25ed4b05ca741ca8e50916a80c80f5aadb2a401a1172cd65d7b1eb`
+- conclusion : l'ancien offset BLTE pointe vers un residu physique valide, mais plus vers la ressource active referencee par la build
+- payloads identiques : `false`; delta de taille : `+1392` octets
+- parsing actif realise avec les definitions `DiabloTools/d4data` `3.1.0.72592`
+- parite semantique avec le snapshot d4data : `true`, hors champ volatil `__fileName__`
+- commit d4data local : `6de4d97763be573773bb2512c9439f3b73502a31`
+- formules actives : `SF_27 = Bonus_Percent_Per_Power#Spiritborn_Centipede_Ultimate`, `SF_32 = 0.2`, `SF_33 = Mod.Side2`
+- aucune formule active ne reference `SF_32` ou `SF_33`
+- l'ancienne branche conditionnelle `SF_33 / SF_32` et son candidat `+30 %` ne sont donc plus courants
+- valeurs `163200`, `212160` et `48960` conservees comme reference historique uniquement
+- DPS strict courant, what-if courant et delta courant : `unknown` jusqu'au recalcul depuis la source active
+- audit ajoute : `work/diablo4-data-exporter/scripts/build-current-power-source-freshness-audit.js`
+- test ajoute : `work/diablo4-data-exporter/scripts/test-current-power-source-freshness-audit.js`
+- rapport genere : `outputs/diablo4-current-power-source-freshness-audit/current-power-source-freshness-audit.json`
+- nouvelle porte prioritaire : `current-source-model-fresh`
+- base historique `1663210` : `canLoadAsWorkingBase false`, `canUseForCurrentBuild false`
+- plan optimiseur : action numero `1` = recalculer le modele depuis la source `3.1.1`
+- site : panneau `Source de calcul locale`, libelles historiques et boutons de chargement bloques
+- suite optimiseur : `131` etapes, statut `target-optimizer-suite-ok`, parite stricte historique `0`
+- serveur local : page et plan optimiseur verifies en HTTP `200`
+
+Decision actuelle : interrompre la promotion de l'ancien delta `48960`. La prochaine etape utile est de reconstruire le graphe de formules du payload actif, puis de recalculer le DPS strict `3.1.1` avant de reprendre les buckets, le ranking ou les recherches `SF_32/SF_33` historiques.
+
+### Graphe de formules actif 3.1.1
+
+- script ajoute : `work/diablo4-data-exporter/scripts/build-current-power-formula-graph.js`
+- test ajoute : `work/diablo4-data-exporter/scripts/test-current-power-formula-graph.js`
+- rapport genere : `outputs/diablo4-current-power-formula-graph/current-power-formula-graph.json`
+- slots de formules : `49`
+- dependances `SF_*` : `13`
+- consommateurs de degats payload : `6`
+- consommateurs de degats DOT : `4`
+- consommateurs totaux : `10`
+- structures normalisees au rang `1` : `8`
+- consommateurs encore non resolus : `2`
+- slots build-state : `4` (`Mod.SoilRuler_B`, `Mod.Side2`, `Mod.UpgradeC`, `Mod.UpgradeB`)
+- slots build-state relies directement aux consommateurs : `0`
+- consommateurs actifs dependant de `SF_32` ou `SF_33` : `0`
+- graphe structurel : `ready true`
+- graphe d'activation : `ready false`
+- DPS strict courant : `unknown`
+- blocages courants : dispatch payload, nombre de touches/cadence, ticks/duree DOT, table `34`, semantique `eClassBaseDamageScalar`, liaison build-state/payload
+- site : le panneau source affiche les `10` consommateurs et les blocages actifs
+- suite optimiseur : `133` etapes, statut `target-optimizer-suite-ok`
+- action prioritaire : `Relier les activations de degats 3.1.1`
+
+Decision revisee : le graphe de formules est reconstruit. La prochaine etape n'est plus de rechercher l'ancien `SF_32`, mais de relier `payloadId`, buffs et DOT aux evenements reels, nombres de touches et cadences avant toute somme DPS.
