@@ -18,6 +18,9 @@ Utiliser ces instructions comme contexte permanent du Projet `Diablo IV Build Op
 - Preferer le dataset cible normalise au dataset prototype quand les deux existent.
 - Garder les candidats bloques visibles dans l'interface et dans les exports.
 - Documenter les limites du modele de calcul quand elles existent.
+- Ne jamais copier une fixture ou une session synthetique dans `inputs/current-runtime-cadence-observations.json`.
+- Pour toute observation runtime reelle, utiliser l'apercu de l'atelier avant l'enregistrement et conserver un `sourceFile` verifiable.
+- Tester les ecritures runtime uniquement sur des copies temporaires; ne pas remplir l'entree reelle pendant les tests automatises ou navigateur.
 
 ## Fichiers principaux
 
@@ -26,6 +29,10 @@ Utiliser ces instructions comme contexte permanent du Projet `Diablo IV Build Op
 - Schema cible : `work/diablo4-data-exporter/schema/target-dataset.schema.json`
 - Convertisseur cible : `work/diablo4-data-exporter/src/target-dataset-exporter.js`
 - Site : `site/index.html`, `site/app.js`, `site/styles.css`, `site/server.js`
+- Observations runtime : `inputs/current-runtime-cadence-observations.json`
+- Analyse runtime : `work/diablo4-data-exporter/src/runtime-cadence-analyzer.js`
+- Admission runtime : `work/diablo4-data-exporter/src/runtime-cadence-intake.js`
+- Atelier runtime : `site/runtime-capture.js`, `site/runtime-cadence-api.js`
 - Rapport : `outputs/rapport-outil-exportateur-diablo4.md`
 - Statut court : `PROJECT_STATUS.md`
 
@@ -73,4 +80,4 @@ Une preuve externe doit rester dans l'intake tant qu'elle n'est pas reliee expli
 
 ## Priorite actuelle
 
-Transformer le prototype de composition en moteur de calcul par buckets Diablo IV, en commencant par resoudre les blocages de `assetId 1663210`.
+Collecter les observations runtime reelles de `assetId 1663210` pour prouver l'ordre, les repetitions et la mise a l'echelle de vitesse, puis relier cette cadence au moteur de calcul par buckets sans promouvoir de DPS non prouve.

@@ -17,6 +17,8 @@ const generationSteps = [
   "test-current-ai-schedule-boundary-audit.js",
   "build-current-runtime-cadence-analysis.js",
   "test-current-runtime-cadence-analysis.js",
+  "test-runtime-cadence-intake.js",
+  "test-runtime-cadence-api.js",
   "build-target-bucket-engine.js",
   "build-fine-bucket-extraction-plan.js",
   "build-delta-promotion-conclusion.js",

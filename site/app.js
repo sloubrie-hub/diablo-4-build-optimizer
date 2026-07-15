@@ -326,6 +326,10 @@ async function boot() {
     });
     byId("exportBuild").addEventListener("click", exportBuildJson);
     byId("importBuild").addEventListener("click", importBuildJson);
+    window.addEventListener("runtime-cadence-saved", async () => {
+      await loadTargetOptimizerPlan();
+      renderTargetOptimizerPlan();
+    });
     document.addEventListener("click", handleGlobalClick);
     render();
   } catch (error) {

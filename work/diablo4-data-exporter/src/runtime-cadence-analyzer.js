@@ -37,11 +37,41 @@ function isObject(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+function validateKeys(value, allowedKeys, path, issues) {
+  if (!isObject(value)) return;
+  Object.keys(value).forEach((key) => {
+    if (!allowedKeys.has(key)) addIssue(issues, `${path}.${key}`, "additional-property", `Unexpected property: ${key}.`);
+  });
+}
+
+function validateStringArray(value, path, code, issues) {
+  if (!Array.isArray(value)) {
+    addIssue(issues, path, code, `${path} must be an array.`);
+    return;
+  }
+  value.forEach((item, index) => {
+    if (typeof item !== "string") addIssue(issues, `${path}[${index}]`, code, `${path} values must be strings.`);
+  });
+}
+
 function validateTopLevel(observations, boundaryAudit, issues) {
   if (!isObject(observations)) {
     addIssue(issues, "$", "input-not-object", "Observation input must be an object.");
     return;
   }
+  validateKeys(observations, new Set([
+    "$schema",
+    "schemaVersion",
+    "mode",
+    "currentBuild",
+    "assetId",
+    "actorSnoId",
+    "aiBehaviorSnoId",
+    "notes",
+    "sessions",
+  ]), "$", issues);
+  if (observations.$schema !== undefined && typeof observations.$schema !== "string") addIssue(issues, "$schema", "schema-reference-invalid", "$schema must be a string when present.");
+  if (observations.notes !== undefined) validateStringArray(observations.notes, "notes", "notes-invalid", issues);
   if (observations.schemaVersion !== 1) addIssue(issues, "schemaVersion", "schema-version-invalid", "schemaVersion must be 1.");
   if (observations.mode !== "runtime-cadence-observation-v1") addIssue(issues, "mode", "mode-invalid", "mode must be runtime-cadence-observation-v1.");
   if (observations.currentBuild !== boundaryAudit.summary?.currentBuild) addIssue(issues, "currentBuild", "build-mismatch", "Observation build must match the active AI boundary audit.");
@@ -69,6 +99,15 @@ function analyzeSession(session, index, context) {
   }
 
   const id = typeof session.id === "string" && session.id.trim() ? session.id.trim() : `invalid-${index}`;
+  validateKeys(session, new Set([
+    "id",
+    "scenarioId",
+    "sourceFile",
+    "captureFps",
+    "attackSpeedState",
+    "buildState",
+    "events",
+  ]), path, issues);
   if (id.startsWith("invalid-")) addIssue(issues, `${path}.id`, "session-id-invalid", "Session id must be a non-empty string.");
   if (seenIds.has(id)) addIssue(issues, `${path}.id`, "session-id-duplicate", `Duplicate session id: ${id}.`);
   seenIds.add(id);
@@ -81,16 +120,18 @@ function analyzeSession(session, index, context) {
   }
 
   const attackSpeedState = isObject(session.attackSpeedState) ? session.attackSpeedState : {};
+  validateKeys(attackSpeedState, new Set(["label", "attacksPerSecond", "modifiers"]), `${path}.attackSpeedState`, issues);
   if (typeof attackSpeedState.label !== "string" || !attackSpeedState.label.trim()) addIssue(issues, `${path}.attackSpeedState.label`, "speed-label-invalid", "Attack-speed state label is required.");
   if (attackSpeedState.attacksPerSecond !== null && (!Number.isFinite(attackSpeedState.attacksPerSecond) || attackSpeedState.attacksPerSecond <= 0)) {
     addIssue(issues, `${path}.attackSpeedState.attacksPerSecond`, "attacks-per-second-invalid", "attacksPerSecond must be positive or null.");
   }
-  if (!Array.isArray(attackSpeedState.modifiers)) addIssue(issues, `${path}.attackSpeedState.modifiers`, "speed-modifiers-invalid", "Attack-speed modifiers must be an array.");
+  validateStringArray(attackSpeedState.modifiers, `${path}.attackSpeedState.modifiers`, "speed-modifiers-invalid", issues);
 
   const buildState = isObject(session.buildState) ? session.buildState : {};
+  validateKeys(buildState, new Set(["blastOfBile", "attackSpeedStableWithinCast", "otherSkillModifiers"]), `${path}.buildState`, issues);
   if (typeof buildState.blastOfBile !== "boolean") addIssue(issues, `${path}.buildState.blastOfBile`, "blast-state-invalid", "blastOfBile must be boolean.");
   if (typeof buildState.attackSpeedStableWithinCast !== "boolean") addIssue(issues, `${path}.buildState.attackSpeedStableWithinCast`, "speed-stability-invalid", "attackSpeedStableWithinCast must be boolean.");
-  if (!Array.isArray(buildState.otherSkillModifiers)) addIssue(issues, `${path}.buildState.otherSkillModifiers`, "skill-modifiers-invalid", "otherSkillModifiers must be an array.");
+  validateStringArray(buildState.otherSkillModifiers, `${path}.buildState.otherSkillModifiers`, "skill-modifiers-invalid", issues);
 
   if (scenarioId === "baseline-sequence" && buildState.blastOfBile !== false) addIssue(issues, `${path}.buildState.blastOfBile`, "baseline-build-state-invalid", "Baseline scenario must disable Blast of Bile.");
   if (scenarioId === "blast-of-bile-single-breath" && buildState.blastOfBile !== true) addIssue(issues, `${path}.buildState.blastOfBile`, "blast-build-state-invalid", "Blast of Bile scenario must enable the modifier.");
@@ -111,15 +152,27 @@ function analyzeSession(session, index, context) {
       addIssue(issues, eventPath, "event-not-object", "Event must be an object.");
       return;
     }
+    validateKeys(event, new Set([
+      "observedAtSeconds",
+      "sourceFrame",
+      "eventKind",
+      "attackKind",
+      "damageInstanceCount",
+      "notes",
+    ]), eventPath, issues);
     const observedAtSeconds = event.observedAtSeconds;
     if (!Number.isFinite(observedAtSeconds) || observedAtSeconds < 0) addIssue(issues, `${eventPath}.observedAtSeconds`, "event-time-invalid", "Event time must be non-negative.");
     if (Number.isFinite(observedAtSeconds) && observedAtSeconds < previousTimestamp) addIssue(issues, `${eventPath}.observedAtSeconds`, "events-not-chronological", "Events must be ordered by time.");
     if (Number.isFinite(observedAtSeconds)) previousTimestamp = observedAtSeconds;
     if (!EVENT_KINDS.has(event.eventKind)) addIssue(issues, `${eventPath}.eventKind`, "event-kind-invalid", `Unknown event kind: ${event.eventKind}.`);
     if (!ATTACK_KINDS.has(event.attackKind)) addIssue(issues, `${eventPath}.attackKind`, "attack-kind-invalid", `Unknown attack kind: ${event.attackKind}.`);
+    if (event.sourceFrame !== undefined && event.sourceFrame !== null && (!Number.isInteger(event.sourceFrame) || event.sourceFrame < 0)) {
+      addIssue(issues, `${eventPath}.sourceFrame`, "source-frame-invalid", "sourceFrame must be a non-negative integer or null.");
+    }
     if (event.damageInstanceCount !== null && (!Number.isInteger(event.damageInstanceCount) || event.damageInstanceCount < 0)) {
       addIssue(issues, `${eventPath}.damageInstanceCount`, "damage-count-invalid", "damageInstanceCount must be a non-negative integer or null.");
     }
+    if (event.notes !== null && typeof event.notes !== "string") addIssue(issues, `${eventPath}.notes`, "event-notes-invalid", "Event notes must be a string or null.");
     if (event.eventKind === "attack-contact" && !["projectile", "breath"].includes(event.attackKind)) {
       addIssue(issues, `${eventPath}.attackKind`, "contact-attack-kind-required", "Attack contacts must identify projectile or breath.");
     }

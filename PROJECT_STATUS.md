@@ -1935,3 +1935,30 @@ Decision revisee : ne plus chercher un fichier `.aib` nomme dans les ressources 
 - navigateur : action prioritaire et cinq metriques runtime visibles, `NaN = 0`, erreurs console `0`
 
 Decision revisee : le pipeline de collecte et d'analyse est pret. La prochaine donnee utile est une observation runtime reelle; les fixtures synthetiques valident uniquement l'analyseur et ne constituent aucune preuve de gameplay ni de DPS.
+
+### Atelier d'admission des observations runtime
+
+- contrat manuel renforce : proprietes inconnues, tableaux mal types, frames et notes invalides rejetes
+- module d'admission : `work/diablo4-data-exporter/src/runtime-cadence-intake.js`
+- API locale : `site/runtime-cadence-api.js`
+- interface : `site/runtime-capture.js`
+- apercu : `POST /api/runtime-cadence/sessions/preview`, aucune ecriture
+- enregistrement : `POST /api/runtime-cadence/sessions`, uniquement apres nouvelle validation serveur
+- lecture de progression : `GET /api/runtime-cadence`
+- source de capture non vide obligatoire
+- marqueurs `synthetic` et `fixture` interdits dans une admission reelle
+- doublons refuses avec conflit HTTP `409`
+- JSON invalide, type de contenu incorrect et requete trop grande refuses
+- entree et analyse ecrites par remplacement atomique
+- plan optimiseur regenere apres un enregistrement reel
+- tests ajoutes : `test-runtime-cadence-intake.js` et `test-runtime-cadence-api.js`
+- test API : apercu sans ecriture, fixture refusee `422`, session temporaire enregistree, plan temporaire regenere, doublon et ecriture concurrente refuses `409`
+- atelier : identifiant, fichier source, scenario, FPS, vitesse, modificateurs et evenements horodates
+- bouton `Enregistrer` bloque tant que le brouillon courant n'a pas un apercu accepte
+- test navigateur : brouillon vide refuse, brouillon complet accepte en apercu, aucune sauvegarde declenchee
+- sessions reelles apres validation : `0 / 20`
+- suite optimiseur : `141` etapes, statut `target-optimizer-suite-ok`
+- HTTP : page, script d'atelier, API et plan servis en `200`
+- navigateur : `NaN = 0`, erreurs console `0`
+
+Decision revisee : la collecte ne necessite plus d'editer le JSON a la main. La prochaine etape factuelle est d'enregistrer une premiere capture reelle via l'atelier; aucune session d'essai ne doit etre sauvegardee pour simuler cette preuve.

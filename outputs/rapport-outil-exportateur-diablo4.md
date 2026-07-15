@@ -13554,3 +13554,58 @@ Integration :
 Decision :
 
 Le pipeline est pret a recevoir les captures reelles. Les donnees synthetiques servent uniquement a tester le comportement de l'analyseur; elles ne doivent jamais etre copiees dans `inputs/current-runtime-cadence-observations.json` ni promouvoir un DPS.
+
+## 2026-07-15 - Atelier d'admission runtime
+
+Protection de l'entree reelle :
+
+- validation manuelle alignee sur le schema strict
+- rejet des proprietes inconnues
+- rejet des tableaux, frames, notes et champs d'evenement invalides
+- `sourceFile` reel obligatoire pour l'admission
+- marqueurs `synthetic` et `fixture` rejetes
+- identifiants de session en doublon rejetes avec HTTP `409`
+- DPS strict et reliableDps toujours non modifiables par l'admission
+
+API locale :
+
+- module : `site/runtime-cadence-api.js`
+- `GET /api/runtime-cadence` : progression, scenarios et sessions actuelles
+- `POST /api/runtime-cadence/sessions/preview` : validation sans ecriture
+- `POST /api/runtime-cadence/sessions` : nouvelle validation, ecriture atomique et regeneration du plan
+- JSON obligatoire, limite de corps `1 MiB`, aucune autorisation CORS ajoutee
+- les ecritures concurrentes sont refusees
+
+Atelier du site :
+
+- script : `site/runtime-capture.js`
+- identifiant de session et fichier source
+- choix des trois scenarios
+- FPS, etat de vitesse, attaques par seconde et modificateurs
+- ajout, modification et suppression des evenements
+- secondes et frames source
+- classification projectile, souffle ou inconnue
+- nombre d'instances de degats et notes
+- bouton d'enregistrement desactive sans apercu accepte
+- toute modification du brouillon annule l'autorisation precedente
+- apres enregistrement, le plan optimiseur est recharge dans l'interface
+
+Tests :
+
+- `runtime-cadence-intake-test-ok`
+- `runtime-cadence-api-test-ok`
+- apercu valide : aucune ecriture
+- fixture API : HTTP `422`
+- session valide : enregistree uniquement dans une copie temporaire
+- regeneration du plan : executee et verifiee sur une sortie temporaire
+- doublon : HTTP `409`
+- tentative d'ecriture concurrente : HTTP `409`, verrou acquis avant la lecture du corps
+- entree reelle apres tous les tests : `0` session
+- suite complete : `141` etapes, `target-optimizer-suite-ok`
+- HTTP `200` : page, atelier, API et plan
+- navigateur : rejet visible du brouillon vide, apercu complet accepte, enregistrement non declenche
+- navigateur : `NaN 0`, erreurs console `0`
+
+Decision :
+
+L'outil peut maintenant recevoir une premiere capture reelle sans edition manuelle du JSON. Les tests et apercus ne constituent toujours aucune preuve runtime; seule une sauvegarde volontaire reliee a un fichier de capture reel fera progresser les compteurs.
