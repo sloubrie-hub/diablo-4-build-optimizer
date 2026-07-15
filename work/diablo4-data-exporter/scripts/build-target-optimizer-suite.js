@@ -107,6 +107,8 @@ const generationSteps = [
   "build-delta-promotion-apply-plan.js",
   "test-delta-promotion-apply-plan.js",
   "build-delta-local-exhaustion-conclusion.js",
+  "build-delta-next-action-decision.js",
+  "test-delta-next-action-decision.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -163,6 +165,7 @@ const deltaParentSystemsTuningContexts = readJson("outputs/diablo4-delta-parent-
 const deltaParentUndecodedSourcePlan = readJson("outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json");
 const deltaParentNontextTableSignals = readJson("outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json");
 const deltaLocalExhaustionConclusion = readJson("outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json");
+const deltaNextActionDecision = readJson("outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json");
 const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
 const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json");
@@ -283,6 +286,10 @@ assertInvariant(deltaLocalExhaustionConclusion.summary.canModifyReliableDps === 
 assertInvariant(deltaLocalExhaustionConclusion.summary.exactParentConsumerProven === false, "delta local exhaustion conclusion must not prove exact parent automatically");
 assertInvariant(deltaLocalExhaustionConclusion.summary.sf33LocalExhausted === true, "delta local exhaustion conclusion should close local SF_33 exploration");
 assertInvariant(deltaLocalExhaustionConclusion.summary.allLocalEvidenceExhausted === true, "delta local exhaustion conclusion should close all local delta evidence");
+assertInvariant(deltaNextActionDecision.summary.canModifyReliableDps === false, "delta next action decision must not modify reliable DPS");
+assertInvariant(deltaNextActionDecision.summary.recommendedActionId === "collect-source-backed-delta-proof", "delta next action should prioritize source-backed proof");
+assertInvariant(deltaNextActionDecision.summary.externalProofMissing === true, "delta next action should keep external proof missing in real run");
+assertInvariant(deltaNextActionDecision.rankedActions.length === 3, "delta next action decision must expose three actions");
 assertInvariant(sf32LocalExhaustionConclusion.summary.canModifyReliableDps === false, "SF_32 local exhaustion conclusion must not modify reliable DPS");
 assertInvariant(sf32LocalExhaustionConclusion.summary.fieldOwnershipProven === false, "SF_32 local exhaustion conclusion must not prove field ownership automatically");
 assertInvariant(sf32LocalExhaustionConclusion.summary.sf32LocalExhausted === true, "SF_32 local exhaustion conclusion should close local SF_32 exploration");
@@ -516,6 +523,10 @@ const report = {
     { id: "delta-local-sf33-exhausted", status: "passed", value: deltaLocalExhaustionConclusion.summary.sf33LocalExhausted },
     { id: "delta-local-all-exhausted", status: "passed", value: deltaLocalExhaustionConclusion.summary.allLocalEvidenceExhausted },
     { id: "delta-local-next-focus", status: "passed", value: deltaLocalExhaustionConclusion.summary.recommendedNextFocus },
+    { id: "delta-next-action-decision-safe", status: "passed", value: deltaNextActionDecision.summary.canModifyReliableDps },
+    { id: "delta-next-action-decision-priority", status: "passed", value: deltaNextActionDecision.summary.recommendedActionId },
+    { id: "delta-next-action-decision-external-missing", status: "passed", value: deltaNextActionDecision.summary.externalProofMissing },
+    { id: "delta-next-action-decision-actions", status: "passed", value: deltaNextActionDecision.summary.actions },
     { id: "sf32-local-exhaustion-safe", status: "passed", value: sf32LocalExhaustionConclusion.summary.canModifyReliableDps },
     { id: "sf32-local-field-not-proven", status: "passed", value: sf32LocalExhaustionConclusion.summary.fieldOwnershipProven },
     { id: "sf32-local-next-focus", status: "passed", value: sf32LocalExhaustionConclusion.summary.recommendedNextFocus },
@@ -676,6 +687,7 @@ assertInvariant(optimizerPlan.deltaParentSystemsTuningContexts?.summary?.canModi
 assertInvariant(optimizerPlan.deltaParentUndecodedSourcePlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent undecoded source plan");
 assertInvariant(optimizerPlan.deltaParentNontextTableSignals?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent nontext table signals");
 assertInvariant(optimizerPlan.deltaLocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta local exhaustion conclusion");
+assertInvariant(optimizerPlan.deltaNextActionDecision?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta next action decision");
 assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
 assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner parser bridge");

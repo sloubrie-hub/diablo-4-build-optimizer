@@ -1561,3 +1561,19 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Plan externe`
   - reliableDps modifiable : `false`
   - decision : documenter les etapes d'application explicite; aucune mutation sans confirmation humaine finale
+- decision prochaine action delta ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-next-action-decision.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-next-action-decision.js`
+  - rapport genere : `outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json`
+  - suite optimiseur : `105` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - preuves locales : epuisees pour `SF_32`, `SF_33` et uptime
+  - action #1 : `collect-source-backed-delta-proof`, priorite `high`
+  - action #2 : `probe-new-binary-family`, priorite `high`
+  - action #3 : `maintain-user-whatif-only`, priorite `medium`
+  - preuve externe manquante : `true`
+  - sonde famille binaire disponible : `true`
+  - what-if separe : `true`
+  - plan optimiseur et site : nouveau panneau `Decision delta`
+  - reliableDps modifiable : `false`
+  - decision : poursuivre par preuve externe source-backed en premier; sinon nouvelle famille binaire, avec what-if conserve hors ranking fiable

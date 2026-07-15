@@ -38,6 +38,7 @@ const deltaParentSystemsTuningContextsFile = "outputs/diablo4-delta-parent-syste
 const deltaParentUndecodedSourcePlanFile = "outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
 const deltaParentNontextTableSignalsFile = "outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const deltaLocalExhaustionConclusionFile = "outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
+const deltaNextActionDecisionFile = "outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json";
 const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const sf32OwnerParserBridgeFile = "outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
@@ -532,6 +533,7 @@ const deltaParentSystemsTuningContexts = readOptionalJson(deltaParentSystemsTuni
 const deltaParentUndecodedSourcePlan = readOptionalJson(deltaParentUndecodedSourcePlanFile);
 const deltaParentNontextTableSignals = readOptionalJson(deltaParentNontextTableSignalsFile);
 const deltaLocalExhaustionConclusion = readOptionalJson(deltaLocalExhaustionConclusionFile);
+const deltaNextActionDecision = readOptionalJson(deltaNextActionDecisionFile);
 const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclusionFile);
 const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
 const sf32OwnerParserBridge = readOptionalJson(sf32OwnerParserBridgeFile);
@@ -649,6 +651,7 @@ const report = {
     deltaParentUndecodedSourcePlanFile: deltaParentUndecodedSourcePlan ? deltaParentUndecodedSourcePlanFile : null,
     deltaParentNontextTableSignalsFile: deltaParentNontextTableSignals ? deltaParentNontextTableSignalsFile : null,
     deltaLocalExhaustionConclusionFile: deltaLocalExhaustionConclusion ? deltaLocalExhaustionConclusionFile : null,
+    deltaNextActionDecisionFile: deltaNextActionDecision ? deltaNextActionDecisionFile : null,
     sf32LocalExhaustionConclusionFile: sf32LocalExhaustionConclusion ? sf32LocalExhaustionConclusionFile : null,
     sf32OwnerSourcePacketFile: sf32OwnerSourcePacket ? sf32OwnerSourcePacketFile : null,
     sf32OwnerParserBridgeFile: sf32OwnerParserBridge ? sf32OwnerParserBridgeFile : null,
@@ -992,6 +995,15 @@ const report = {
         sf33Evidence: deltaLocalExhaustionConclusion.sf33Evidence,
         nextFocus: deltaLocalExhaustionConclusion.nextFocus,
         safeguards: deltaLocalExhaustionConclusion.safeguards,
+      }
+    : null,
+  deltaNextActionDecision: deltaNextActionDecision
+    ? {
+        file: deltaNextActionDecisionFile,
+        summary: deltaNextActionDecision.summary,
+        rankedActions: deltaNextActionDecision.rankedActions,
+        evidenceState: deltaNextActionDecision.evidenceState,
+        safeguards: deltaNextActionDecision.safeguards,
       }
     : null,
   sf32LocalExhaustionConclusion: sf32LocalExhaustionConclusion

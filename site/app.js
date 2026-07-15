@@ -31,6 +31,7 @@ const DELTA_PARENT_SYSTEMS_TUNING_CONTEXTS_URL = "../outputs/diablo4-delta-paren
 const DELTA_PARENT_UNDECODED_SOURCE_PLAN_URL = "../outputs/diablo4-delta-parent-undecoded-source-plan/delta-parent-undecoded-source-plan.json";
 const DELTA_PARENT_NONTEXT_TABLE_SIGNALS_URL = "../outputs/diablo4-delta-parent-nontext-table-signals/delta-parent-nontext-table-signals.json";
 const DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-delta-local-exhaustion-conclusion/delta-local-exhaustion-conclusion.json";
+const DELTA_NEXT_ACTION_DECISION_URL = "../outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json";
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
@@ -99,6 +100,7 @@ const state = {
   deltaParentUndecodedSourcePlan: null,
   deltaParentNontextTableSignals: null,
   deltaLocalExhaustionConclusion: null,
+  deltaNextActionDecision: null,
   sf32LocalExhaustionConclusion: null,
   sf32OwnerSourcePacket: null,
   sf32OwnerParserBridge: null,
@@ -202,6 +204,7 @@ async function boot() {
     await loadDeltaParentUndecodedSourcePlan();
     await loadDeltaParentNontextTableSignals();
     await loadDeltaLocalExhaustionConclusion();
+    await loadDeltaNextActionDecision();
     await loadSf32LocalExhaustionConclusion();
     await loadSf32OwnerSourcePacket();
     await loadSf32OwnerParserBridge();
@@ -531,6 +534,10 @@ async function loadDeltaLocalExhaustionConclusion() {
   state.deltaLocalExhaustionConclusion = await fetchOptionalJson(DELTA_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
 
+async function loadDeltaNextActionDecision() {
+  state.deltaNextActionDecision = await fetchOptionalJson(DELTA_NEXT_ACTION_DECISION_URL);
+}
+
 async function loadSf32LocalExhaustionConclusion() {
   state.sf32LocalExhaustionConclusion = await fetchOptionalJson(SF32_LOCAL_EXHAUSTION_CONCLUSION_URL);
 }
@@ -735,6 +742,7 @@ function renderTargetOptimizerPlan() {
     ${renderDeltaParentUndecodedSourcePlan(state.deltaParentUndecodedSourcePlan ?? plan.deltaParentUndecodedSourcePlan)}
     ${renderDeltaParentNontextTableSignals(state.deltaParentNontextTableSignals ?? plan.deltaParentNontextTableSignals)}
     ${renderDeltaLocalExhaustionConclusion(state.deltaLocalExhaustionConclusion ?? plan.deltaLocalExhaustionConclusion)}
+    ${renderDeltaNextActionDecision(state.deltaNextActionDecision ?? plan.deltaNextActionDecision)}
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
     ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
@@ -1413,6 +1421,49 @@ function renderDeltaLocalExhaustionConclusion(report) {
             <span>${item.priority ?? item.status ?? "audit"}</span>
             <strong>${item.id}</strong>
             <p>${item.nextAction ?? item.finding ?? item.reason ?? ""}</p>
+          </article>
+        `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderDeltaNextActionDecision(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const actions = report.rankedActions ?? [];
+  return `
+    <div class="bonus-selector-proof delta-next-action-decision">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Decision delta</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.promotionReady ? "positive" : "blocked"}">
+          ${summary.promotionReady ? "pret" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Action", summary.recommendedActionId ?? "n/a")}
+        ${targetMetric("Priorite", summary.recommendedPriority ?? "n/a")}
+        ${targetMetric("Actions", summary.actions)}
+        ${targetMetric("Delta", summary.blockedDeltaDps)}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Preuve externe ${summary.externalProofMissing ? "manquante" : "presente"}</span>
+        <span>Famille binaire ${summary.binaryProbeAvailable ? "sonde" : "absente"}</span>
+        <span>What-if ${summary.whatIfSeparated ? "separe" : "a cadrer"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${actions.map((action) => `
+          <article>
+            <span>#${action.rank} ${action.priority} - ${action.readiness}</span>
+            <strong>${action.title}</strong>
+            <p>${action.nextStep}</p>
+            <em>${action.id}</em>
           </article>
         `).join("")}
       </div>

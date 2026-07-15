@@ -12316,3 +12316,48 @@ Validation :
 Decision :
 
 Le plan externe ne modifie pas `target-dataset.json`. Il rend l'application future auditable, mais la branche reelle reste bloquee tant que `manualApplyAllowed` est faux. Aucune valeur conditionnelle n'est promue dans `reliableDps`.
+
+## Decision prochaine action delta
+
+Un rapport de decision a ete ajoute pour eviter de prolonger les audits locaux redondants sur le delta `1663210`. Il consolide la conclusion locale, la roadmap de preuves, le plan d'application externe, la famille binaire candidate et le contrat what-if utilisateur.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-delta-next-action-decision.js`
+- `work/diablo4-data-exporter/scripts/test-delta-next-action-decision.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- preuves locales epuisees : `true`
+- preuve externe manquante : `true`
+- sonde famille binaire disponible : `true`
+- what-if separe : `true`
+- action recommandee : `collect-source-backed-delta-proof`
+- priorite : `high`
+- actions classees : `3`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `105` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour la decision delta, le test, la suite, le plan optimiseur et le site
+- test decision delta : `delta-next-action-decision-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `105` etapes
+- plan optimiseur : section `deltaNextActionDecision` presente
+- site : nouveau panneau `Decision delta`
+
+Decision :
+
+La prochaine action prioritaire est de collecter une preuve externe source-backed pour le delta, en commencant par `delta-proof-sf32-owner`. Si cette piste ne peut pas etre alimentee, la deuxieme action utile est une nouvelle famille binaire source-backed. Le scenario utilisateur what-if reste conserve, mais hors `reliableDps` et hors ranking fiable.
