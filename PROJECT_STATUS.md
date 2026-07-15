@@ -1733,3 +1733,16 @@ Build de reference :
   - reliableDps modifiable : `false`
   - plan optimiseur et site : nouveau panneau `Parser selector-asset`
   - decision : sortie structurelle exploitable avec `selector`, `assetRef`, `layoutId`, payload fields et `evidence`; prochaine etape = lecture binaire bas niveau ou preuve source-backed avant bridge
+- verification binaire `selector-asset-record` ajoutee
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-selector-asset-record-binary-verification.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-selector-asset-record-binary-verification.js`
+  - rapport genere : `outputs/diablo4-selector-asset-record-binary-verification/selector-asset-record-binary-verification.json`
+  - suite optimiseur : `125` etapes, statut `target-optimizer-suite-ok`
+  - records verifies : `5 / 5`
+  - record cible `1663210` verifie : `true`
+  - valeurs binaires cible : selector `949`, assetRef `1663210`, metadataId `12337`, opcode `6`, scale float `10`
+  - invariants echoues : `0`
+  - bridge semantique : `false`
+  - reliableDps modifiable : `false`
+  - plan optimiseur et site : nouveau panneau `Verification binaire selector-asset`
+  - decision : preuve structurelle binaire confirmee aux offsets connus; ne prouve toujours pas `SF_32`, `SF_33` ni uptime

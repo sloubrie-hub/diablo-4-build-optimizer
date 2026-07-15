@@ -29,6 +29,8 @@ const generationSteps = [
   "test-d4data-parser-reference-audit.js",
   "build-selector-asset-record-parser.js",
   "test-selector-asset-record-parser.js",
+  "build-selector-asset-record-binary-verification.js",
+  "test-selector-asset-record-binary-verification.js",
   "build-selector-949-reconciliation-audit.js",
   "test-selector-949-reconciliation-audit.js",
   "build-selector-949-window-reparse-audit.js",
@@ -191,6 +193,7 @@ const diabloToolsAttributeSourceAudit = readJson("outputs/diablo4-diablo-tools-a
 const communitySourceTriageAudit = readJson("outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json");
 const d4dataParserReferenceAudit = readJson("outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json");
 const selectorAssetRecordParser = readJson("outputs/diablo4-selector-asset-record-parser/selector-asset-record-parser.json");
+const selectorAssetRecordBinaryVerification = readJson("outputs/diablo4-selector-asset-record-binary-verification/selector-asset-record-binary-verification.json");
 const selector949ReconciliationAudit = readJson("outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json");
 const selector949WindowReparseAudit = readJson("outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json");
 const local949RoleDecodeAudit = readJson("outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json");
@@ -346,6 +349,10 @@ assertInvariant(selectorAssetRecordParser.summary.canModifyReliableDps === false
 assertInvariant(selectorAssetRecordParser.summary.readOnlyParserReady === true, "selector asset record parser must be read-only ready");
 assertInvariant(selectorAssetRecordParser.summary.targetRecords === 1, "selector asset record parser must emit one target record");
 assertInvariant(selectorAssetRecordParser.summary.semanticBridgeReady === false, "selector asset record parser must not open semantic bridge");
+assertInvariant(selectorAssetRecordBinaryVerification.summary.canModifyReliableDps === false, "selector asset record binary verification must not modify reliable DPS");
+assertInvariant(selectorAssetRecordBinaryVerification.summary.binaryVerificationReady === true, "selector asset record binary verification must be ready");
+assertInvariant(selectorAssetRecordBinaryVerification.summary.targetBinaryVerified === true, "selector asset record binary verification must verify target record");
+assertInvariant(selectorAssetRecordBinaryVerification.summary.semanticBridgeReady === false, "selector asset record binary verification must not open semantic bridge");
 assertInvariant(selector949ReconciliationAudit.summary.canModifyReliableDps === false, "selector 949 reconciliation must not modify reliable DPS");
 assertInvariant(selector949ReconciliationAudit.summary.selector994Aligned === true, "selector 949 reconciliation must align selector 994");
 assertInvariant(selector949ReconciliationAudit.summary.selector949Contradicted === true, "selector 949 reconciliation must flag 949 contradiction");
@@ -622,6 +629,10 @@ const report = {
     { id: "selector-asset-record-parser-ready", status: "passed", value: selectorAssetRecordParser.summary.readOnlyParserReady },
     { id: "selector-asset-record-parser-target", status: "passed", value: selectorAssetRecordParser.summary.targetRecords },
     { id: "selector-asset-record-parser-bridge", status: "passed", value: selectorAssetRecordParser.summary.semanticBridgeReady },
+    { id: "selector-asset-record-binary-safe", status: "passed", value: selectorAssetRecordBinaryVerification.summary.canModifyReliableDps },
+    { id: "selector-asset-record-binary-ready", status: "passed", value: selectorAssetRecordBinaryVerification.summary.binaryVerificationReady },
+    { id: "selector-asset-record-binary-target", status: "passed", value: selectorAssetRecordBinaryVerification.summary.targetBinaryVerified },
+    { id: "selector-asset-record-binary-bridge", status: "passed", value: selectorAssetRecordBinaryVerification.summary.semanticBridgeReady },
     { id: "selector-949-reconciliation-safe", status: "passed", value: selector949ReconciliationAudit.summary.canModifyReliableDps },
     { id: "selector-949-reconciliation-994-aligned", status: "passed", value: selector949ReconciliationAudit.summary.selector994Aligned },
     { id: "selector-949-reconciliation-949-conflict", status: "passed", value: selector949ReconciliationAudit.summary.selector949Contradicted },
@@ -800,6 +811,7 @@ assertInvariant(optimizerPlan.diabloToolsAttributeSourceAudit?.summary?.canModif
 assertInvariant(optimizerPlan.communitySourceTriageAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe community source triage audit");
 assertInvariant(optimizerPlan.d4dataParserReferenceAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe d4data parser reference audit");
 assertInvariant(optimizerPlan.selectorAssetRecordParser?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector asset record parser");
+assertInvariant(optimizerPlan.selectorAssetRecordBinaryVerification?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector asset record binary verification");
 assertInvariant(optimizerPlan.selector949ReconciliationAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 reconciliation audit");
 assertInvariant(optimizerPlan.selector949WindowReparseAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 window reparse audit");
 assertInvariant(optimizerPlan.local949RoleDecodeAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe local 949 role decode audit");

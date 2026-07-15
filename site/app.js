@@ -39,6 +39,7 @@ const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools
 const COMMUNITY_SOURCE_TRIAGE_AUDIT_URL = "../outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const D4DATA_PARSER_REFERENCE_AUDIT_URL = "../outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
 const SELECTOR_ASSET_RECORD_PARSER_URL = "../outputs/diablo4-selector-asset-record-parser/selector-asset-record-parser.json";
+const SELECTOR_ASSET_RECORD_BINARY_VERIFICATION_URL = "../outputs/diablo4-selector-asset-record-binary-verification/selector-asset-record-binary-verification.json";
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const LOCAL_949_ROLE_DECODE_AUDIT_URL = "../outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -117,6 +118,7 @@ const state = {
   communitySourceTriageAudit: null,
   d4dataParserReferenceAudit: null,
   selectorAssetRecordParser: null,
+  selectorAssetRecordBinaryVerification: null,
   selector949ReconciliationAudit: null,
   selector949WindowReparseAudit: null,
   local949RoleDecodeAudit: null,
@@ -230,6 +232,7 @@ async function boot() {
     await loadCommunitySourceTriageAudit();
     await loadD4dataParserReferenceAudit();
     await loadSelectorAssetRecordParser();
+    await loadSelectorAssetRecordBinaryVerification();
     await loadSelector949ReconciliationAudit();
     await loadSelector949WindowReparseAudit();
     await loadLocal949RoleDecodeAudit();
@@ -593,6 +596,10 @@ async function loadSelectorAssetRecordParser() {
   state.selectorAssetRecordParser = await fetchOptionalJson(SELECTOR_ASSET_RECORD_PARSER_URL);
 }
 
+async function loadSelectorAssetRecordBinaryVerification() {
+  state.selectorAssetRecordBinaryVerification = await fetchOptionalJson(SELECTOR_ASSET_RECORD_BINARY_VERIFICATION_URL);
+}
+
 async function loadSelector949ReconciliationAudit() {
   state.selector949ReconciliationAudit = await fetchOptionalJson(SELECTOR_949_RECONCILIATION_AUDIT_URL);
 }
@@ -813,6 +820,7 @@ function renderTargetOptimizerPlan() {
     ${renderCommunitySourceTriageAudit(state.communitySourceTriageAudit ?? plan.communitySourceTriageAudit)}
     ${renderD4dataParserReferenceAudit(state.d4dataParserReferenceAudit ?? plan.d4dataParserReferenceAudit)}
     ${renderSelectorAssetRecordParser(state.selectorAssetRecordParser ?? plan.selectorAssetRecordParser)}
+    ${renderSelectorAssetRecordBinaryVerification(state.selectorAssetRecordBinaryVerification ?? plan.selectorAssetRecordBinaryVerification)}
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
     ${renderLocal949RoleDecodeAudit(state.local949RoleDecodeAudit ?? plan.local949RoleDecodeAudit)}
@@ -1871,6 +1879,48 @@ function renderSelectorAssetRecordParser(report) {
       </div>
       <div class="suite-invariant-list">
         ${(report.skippedGroups ?? []).map((item) => `<span class="neutral">${item.reason}: ${item.selector}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSelectorAssetRecordBinaryVerification(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const verifications = report.verifications ?? [];
+  const target = verifications.find((record) => Number(record.assetRef) === 1663210 && Number(record.selector) === 949);
+  const targetFields = target?.fields ?? [];
+  return `
+    <div class="bonus-selector-proof selector-asset-record-binary-verification">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Verification binaire selector-asset</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.binaryVerificationReady ? "positive" : "blocked"}">
+          ${summary.binaryVerificationReady ? "binaire confirme" : "bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Records", summary.records ?? 0)}
+        ${targetMetric("Confirmes", summary.binaryVerifiedRecords ?? 0)}
+        ${targetMetric("Cible", summary.targetBinaryVerified ? "oui" : "non")}
+        ${targetMetric("Scale", summary.targetScaleF32 ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Selector ${summary.targetSelectorU32 ?? "n/a"}</span>
+        <span>Asset ${summary.targetAssetRefU32 ?? "n/a"}</span>
+        <span>Metadata ${summary.targetMetadataIdU32 ?? "n/a"}</span>
+        <span>Opcode ${summary.targetOpcodeU32 ?? "n/a"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${targetFields.map((field) => `
+          <span class="${field.match === true || field.match === "not-applicable" ? "passed" : "failed"}">
+            +${field.offset} ${field.role}: ${field.read?.preferredValueKind === "f32" ? field.read?.f32 : field.read?.u32}
+          </span>
+        `).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

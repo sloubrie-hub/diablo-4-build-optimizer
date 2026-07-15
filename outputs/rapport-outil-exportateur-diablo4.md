@@ -12910,3 +12910,57 @@ Validation :
 Decision :
 
 La sortie est maintenant exploitable pour inspecter les records `selector -> asset` sans rien promouvoir. Le payload `949` de `1663210` reste non resolu; `metadataId=12337`, `opcode=6` et `scale=10` sont des champs structurels, pas une preuve `SF_32`. La prochaine etape doit soit brancher une lecture binaire bas niveau sur ces offsets, soit fournir une preuve source-backed pour `SF_32`, `SF_33` et l'uptime avant tout bridge DPS.
+
+## Verification binaire selector-asset-record
+
+Une verification binaire read-only a ete ajoutee pour confirmer les records emis par le parser `selector-asset-record` directement dans les fichiers `.decoded.bin` aux offsets connus.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-selector-asset-record-binary-verification.js`
+- `work/diablo4-data-exporter/scripts/test-selector-asset-record-binary-verification.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-selector-asset-record-binary-verification/selector-asset-record-binary-verification.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- parser root : `selector-asset-record`
+- cible : `asset 1663210`, `skill:1663210`
+- records inspectes : `5`
+- records verifies binaire : `5`
+- verifications echouees : `0`
+- record cible verifie : `true`
+- selector cible lu en `u32` : `949`
+- assetRef cible lu en `u32` : `1663210`
+- metadataId cible lu en `u32` : `12337`
+- opcode cible lu en `u32` : `6`
+- scale cible lue en `f32` : `10`
+- invariants echoues : `0`
+- verification binaire prete : `true`
+- `semanticBridgeReady false`
+- `acceptedForBridge false`
+- `writesTargetDataset false`
+- `writesRealIntake false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `125` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test verification binaire : `selector-asset-record-binary-verification-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `125` etapes
+- plan optimiseur : section `selectorAssetRecordBinaryVerification` presente
+- site : nouveau panneau `Verification binaire selector-asset`
+
+Decision :
+
+La lecture binaire confirme la structure du record cible a l'offset `19012` dans `outputs\diablo4-source-asset-1663210-payload\data.007.8265002.decoded.bin`. Cette preuve est structurelle uniquement : elle confirme `selector`, `assetRef`, `metadataId`, `opcode` et `scale`, mais ne prouve pas encore que le payload correspond a `SF_32`, au trigger `SF_33` ou a un uptime fiable.
