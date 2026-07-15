@@ -23,6 +23,8 @@ const generationSteps = [
   "build-external-delta-evidence-workorder.js",
   "build-diablo-tools-attribute-source-audit.js",
   "test-diablo-tools-attribute-source-audit.js",
+  "build-community-source-triage-audit.js",
+  "test-community-source-triage-audit.js",
   "build-selector-949-reconciliation-audit.js",
   "test-selector-949-reconciliation-audit.js",
   "build-selector-949-window-reparse-audit.js",
@@ -182,6 +184,7 @@ const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhau
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
 const sf32OwnerSourceHuntPlan = readJson("outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json");
 const diabloToolsAttributeSourceAudit = readJson("outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json");
+const communitySourceTriageAudit = readJson("outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json");
 const selector949ReconciliationAudit = readJson("outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json");
 const selector949WindowReparseAudit = readJson("outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json");
 const local949RoleDecodeAudit = readJson("outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json");
@@ -325,6 +328,10 @@ assertInvariant(diabloToolsAttributeSourceAudit.summary.canModifyReliableDps ===
 assertInvariant(diabloToolsAttributeSourceAudit.summary.selector949Name === "Damage_Percent_Reduction_From_Elites", "DiabloTools must map eAttrib 949 to Damage_Percent_Reduction_From_Elites");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib === 994, "DiabloTools must map Bonus_Percent_Per_Power to eAttrib 994");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.sourceContradictsPriorSelectorAssumption === true, "DiabloTools audit must flag selector assumption mismatch");
+assertInvariant(communitySourceTriageAudit.summary.canModifyReliableDps === false, "community source triage must not modify reliable DPS");
+assertInvariant(communitySourceTriageAudit.summary.bestNextSourceId === "diablotools-d4data", "community source triage must prefer active DiabloTools/d4data");
+assertInvariant(communitySourceTriageAudit.summary.sourceTriageReady === true, "community source triage must be ready");
+assertInvariant(communitySourceTriageAudit.summary.promotionReady === false, "community source triage must not be promotion ready");
 assertInvariant(selector949ReconciliationAudit.summary.canModifyReliableDps === false, "selector 949 reconciliation must not modify reliable DPS");
 assertInvariant(selector949ReconciliationAudit.summary.selector994Aligned === true, "selector 949 reconciliation must align selector 994");
 assertInvariant(selector949ReconciliationAudit.summary.selector949Contradicted === true, "selector 949 reconciliation must flag 949 contradiction");
@@ -589,6 +596,10 @@ const report = {
     { id: "diablo-tools-attribute-audit-949-name", status: "passed", value: diabloToolsAttributeSourceAudit.summary.selector949Name },
     { id: "diablo-tools-attribute-audit-bonus-eattrib", status: "passed", value: diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib },
     { id: "diablo-tools-attribute-audit-contradiction", status: "passed", value: diabloToolsAttributeSourceAudit.summary.sourceContradictsPriorSelectorAssumption },
+    { id: "community-source-triage-safe", status: "passed", value: communitySourceTriageAudit.summary.canModifyReliableDps },
+    { id: "community-source-triage-best-source", status: "passed", value: communitySourceTriageAudit.summary.bestNextSourceId },
+    { id: "community-source-triage-ready", status: "passed", value: communitySourceTriageAudit.summary.sourceTriageReady },
+    { id: "community-source-triage-promotion", status: "passed", value: communitySourceTriageAudit.summary.promotionReady },
     { id: "selector-949-reconciliation-safe", status: "passed", value: selector949ReconciliationAudit.summary.canModifyReliableDps },
     { id: "selector-949-reconciliation-994-aligned", status: "passed", value: selector949ReconciliationAudit.summary.selector994Aligned },
     { id: "selector-949-reconciliation-949-conflict", status: "passed", value: selector949ReconciliationAudit.summary.selector949Contradicted },
@@ -764,6 +775,7 @@ assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyR
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
 assertInvariant(optimizerPlan.sf32OwnerSourceHuntPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source hunt plan");
 assertInvariant(optimizerPlan.diabloToolsAttributeSourceAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe DiabloTools attribute audit");
+assertInvariant(optimizerPlan.communitySourceTriageAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe community source triage audit");
 assertInvariant(optimizerPlan.selector949ReconciliationAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 reconciliation audit");
 assertInvariant(optimizerPlan.selector949WindowReparseAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 window reparse audit");
 assertInvariant(optimizerPlan.local949RoleDecodeAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe local 949 role decode audit");

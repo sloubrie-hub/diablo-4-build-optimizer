@@ -12745,3 +12745,57 @@ Validation :
 Decision :
 
 Le contrat autorise seulement une lecture structurelle des records et payloads. Il interdit toute ecriture directe vers le dataset cible, l'intake reel, le ranking ou le DPS fiable. La suite logique est d'implementer le parser read-only concret, puis d'attendre une preuve source-backed avant de construire un bridge semantique `SF_32` / `SF_33` / uptime.
+
+## Audit sources communautaires
+
+Les trois sources proposees ont ete verifiees et consolidees dans un audit de triage. Le depot actif utile est `DiabloTools/d4data`; `blizzhackers/d4data` sert de contexte historique archive; `mfloob/diablo4-data-harvest` peut servir de reference limitee pour les familles `.stl`, `.aff` et `.skl`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-community-source-triage-audit.js`
+- `work/diablo4-data-exporter/scripts/test-community-source-triage-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Sources inspectees :
+
+- `https://github.com/DiabloTools`
+- `https://github.com/DiabloTools/d4data`
+- `https://github.com/blizzhackers/d4data`
+- `https://github.com/mfloob/diablo4-data-harvest`
+
+Resultat :
+
+- sources revues : `4`
+- sources actives : `2`
+- sources archivees : `2`
+- source prioritaire : `diablotools-d4data`
+- fichiers utiles detectes : `attributeList.json`, `attributes.json`, `definitions.json`, `field_types.txt`, `parse.js`, `names`, `json`
+- signaux parser utiles : lecteurs `DT_SNO`, `DT_SNO_NAME`, `DT_GBID`, enrichissement `eAttribute`, definitions et field types
+- reference secondaire : parsers `.stl`, `.aff`, `.skl` de `mfloob/diablo4-data-harvest`
+- `acceptedForBridge false`
+- `writesTargetDataset false`
+- `writesRealIntake false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `119` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test audit sources communautaires : `community-source-triage-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `119` etapes
+- plan optimiseur : section `communitySourceTriageAudit` presente
+- site : nouveau panneau `Sources communautaires`
+
+Decision :
+
+Ces sources sont utiles pour cadrer le parser read-only `selector-asset-record`, notamment via `DiabloTools/d4data` (`parse.js`, `definitions.json`, `field_types.txt`). Elles ne prouvent pas encore le champ exact `SF_32`, le trigger `SF_33` ni l'uptime. Elles ne doivent donc ouvrir aucun bridge semantique et ne peuvent pas modifier `reliableDps`.

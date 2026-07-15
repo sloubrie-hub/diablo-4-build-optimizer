@@ -43,6 +43,7 @@ const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion
 const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
+const communitySourceTriageAuditFile = "outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const selector949ReconciliationAuditFile = "outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const selector949WindowReparseAuditFile = "outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const local949RoleDecodeAuditFile = "outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -544,6 +545,7 @@ const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclu
 const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
 const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
 const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
+const communitySourceTriageAudit = readOptionalJson(communitySourceTriageAuditFile);
 const selector949ReconciliationAudit = readOptionalJson(selector949ReconciliationAuditFile);
 const selector949WindowReparseAudit = readOptionalJson(selector949WindowReparseAuditFile);
 const local949RoleDecodeAudit = readOptionalJson(local949RoleDecodeAuditFile);
@@ -668,6 +670,7 @@ const report = {
     sf32OwnerSourcePacketFile: sf32OwnerSourcePacket ? sf32OwnerSourcePacketFile : null,
     sf32OwnerSourceHuntPlanFile: sf32OwnerSourceHuntPlan ? sf32OwnerSourceHuntPlanFile : null,
     diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
+    communitySourceTriageAuditFile: communitySourceTriageAudit ? communitySourceTriageAuditFile : null,
     selector949ReconciliationAuditFile: selector949ReconciliationAudit ? selector949ReconciliationAuditFile : null,
     selector949WindowReparseAuditFile: selector949WindowReparseAudit ? selector949WindowReparseAuditFile : null,
     local949RoleDecodeAuditFile: local949RoleDecodeAudit ? local949RoleDecodeAuditFile : null,
@@ -1063,6 +1066,16 @@ const report = {
         evidence: diabloToolsAttributeSourceAudit.evidence,
         impact: diabloToolsAttributeSourceAudit.impact,
         safeguards: diabloToolsAttributeSourceAudit.safeguards,
+      }
+    : null,
+  communitySourceTriageAudit: communitySourceTriageAudit
+    ? {
+        file: communitySourceTriageAuditFile,
+        summary: communitySourceTriageAudit.summary,
+        sources: communitySourceTriageAudit.sources,
+        recommendedUse: communitySourceTriageAudit.recommendedUse,
+        blockers: communitySourceTriageAudit.blockers,
+        safeguards: communitySourceTriageAudit.safeguards,
       }
     : null,
   selector949ReconciliationAudit: selector949ReconciliationAudit

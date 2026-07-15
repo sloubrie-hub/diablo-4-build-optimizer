@@ -1689,3 +1689,17 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Contrat parser selector-asset`
   - reliableDps modifiable : `false`
   - decision : implementer ensuite un parser structurel read-only qui emet des records et payloads; aucune semantique `SF_32` ni DPS fiable sans preuve source-backed
+- audit sources communautaires ajoute
+  - sources verifiees : `https://github.com/DiabloTools`, `https://github.com/DiabloTools/d4data`, `https://github.com/blizzhackers/d4data`, `https://github.com/mfloob/diablo4-data-harvest`
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-community-source-triage-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-community-source-triage-audit.js`
+  - rapport genere : `outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json`
+  - suite optimiseur : `119` etapes, statut `target-optimizer-suite-ok`
+  - source prioritaire : `DiabloTools/d4data`
+  - sources actives : `2`
+  - sources archivees : `2`
+  - usages retenus : `definitions`, `field_types.txt`, `parse.js`, `attributeList.json`, references `.stl/.aff/.skl`
+  - plan optimiseur et site : nouveau panneau `Sources communautaires`
+  - reliableDps modifiable : `false`
+  - bridge semantique : `false`
+  - decision : utiliser ces sources pour cadrer le parser read-only, pas pour promouvoir `SF_32`, `SF_33` ou l'uptime

@@ -36,6 +36,7 @@ const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exha
 const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
+const COMMUNITY_SOURCE_TRIAGE_AUDIT_URL = "../outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const LOCAL_949_ROLE_DECODE_AUDIT_URL = "../outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
@@ -111,6 +112,7 @@ const state = {
   sf32OwnerSourcePacket: null,
   sf32OwnerSourceHuntPlan: null,
   diabloToolsAttributeSourceAudit: null,
+  communitySourceTriageAudit: null,
   selector949ReconciliationAudit: null,
   selector949WindowReparseAudit: null,
   local949RoleDecodeAudit: null,
@@ -221,6 +223,7 @@ async function boot() {
     await loadSf32OwnerSourcePacket();
     await loadSf32OwnerSourceHuntPlan();
     await loadDiabloToolsAttributeSourceAudit();
+    await loadCommunitySourceTriageAudit();
     await loadSelector949ReconciliationAudit();
     await loadSelector949WindowReparseAudit();
     await loadLocal949RoleDecodeAudit();
@@ -572,6 +575,10 @@ async function loadDiabloToolsAttributeSourceAudit() {
   state.diabloToolsAttributeSourceAudit = await fetchOptionalJson(DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL);
 }
 
+async function loadCommunitySourceTriageAudit() {
+  state.communitySourceTriageAudit = await fetchOptionalJson(COMMUNITY_SOURCE_TRIAGE_AUDIT_URL);
+}
+
 async function loadSelector949ReconciliationAudit() {
   state.selector949ReconciliationAudit = await fetchOptionalJson(SELECTOR_949_RECONCILIATION_AUDIT_URL);
 }
@@ -789,6 +796,7 @@ function renderTargetOptimizerPlan() {
     ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
     ${renderSf32OwnerSourceHuntPlan(state.sf32OwnerSourceHuntPlan ?? plan.sf32OwnerSourceHuntPlan)}
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
+    ${renderCommunitySourceTriageAudit(state.communitySourceTriageAudit ?? plan.communitySourceTriageAudit)}
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
     ${renderLocal949RoleDecodeAudit(state.local949RoleDecodeAudit ?? plan.local949RoleDecodeAudit)}
@@ -1696,6 +1704,60 @@ function renderDiabloToolsAttributeSourceAudit(report) {
       <div class="suite-invariant-list">
         ${(evidence.selector949 ?? []).map((item) => `<span class="failed">949: ${item.name}</span>`).join("")}
         ${(evidence.selector994 ?? []).map((item) => `<span class="passed">994: ${item.name}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderCommunitySourceTriageAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const sources = report.sources ?? [];
+  const recommendedUse = report.recommendedUse ?? [];
+  const blockers = report.blockers ?? [];
+  return `
+    <div class="bonus-selector-proof community-source-triage-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Sources communautaires</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.promotionReady ? "positive" : "blocked"}">
+          ${summary.promotionReady ? "promouvable" : "consultatif"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Sources", summary.sourcesReviewed ?? 0)}
+        ${targetMetric("Actives", summary.activeSources ?? 0)}
+        ${targetMetric("Archivees", summary.archivedSources ?? 0)}
+        ${targetMetric("Priorite", summary.bestNextSourceId ?? "n/a")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Bridge ${summary.acceptedForBridge ? "ouvert" : "ferme"}</span>
+        <span>Dataset ${summary.writesTargetDataset ? "modifiable" : "protege"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+        <span>Ranking ${summary.canUseForRanking ? "autorise" : "interdit"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${sources.map((source) => `
+          <span class="${source.status === "active" || source.status === "active-candidate" ? "passed" : "neutral"}">
+            ${source.id}: ${source.status}
+          </span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${recommendedUse.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.sourceId}</strong>
+            <p>${item.action}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${blockers.map((item) => `<span class="failed">${item.id}: ${item.status}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>
