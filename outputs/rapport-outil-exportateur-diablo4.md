@@ -12693,3 +12693,55 @@ Validation :
 Decision :
 
 Le `949` local est maintenant classe comme selecteur de record surcharge par layout. Il n'est ni l'opcode, ni la scale, ni une preuve directe de l'eAttrib bonus ou de l'ownership `SF_32`. Le prochain parser doit partir du record `selector -> asset`, utiliser `994` comme ancre bonus, puis decoder le payload compact `949` sans ouvrir de bridge DPS tant que la semantique `SF_32`, `SF_33` et uptime reste non prouvee.
+
+## Contrat parser selector-asset-record
+
+Un contrat de parser structurel a ete ajoute pour encadrer la prochaine implementation du parser `selector-asset-record` sans risque de promotion DPS prematuree.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-selector-asset-record-parser-contract.js`
+- `work/diablo4-data-exporter/scripts/test-selector-asset-record-parser-contract.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-selector-asset-record-parser-contract/selector-asset-record-parser-contract.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- root parser : `selector-asset-record`
+- cible : `asset 1663210`, `skill:1663210`
+- role local : `local-record-selector-with-layout-overload`
+- contrat pret : `true`
+- layouts parser : `3`
+- invariants echoues : `0`
+- ancre bonus : `994`
+- payload local : `949`
+- tail compact lisible : `true`
+- tail variant lisible : `true`
+- bridge semantique : `false`
+- `acceptedForBridge false`
+- `writesTargetDataset false`
+- `writesRealIntake false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- champs de sortie interdits : `reliableDps`, `promotionReady`, `canUseForReliableDps`, `acceptedForBridge`
+- suite optimiseur : `target-optimizer-suite-ok`, `117` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test contrat parser : `selector-asset-record-parser-contract-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `117` etapes
+- plan optimiseur : section `selectorAssetRecordParserContract` presente
+- site : nouveau panneau `Contrat parser selector-asset`
+
+Decision :
+
+Le contrat autorise seulement une lecture structurelle des records et payloads. Il interdit toute ecriture directe vers le dataset cible, l'intake reel, le ranking ou le DPS fiable. La suite logique est d'implementer le parser read-only concret, puis d'attendre une preuve source-backed avant de construire un bridge semantique `SF_32` / `SF_33` / uptime.

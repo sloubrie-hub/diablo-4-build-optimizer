@@ -39,6 +39,7 @@ const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
 const LOCAL_949_ROLE_DECODE_AUDIT_URL = "../outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
+const SELECTOR_ASSET_RECORD_PARSER_CONTRACT_URL = "../outputs/diablo4-selector-asset-record-parser-contract/selector-asset-record-parser-contract.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -113,6 +114,7 @@ const state = {
   selector949ReconciliationAudit: null,
   selector949WindowReparseAudit: null,
   local949RoleDecodeAudit: null,
+  selectorAssetRecordParserContract: null,
   sf32OwnerParserBridge: null,
   sf33TriggerSourcePacket: null,
   sf33TriggerParserBridge: null,
@@ -222,6 +224,7 @@ async function boot() {
     await loadSelector949ReconciliationAudit();
     await loadSelector949WindowReparseAudit();
     await loadLocal949RoleDecodeAudit();
+    await loadSelectorAssetRecordParserContract();
     await loadSf32OwnerParserBridge();
     await loadSf33TriggerSourcePacket();
     await loadSf33TriggerParserBridge();
@@ -581,6 +584,10 @@ async function loadLocal949RoleDecodeAudit() {
   state.local949RoleDecodeAudit = await fetchOptionalJson(LOCAL_949_ROLE_DECODE_AUDIT_URL);
 }
 
+async function loadSelectorAssetRecordParserContract() {
+  state.selectorAssetRecordParserContract = await fetchOptionalJson(SELECTOR_ASSET_RECORD_PARSER_CONTRACT_URL);
+}
+
 async function loadSf32OwnerParserBridge() {
   state.sf32OwnerParserBridge = await fetchOptionalJson(SF32_OWNER_PARSER_BRIDGE_URL);
 }
@@ -785,6 +792,7 @@ function renderTargetOptimizerPlan() {
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
     ${renderLocal949RoleDecodeAudit(state.local949RoleDecodeAudit ?? plan.local949RoleDecodeAudit)}
+    ${renderSelectorAssetRecordParserContract(state.selectorAssetRecordParserContract ?? plan.selectorAssetRecordParserContract)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
     ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
     ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
@@ -1838,6 +1846,56 @@ function renderLocal949RoleDecodeAudit(report) {
         <span>Parser: ${parser.recommendedParserRoot ?? "n/a"}</span>
         <span>Ancre bonus: ${parser.bonusAnchorSelector ?? "n/a"}</span>
         <span>Payload local: ${parser.localPayloadSelector ?? "n/a"}</span>
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSelectorAssetRecordParserContract(contract) {
+  if (!contract) return "";
+  const summary = contract.summary ?? {};
+  const layouts = contract.parserLayouts ?? [];
+  const invariants = contract.requiredInvariants ?? [];
+  const output = contract.outputContract ?? {};
+  return `
+    <div class="bonus-selector-proof selector-asset-record-parser-contract">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Contrat parser selector-asset</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.contractReady ? "positive" : "blocked"}">
+          ${summary.contractReady ? "structure pret" : "incomplet"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Root", summary.parserRoot ?? "n/a")}
+        ${targetMetric("Layouts", summary.parserLayouts ?? 0)}
+        ${targetMetric("Invariants KO", summary.failedInvariants ?? 0)}
+        ${targetMetric("Bridge", summary.semanticBridgeReady ? "pret" : "ferme")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Ancre bonus ${summary.bonusAnchorSelector ?? "n/a"}</span>
+        <span>Payload local ${summary.localPayloadSelector ?? "n/a"}</span>
+        <span>Read-only ${contract.safeguards?.readOnlyParser ? "oui" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="next-evidence-actions">
+        ${layouts.map((layout) => `
+          <article>
+            <span>${layout.parserStatus} - ${layout.semanticStatus}</span>
+            <strong>${layout.id}</strong>
+            <p>${(layout.fields ?? []).map((field) => `${field.role}@${field.offset}`).join(", ")}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${invariants.map((item) => `<span class="${item.status === "passed" ? "passed" : "failed"}">${item.id}: ${item.status}</span>`).join("")}
+      </div>
+      <div class="bonus-selector-signals">
+        ${(output.forbiddenOutputFields ?? []).map((field) => `<span>Interdit: ${field}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

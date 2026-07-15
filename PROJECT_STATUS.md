@@ -1673,3 +1673,19 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Role local 949`
   - reliableDps modifiable : `false`
   - decision : construire le prochain parser sur `selector-asset-record`; utiliser `994` comme ancre bonus et traiter le tail compact `949` comme payload local a decoder, sans bridge ni promotion
+- contrat parser `selector-asset-record` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-selector-asset-record-parser-contract.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-selector-asset-record-parser-contract.js`
+  - rapport genere : `outputs/diablo4-selector-asset-record-parser-contract/selector-asset-record-parser-contract.json`
+  - suite optimiseur : `117` etapes, statut `target-optimizer-suite-ok`
+  - root parser : `selector-asset-record`
+  - layouts : `3`
+  - ancre bonus : `994`
+  - payload local : `949`
+  - contrat structurel : `contractReady true`
+  - invariants echoues : `0`
+  - bridge semantique : `false`
+  - champs de sortie interdits : `reliableDps`, `promotionReady`, `canUseForReliableDps`, `acceptedForBridge`
+  - plan optimiseur et site : nouveau panneau `Contrat parser selector-asset`
+  - reliableDps modifiable : `false`
+  - decision : implementer ensuite un parser structurel read-only qui emet des records et payloads; aucune semantique `SF_32` ni DPS fiable sans preuve source-backed
