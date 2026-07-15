@@ -35,6 +35,7 @@ const DELTA_NEXT_ACTION_DECISION_URL = "../outputs/diablo4-delta-next-action-dec
 const SF32_LOCAL_EXHAUSTION_CONCLUSION_URL = "../outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const SF32_OWNER_SOURCE_PACKET_URL = "../outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
+const SF32_BINARY_SEMANTIC_GAP_AUDIT_URL = "../outputs/diablo4-sf32-binary-semantic-gap-audit/sf32-binary-semantic-gap-audit.json";
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const COMMUNITY_SOURCE_TRIAGE_AUDIT_URL = "../outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const D4DATA_PARSER_REFERENCE_AUDIT_URL = "../outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
@@ -114,6 +115,7 @@ const state = {
   sf32LocalExhaustionConclusion: null,
   sf32OwnerSourcePacket: null,
   sf32OwnerSourceHuntPlan: null,
+  sf32BinarySemanticGapAudit: null,
   diabloToolsAttributeSourceAudit: null,
   communitySourceTriageAudit: null,
   d4dataParserReferenceAudit: null,
@@ -228,6 +230,7 @@ async function boot() {
     await loadSf32LocalExhaustionConclusion();
     await loadSf32OwnerSourcePacket();
     await loadSf32OwnerSourceHuntPlan();
+    await loadSf32BinarySemanticGapAudit();
     await loadDiabloToolsAttributeSourceAudit();
     await loadCommunitySourceTriageAudit();
     await loadD4dataParserReferenceAudit();
@@ -580,6 +583,10 @@ async function loadSf32OwnerSourceHuntPlan() {
   state.sf32OwnerSourceHuntPlan = await fetchOptionalJson(SF32_OWNER_SOURCE_HUNT_PLAN_URL);
 }
 
+async function loadSf32BinarySemanticGapAudit() {
+  state.sf32BinarySemanticGapAudit = await fetchOptionalJson(SF32_BINARY_SEMANTIC_GAP_AUDIT_URL);
+}
+
 async function loadDiabloToolsAttributeSourceAudit() {
   state.diabloToolsAttributeSourceAudit = await fetchOptionalJson(DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL);
 }
@@ -816,6 +823,7 @@ function renderTargetOptimizerPlan() {
     ${renderSf32LocalExhaustionConclusion(state.sf32LocalExhaustionConclusion ?? plan.sf32LocalExhaustionConclusion)}
     ${renderSf32OwnerSourcePacket(state.sf32OwnerSourcePacket ?? plan.sf32OwnerSourcePacket)}
     ${renderSf32OwnerSourceHuntPlan(state.sf32OwnerSourceHuntPlan ?? plan.sf32OwnerSourceHuntPlan)}
+    ${renderSf32BinarySemanticGapAudit(state.sf32BinarySemanticGapAudit ?? plan.sf32BinarySemanticGapAudit)}
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
     ${renderCommunitySourceTriageAudit(state.communitySourceTriageAudit ?? plan.communitySourceTriageAudit)}
     ${renderD4dataParserReferenceAudit(state.d4dataParserReferenceAudit ?? plan.d4dataParserReferenceAudit)}
@@ -1691,6 +1699,56 @@ function renderSf32OwnerSourceHuntPlan(report) {
       </div>
       <div class="suite-invariant-list">
         ${accept.map((item) => `<span class="passed">${item}</span>`).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderSf32BinarySemanticGapAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const validatedStructure = report.validatedStructure ?? [];
+  const semanticRequirements = report.semanticRequirements ?? [];
+  const rejectedPromotions = report.rejectedPromotions ?? [];
+  return `
+    <div class="bonus-selector-proof sf32-binary-semantic-gap-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Gap semantique SF_32</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.sf32OwnerProven ? "positive" : "blocked"}">
+          ${summary.sf32OwnerProven ? "ownership prouve" : "ownership bloque"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Structure", summary.binaryStructureReady ? "prete" : "bloquee")}
+        ${targetMetric("Valides", `${summary.validatedStructure ?? 0}/${(summary.validatedStructure ?? 0) + (summary.failedStructure ?? 0)}`)}
+        ${targetMetric("Semantique", `${(summary.semanticRequirements ?? 0) - (summary.missingSemantics ?? 0)}/${summary.semanticRequirements ?? 0}`)}
+        ${targetMetric("Bridge", summary.semanticBridgeReady ? "ouvert" : "ferme")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Selector ${summary.targetSelector ?? "n/a"}</span>
+        <span>Metadata ${summary.targetMetadataId ?? "n/a"}</span>
+        <span>Opcode ${summary.targetOpcode ?? "n/a"}</span>
+        <span>Scale ${summary.targetScale ?? "n/a"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${validatedStructure.map((item) => `<span class="${item.status === "passed" ? "passed" : "failed"}">${item.id}: ${item.value}</span>`).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${semanticRequirements.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.id}</strong>
+            <p>${item.requiredEvidence}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="suite-invariant-list">
+        ${rejectedPromotions.map((item) => `<span class="failed">${item.id}</span>`).join("")}
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

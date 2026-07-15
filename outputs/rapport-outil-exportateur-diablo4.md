@@ -12964,3 +12964,70 @@ Validation :
 Decision :
 
 La lecture binaire confirme la structure du record cible a l'offset `19012` dans `outputs\diablo4-source-asset-1663210-payload\data.007.8265002.decoded.bin`. Cette preuve est structurelle uniquement : elle confirme `selector`, `assetRef`, `metadataId`, `opcode` et `scale`, mais ne prouve pas encore que le payload correspond a `SF_32`, au trigger `SF_33` ou a un uptime fiable.
+
+## Audit gap semantique SF_32
+
+Un audit explicite du gap semantique a ete ajoute apres la verification binaire `selector-asset-record`. Il separe les faits binaires prouves de ce qui manque pour prouver l'ownership `SF_32`.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-binary-semantic-gap-audit.js`
+- `work/diablo4-data-exporter/scripts/test-sf32-binary-semantic-gap-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-binary-semantic-gap-audit/sf32-binary-semantic-gap-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- selector cible : `949`
+- metadataId cible : `12337`
+- opcode cible : `6`
+- scale cible : `10`
+- structure binaire prete : `true`
+- faits structurels valides : `5`
+- verifications structurelles echouees : `0`
+- exigences semantiques : `4`
+- semantiques manquantes : `4`
+- ownership `SF_32` prouve : `false`
+- bridge semantique pret : `false`
+- `acceptedForBridge false`
+- `writesTargetDataset false`
+- `writesRealIntake false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `canUseForRanking false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `127` etapes
+
+Semantiques encore manquantes :
+
+- champ proprietaire `SF_32` nomme
+- role local `949` nomme
+- metadata `12337` nommee
+- semantique gameplay de `scale=10`
+
+Promotions explicitement rejetees :
+
+- promotion depuis `selector 949`
+- promotion depuis `metadata 12337`
+- promotion depuis `scale 10`
+- promotion depuis l'adjacence binaire
+
+Validation :
+
+- controles syntaxe Node : OK
+- test audit gap semantique : `sf32-binary-semantic-gap-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `127` etapes
+- plan optimiseur : section `sf32BinarySemanticGapAudit` presente
+- site : nouveau panneau `Gap semantique SF_32`
+- serveur local : `http://127.0.0.1:4173/site/` OK
+
+Decision :
+
+La structure `949 -> 1663210 -> metadata 12337 -> opcode 6 -> scale 10` est maintenant acceptee comme preuve binaire structurelle. Elle ne prouve pas encore que le payload possede `SF_32`, que `949` est nomme, que `12337` est une table/champ connu, ou que `10` exprime la semantique gameplay. Aucune promotion DPS n'est autorisee.

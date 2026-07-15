@@ -42,6 +42,7 @@ const deltaNextActionDecisionFile = "outputs/diablo4-delta-next-action-decision/
 const sf32LocalExhaustionConclusionFile = "outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json";
 const sf32OwnerSourcePacketFile = "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json";
 const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json";
+const sf32BinarySemanticGapAuditFile = "outputs/diablo4-sf32-binary-semantic-gap-audit/sf32-binary-semantic-gap-audit.json";
 const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const communitySourceTriageAuditFile = "outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json";
 const d4dataParserReferenceAuditFile = "outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json";
@@ -547,6 +548,7 @@ const deltaNextActionDecision = readOptionalJson(deltaNextActionDecisionFile);
 const sf32LocalExhaustionConclusion = readOptionalJson(sf32LocalExhaustionConclusionFile);
 const sf32OwnerSourcePacket = readOptionalJson(sf32OwnerSourcePacketFile);
 const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
+const sf32BinarySemanticGapAudit = readOptionalJson(sf32BinarySemanticGapAuditFile);
 const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
 const communitySourceTriageAudit = readOptionalJson(communitySourceTriageAuditFile);
 const d4dataParserReferenceAudit = readOptionalJson(d4dataParserReferenceAuditFile);
@@ -675,6 +677,7 @@ const report = {
     sf32LocalExhaustionConclusionFile: sf32LocalExhaustionConclusion ? sf32LocalExhaustionConclusionFile : null,
     sf32OwnerSourcePacketFile: sf32OwnerSourcePacket ? sf32OwnerSourcePacketFile : null,
     sf32OwnerSourceHuntPlanFile: sf32OwnerSourceHuntPlan ? sf32OwnerSourceHuntPlanFile : null,
+    sf32BinarySemanticGapAuditFile: sf32BinarySemanticGapAudit ? sf32BinarySemanticGapAuditFile : null,
     diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
     communitySourceTriageAuditFile: communitySourceTriageAudit ? communitySourceTriageAuditFile : null,
     d4dataParserReferenceAuditFile: d4dataParserReferenceAudit ? d4dataParserReferenceAuditFile : null,
@@ -1065,6 +1068,18 @@ const report = {
         acceptanceChecklist: sf32OwnerSourceHuntPlan.acceptanceChecklist,
         rejectionChecklist: sf32OwnerSourceHuntPlan.rejectionChecklist,
         safeguards: sf32OwnerSourceHuntPlan.safeguards,
+      }
+    : null,
+  sf32BinarySemanticGapAudit: sf32BinarySemanticGapAudit
+    ? {
+        file: sf32BinarySemanticGapAuditFile,
+        summary: sf32BinarySemanticGapAudit.summary,
+        targetBinaryFields: sf32BinarySemanticGapAudit.targetBinaryFields,
+        validatedStructure: sf32BinarySemanticGapAudit.validatedStructure,
+        semanticRequirements: sf32BinarySemanticGapAudit.semanticRequirements,
+        rejectedPromotions: sf32BinarySemanticGapAudit.rejectedPromotions,
+        sourceHuntSnapshot: sf32BinarySemanticGapAudit.sourceHuntSnapshot,
+        safeguards: sf32BinarySemanticGapAudit.safeguards,
       }
     : null,
   diabloToolsAttributeSourceAudit: diabloToolsAttributeSourceAudit

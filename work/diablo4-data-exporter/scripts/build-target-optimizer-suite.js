@@ -129,6 +129,8 @@ const generationSteps = [
   "test-delta-next-action-decision.js",
   "build-sf32-owner-source-hunt-plan.js",
   "test-sf32-owner-source-hunt-plan.js",
+  "build-sf32-binary-semantic-gap-audit.js",
+  "test-sf32-binary-semantic-gap-audit.js",
   "build-working-base-contract.js",
   "build-bucket-engine-contract.js",
 ];
@@ -189,6 +191,7 @@ const deltaNextActionDecision = readJson("outputs/diablo4-delta-next-action-deci
 const sf32LocalExhaustionConclusion = readJson("outputs/diablo4-sf32-local-exhaustion-conclusion/sf32-local-exhaustion-conclusion.json");
 const sf32OwnerSourcePacket = readJson("outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json");
 const sf32OwnerSourceHuntPlan = readJson("outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json");
+const sf32BinarySemanticGapAudit = readJson("outputs/diablo4-sf32-binary-semantic-gap-audit/sf32-binary-semantic-gap-audit.json");
 const diabloToolsAttributeSourceAudit = readJson("outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json");
 const communitySourceTriageAudit = readJson("outputs/diablo4-community-source-triage-audit/community-source-triage-audit.json");
 const d4dataParserReferenceAudit = readJson("outputs/diablo4-d4data-parser-reference-audit/d4data-parser-reference-audit.json");
@@ -333,6 +336,10 @@ assertInvariant(sf32OwnerSourceHuntPlan.summary.searches === 4, "SF_32 source hu
 assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetReady === true, "SF_32 source hunt plan must carry the pending candidate snippet");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.templateNeedsRevision === true, "SF_32 source hunt plan must require template revision after 949 reparse");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetUsable === false, "SF_32 source hunt plan must supersede old selector 949 candidate");
+assertInvariant(sf32BinarySemanticGapAudit.summary.canModifyReliableDps === false, "SF_32 binary semantic gap audit must not modify reliable DPS");
+assertInvariant(sf32BinarySemanticGapAudit.summary.binaryStructureReady === true, "SF_32 binary semantic gap audit must accept binary structure");
+assertInvariant(sf32BinarySemanticGapAudit.summary.sf32OwnerProven === false, "SF_32 binary semantic gap audit must keep ownership unproven");
+assertInvariant(sf32BinarySemanticGapAudit.summary.semanticBridgeReady === false, "SF_32 binary semantic gap audit must not open semantic bridge");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.canModifyReliableDps === false, "DiabloTools attribute audit must not modify reliable DPS");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.selector949Name === "Damage_Percent_Reduction_From_Elites", "DiabloTools must map eAttrib 949 to Damage_Percent_Reduction_From_Elites");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib === 994, "DiabloTools must map Bonus_Percent_Per_Power to eAttrib 994");
@@ -613,6 +620,10 @@ const report = {
     { id: "sf32-owner-source-hunt-snippet-ready", status: "passed", value: sf32OwnerSourceHuntPlan.summary.candidateSnippetReady },
     { id: "sf32-owner-source-hunt-template-revision", status: "passed", value: sf32OwnerSourceHuntPlan.summary.templateNeedsRevision },
     { id: "sf32-owner-source-hunt-snippet-superseded", status: "passed", value: sf32OwnerSourceHuntPlan.summary.candidateSnippetUsable },
+    { id: "sf32-binary-semantic-gap-safe", status: "passed", value: sf32BinarySemanticGapAudit.summary.canModifyReliableDps },
+    { id: "sf32-binary-semantic-gap-structure", status: "passed", value: sf32BinarySemanticGapAudit.summary.binaryStructureReady },
+    { id: "sf32-binary-semantic-gap-owner", status: "passed", value: sf32BinarySemanticGapAudit.summary.sf32OwnerProven },
+    { id: "sf32-binary-semantic-gap-bridge", status: "passed", value: sf32BinarySemanticGapAudit.summary.semanticBridgeReady },
     { id: "diablo-tools-attribute-audit-safe", status: "passed", value: diabloToolsAttributeSourceAudit.summary.canModifyReliableDps },
     { id: "diablo-tools-attribute-audit-949-name", status: "passed", value: diabloToolsAttributeSourceAudit.summary.selector949Name },
     { id: "diablo-tools-attribute-audit-bonus-eattrib", status: "passed", value: diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib },
@@ -807,6 +818,7 @@ assertInvariant(optimizerPlan.deltaNextActionDecision?.summary?.canModifyReliabl
 assertInvariant(optimizerPlan.sf32LocalExhaustionConclusion?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 local exhaustion conclusion");
 assertInvariant(optimizerPlan.sf32OwnerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source packet");
 assertInvariant(optimizerPlan.sf32OwnerSourceHuntPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner source hunt plan");
+assertInvariant(optimizerPlan.sf32BinarySemanticGapAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 binary semantic gap audit");
 assertInvariant(optimizerPlan.diabloToolsAttributeSourceAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe DiabloTools attribute audit");
 assertInvariant(optimizerPlan.communitySourceTriageAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe community source triage audit");
 assertInvariant(optimizerPlan.d4dataParserReferenceAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe d4data parser reference audit");

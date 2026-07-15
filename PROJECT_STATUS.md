@@ -1746,3 +1746,17 @@ Build de reference :
   - reliableDps modifiable : `false`
   - plan optimiseur et site : nouveau panneau `Verification binaire selector-asset`
   - decision : preuve structurelle binaire confirmee aux offsets connus; ne prouve toujours pas `SF_32`, `SF_33` ni uptime
+- audit gap semantique `SF_32` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-sf32-binary-semantic-gap-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-sf32-binary-semantic-gap-audit.js`
+  - rapport genere : `outputs/diablo4-sf32-binary-semantic-gap-audit/sf32-binary-semantic-gap-audit.json`
+  - suite optimiseur : `127` etapes, statut `target-optimizer-suite-ok`
+  - structure binaire prete : `true`
+  - faits structurels valides : `5`
+  - semantiques manquantes : `4`
+  - ownership `SF_32` prouve : `false`
+  - bridge semantique : `false`
+  - reliableDps modifiable : `false`
+  - promotions rejetees : selector `949`, metadata `12337`, scale `10`, adjacency binaire
+  - plan optimiseur et site : nouveau panneau `Gap semantique SF_32`
+  - decision : la preuve binaire est acceptee comme structurelle, mais il faut encore une table/dictionnaire ou parser champ exact avant bridge DPS
