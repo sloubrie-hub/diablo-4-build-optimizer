@@ -12087,3 +12087,54 @@ Validation :
 Decision :
 
 La decision humaine est separee de la preparation technique. Le cas reel reste bloque, le candidat ne devient pas `approved` automatiquement, et aucune valeur conditionnelle ne peut entrer dans `reliableDps`.
+
+## Decision humaine soumission preuve externe
+
+Le flux de soumission externe dispose maintenant d'un paquet de decision et d'un audit de decision. Le paquet prepare les champs humains requis; l'audit lit un fichier de decision optionnel et distingue `approved` de `rejected`, sans ecriture automatique ni promotion.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-external-evidence-submission-review-decision-package.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-review-decision-package.js`
+- `work/diablo4-data-exporter/scripts/audit-external-evidence-submission-review-decision.js`
+- `work/diablo4-data-exporter/scripts/test-external-evidence-submission-review-decision-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-external-evidence-submission-review-decision-package/external-evidence-submission-review-decision-package.json`
+- `outputs/diablo4-external-evidence-submission-review-decision-package/external-evidence-submission-review-decision-package.md`
+- `outputs/diablo4-external-evidence-submission-review-decision-audit/external-evidence-submission-review-decision-audit.json`
+- `outputs/diablo4-external-evidence-submission-review-decision-audit/external-evidence-submission-review-decision.template.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- paquet reel : `readyForDecisionInput false`
+- checks paquet echoues : `review-gate-ready`, `candidate-still-pending`, `manual-review-blocker-present`
+- audit reel : `readyForPromotionAudit false`, decision absente
+- checks audit echoues : `decision-package-ready`, `decision-input-present`, `required-fields-complete`, `status-allowed`, `source-rechecked`
+- test synthetique `approved` : ouvre seulement `readyForPromotionAudit true`
+- test synthetique `rejected` : `decisionRejected true`, aucune suite promotion
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `95` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour les quatre nouveaux scripts, la suite, le plan optimiseur et le site
+- test paquet decision : `external-evidence-submission-review-decision-package-test-ok`
+- test audit decision : `external-evidence-submission-review-decision-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `95` etapes
+- plan optimiseur : sections `externalEvidenceSubmissionReviewDecisionPackage` et `externalEvidenceSubmissionReviewDecisionAudit` presentes
+- site : nouveaux panneaux `Decision soumission` et `Audit decision soumission`
+
+Decision :
+
+Une decision `approved` ne modifie pas `reliableDps`. Elle ouvre seulement un audit de promotion separe. Une decision `rejected` documente le rejet et maintient le delta en what-if bloque.

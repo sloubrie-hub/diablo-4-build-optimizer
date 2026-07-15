@@ -1486,3 +1486,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Revue soumission`
   - reliableDps modifiable : `false`
   - decision : ouvrir seulement une decision humaine separee; pending ne devient jamais approved automatiquement
+- decision humaine soumission preuve externe ajoutee
+  - scripts ajoutes : `work/diablo4-data-exporter/scripts/build-external-evidence-submission-review-decision-package.js` et `work/diablo4-data-exporter/scripts/audit-external-evidence-submission-review-decision.js`
+  - tests ajoutes : `work/diablo4-data-exporter/scripts/test-external-evidence-submission-review-decision-package.js` et `work/diablo4-data-exporter/scripts/test-external-evidence-submission-review-decision-audit.js`
+  - rapports generes : `outputs/diablo4-external-evidence-submission-review-decision-package/external-evidence-submission-review-decision-package.json` et `outputs/diablo4-external-evidence-submission-review-decision-audit/external-evidence-submission-review-decision-audit.json`
+  - suite optimiseur : `95` etapes, statut `target-optimizer-suite-ok`
+  - cible : `asset 1663210`, `skill:1663210`
+  - candidat : `draft-delta-proof-sf32-owner`
+  - paquet reel : `readyForDecisionInput false`, checks echoues `review-gate-ready`, `candidate-still-pending`, `manual-review-blocker-present`
+  - audit reel : `readyForPromotionAudit false`, decision absente, checks echoues `decision-package-ready`, `decision-input-present`, `required-fields-complete`, `status-allowed`, `source-rechecked`
+  - tests synthetiques : `approved` ouvre seulement `readyForPromotionAudit true`; `rejected` conserve le delta hors reliableDps
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveaux panneaux `Decision soumission` et `Audit decision soumission`
+  - reliableDps modifiable : `false`
+  - decision : une decision humaine valide n'est pas une promotion; elle ouvre au mieux un audit de promotion separe

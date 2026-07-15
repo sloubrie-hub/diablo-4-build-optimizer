@@ -31,6 +31,10 @@ const generationSteps = [
   "test-external-evidence-submission-post-copy-intake.js",
   "build-external-evidence-submission-manual-review-gate.js",
   "test-external-evidence-submission-manual-review-gate.js",
+  "build-external-evidence-submission-review-decision-package.js",
+  "test-external-evidence-submission-review-decision-package.js",
+  "audit-external-evidence-submission-review-decision.js",
+  "test-external-evidence-submission-review-decision-audit.js",
   "build-next-evidence-roadmap.js",
   "build-new-binary-family-plan.js",
   "audit-new-binary-family-delta-parent.js",
@@ -135,6 +139,8 @@ const externalEvidenceSubmissionGate = readJson("outputs/diablo4-external-eviden
 const externalEvidenceSubmissionIntakePreview = readJson("outputs/diablo4-external-evidence-submission-intake-preview/external-evidence-submission-intake-preview.json");
 const externalEvidenceSubmissionPostCopyIntake = readJson("outputs/diablo4-external-evidence-submission-post-copy-intake/external-evidence-submission-post-copy-intake.json");
 const externalEvidenceSubmissionManualReviewGate = readJson("outputs/diablo4-external-evidence-submission-manual-review-gate/external-evidence-submission-manual-review-gate.json");
+const externalEvidenceSubmissionReviewDecisionPackage = readJson("outputs/diablo4-external-evidence-submission-review-decision-package/external-evidence-submission-review-decision-package.json");
+const externalEvidenceSubmissionReviewDecisionAudit = readJson("outputs/diablo4-external-evidence-submission-review-decision-audit/external-evidence-submission-review-decision-audit.json");
 const newBinaryFamilyPlan = readJson("outputs/diablo4-new-binary-family-plan/new-binary-family-plan.json");
 const newBinaryFamilyDeltaParentAudit = readJson("outputs/diablo4-new-binary-family-delta-parent-audit/delta-parent-audit.json");
 const deltaParentConsumerCorpusScan = readJson("outputs/diablo4-delta-parent-consumer-corpus-scan/delta-parent-consumer-corpus-scan.json");
@@ -208,6 +214,16 @@ assertInvariant(externalEvidenceSubmissionPostCopyIntake.summary.readyForManualR
 assertInvariant(externalEvidenceSubmissionManualReviewGate.summary.canModifyReliableDps === false, "external evidence submission manual review gate must not modify reliable DPS");
 assertInvariant(externalEvidenceSubmissionManualReviewGate.summary.writesRealIntake === false, "external evidence submission manual review gate must not write intake");
 assertInvariant(externalEvidenceSubmissionManualReviewGate.summary.readyForReviewerDecision === false, "real external evidence submission manual review gate should remain blocked");
+assertInvariant(externalEvidenceSubmissionReviewDecisionPackage.summary.canModifyReliableDps === false, "external evidence submission review decision package must not modify reliable DPS");
+assertInvariant(externalEvidenceSubmissionReviewDecisionPackage.summary.readyForDecisionInput === false, "real external evidence submission review decision package should remain blocked");
+assertInvariant(externalEvidenceSubmissionReviewDecisionPackage.summary.writesRealIntake === false, "external evidence submission review decision package must not write real intake");
+assertInvariant(externalEvidenceSubmissionReviewDecisionPackage.summary.acceptedForBridge === false, "external evidence submission review decision package must not accept for bridge");
+assertInvariant(externalEvidenceSubmissionReviewDecisionPackage.summary.promotionReady === false, "external evidence submission review decision package must not auto-promote");
+assertInvariant(externalEvidenceSubmissionReviewDecisionAudit.summary.canModifyReliableDps === false, "external evidence submission review decision audit must not modify reliable DPS");
+assertInvariant(externalEvidenceSubmissionReviewDecisionAudit.summary.readyForPromotionAudit === false, "real external evidence submission review decision audit should remain blocked");
+assertInvariant(externalEvidenceSubmissionReviewDecisionAudit.summary.writesRealIntake === false, "external evidence submission review decision audit must not write real intake");
+assertInvariant(externalEvidenceSubmissionReviewDecisionAudit.summary.acceptedForBridge === false, "external evidence submission review decision audit must not accept for bridge");
+assertInvariant(externalEvidenceSubmissionReviewDecisionAudit.summary.promotionReady === false, "external evidence submission review decision audit must not auto-promote");
 assertInvariant(newBinaryFamilyPlan.summary.canModifyReliableDps === false, "new binary family plan must not modify reliable DPS");
 assertInvariant(newBinaryFamilyPlan.summary.nextProbeId === "binary-family-delta-parent-1663210", "new binary family plan should prioritize the delta parent probe");
 assertInvariant(newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps === false, "new binary family delta parent audit must not modify reliable DPS");
@@ -411,6 +427,16 @@ const report = {
     { id: "external-evidence-submission-manual-review-safe", status: "passed", value: externalEvidenceSubmissionManualReviewGate.summary.canModifyReliableDps },
     { id: "external-evidence-submission-manual-review-no-write", status: "passed", value: externalEvidenceSubmissionManualReviewGate.summary.writesRealIntake },
     { id: "external-evidence-submission-manual-review-blocked-real", status: "passed", value: externalEvidenceSubmissionManualReviewGate.summary.readyForReviewerDecision },
+    { id: "external-evidence-submission-review-decision-package-safe", status: "passed", value: externalEvidenceSubmissionReviewDecisionPackage.summary.canModifyReliableDps },
+    { id: "external-evidence-submission-review-decision-package-blocked-real", status: "passed", value: externalEvidenceSubmissionReviewDecisionPackage.summary.readyForDecisionInput },
+    { id: "external-evidence-submission-review-decision-package-no-write", status: "passed", value: externalEvidenceSubmissionReviewDecisionPackage.summary.writesRealIntake },
+    { id: "external-evidence-submission-review-decision-package-not-accepted", status: "passed", value: externalEvidenceSubmissionReviewDecisionPackage.summary.acceptedForBridge },
+    { id: "external-evidence-submission-review-decision-package-not-auto-promoted", status: "passed", value: externalEvidenceSubmissionReviewDecisionPackage.summary.promotionReady },
+    { id: "external-evidence-submission-review-decision-audit-safe", status: "passed", value: externalEvidenceSubmissionReviewDecisionAudit.summary.canModifyReliableDps },
+    { id: "external-evidence-submission-review-decision-audit-blocked-real", status: "passed", value: externalEvidenceSubmissionReviewDecisionAudit.summary.readyForPromotionAudit },
+    { id: "external-evidence-submission-review-decision-audit-no-write", status: "passed", value: externalEvidenceSubmissionReviewDecisionAudit.summary.writesRealIntake },
+    { id: "external-evidence-submission-review-decision-audit-not-accepted", status: "passed", value: externalEvidenceSubmissionReviewDecisionAudit.summary.acceptedForBridge },
+    { id: "external-evidence-submission-review-decision-audit-not-auto-promoted", status: "passed", value: externalEvidenceSubmissionReviewDecisionAudit.summary.promotionReady },
     { id: "new-binary-family-plan-safe", status: "passed", value: newBinaryFamilyPlan.summary.canModifyReliableDps },
     { id: "new-binary-family-priority-delta", status: "passed", value: newBinaryFamilyPlan.summary.nextProbeId },
     { id: "new-binary-family-delta-parent-safe", status: "passed", value: newBinaryFamilyDeltaParentAudit.summary.canModifyReliableDps },
@@ -582,6 +608,8 @@ assertInvariant(optimizerPlan.externalEvidenceSubmissionGate?.summary?.canModify
 assertInvariant(optimizerPlan.externalEvidenceSubmissionIntakePreview?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission intake preview");
 assertInvariant(optimizerPlan.externalEvidenceSubmissionPostCopyIntake?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission post-copy intake");
 assertInvariant(optimizerPlan.externalEvidenceSubmissionManualReviewGate?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission manual review gate");
+assertInvariant(optimizerPlan.externalEvidenceSubmissionReviewDecisionPackage?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission review decision package");
+assertInvariant(optimizerPlan.externalEvidenceSubmissionReviewDecisionAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe external evidence submission review decision audit");
 assertInvariant(optimizerPlan.newBinaryFamilyPlan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe new binary family plan");
 assertInvariant(optimizerPlan.newBinaryFamilyDeltaParentAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent audit");
 assertInvariant(optimizerPlan.deltaParentConsumerCorpusScan?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe delta parent corpus scan");
