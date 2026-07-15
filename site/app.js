@@ -38,6 +38,7 @@ const SF32_OWNER_SOURCE_HUNT_PLAN_URL = "../outputs/diablo4-sf32-owner-source-hu
 const DIABLO_TOOLS_ATTRIBUTE_SOURCE_AUDIT_URL = "../outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const SELECTOR_949_RECONCILIATION_AUDIT_URL = "../outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const SELECTOR_949_WINDOW_REPARSE_AUDIT_URL = "../outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
+const LOCAL_949_ROLE_DECODE_AUDIT_URL = "../outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
 const SF32_OWNER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const SF33_TRIGGER_SOURCE_PACKET_URL = "../outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const SF33_TRIGGER_PARSER_BRIDGE_URL = "../outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -111,6 +112,7 @@ const state = {
   diabloToolsAttributeSourceAudit: null,
   selector949ReconciliationAudit: null,
   selector949WindowReparseAudit: null,
+  local949RoleDecodeAudit: null,
   sf32OwnerParserBridge: null,
   sf33TriggerSourcePacket: null,
   sf33TriggerParserBridge: null,
@@ -219,6 +221,7 @@ async function boot() {
     await loadDiabloToolsAttributeSourceAudit();
     await loadSelector949ReconciliationAudit();
     await loadSelector949WindowReparseAudit();
+    await loadLocal949RoleDecodeAudit();
     await loadSf32OwnerParserBridge();
     await loadSf33TriggerSourcePacket();
     await loadSf33TriggerParserBridge();
@@ -574,6 +577,10 @@ async function loadSelector949WindowReparseAudit() {
   state.selector949WindowReparseAudit = await fetchOptionalJson(SELECTOR_949_WINDOW_REPARSE_AUDIT_URL);
 }
 
+async function loadLocal949RoleDecodeAudit() {
+  state.local949RoleDecodeAudit = await fetchOptionalJson(LOCAL_949_ROLE_DECODE_AUDIT_URL);
+}
+
 async function loadSf32OwnerParserBridge() {
   state.sf32OwnerParserBridge = await fetchOptionalJson(SF32_OWNER_PARSER_BRIDGE_URL);
 }
@@ -777,6 +784,7 @@ function renderTargetOptimizerPlan() {
     ${renderDiabloToolsAttributeSourceAudit(state.diabloToolsAttributeSourceAudit ?? plan.diabloToolsAttributeSourceAudit)}
     ${renderSelector949ReconciliationAudit(state.selector949ReconciliationAudit ?? plan.selector949ReconciliationAudit)}
     ${renderSelector949WindowReparseAudit(state.selector949WindowReparseAudit ?? plan.selector949WindowReparseAudit)}
+    ${renderLocal949RoleDecodeAudit(state.local949RoleDecodeAudit ?? plan.local949RoleDecodeAudit)}
     ${renderSf32OwnerParserBridge(state.sf32OwnerParserBridge ?? plan.sf32OwnerParserBridge)}
     ${renderSf33TriggerSourcePacket(state.sf33TriggerSourcePacket ?? plan.sf33TriggerSourcePacket)}
     ${renderSf33TriggerParserBridge(state.sf33TriggerParserBridge ?? plan.sf33TriggerParserBridge)}
@@ -1776,6 +1784,60 @@ function renderSelector949WindowReparseAudit(report) {
             <p>${item.reason}</p>
           </article>
         `).join("")}
+      </div>
+      <p>${summary.assessment?.finding ?? ""}</p>
+      <p>${summary.assessment?.nextAction ?? ""}</p>
+    </div>
+  `;
+}
+
+function renderLocal949RoleDecodeAudit(report) {
+  if (!report) return "";
+  const summary = report.summary ?? {};
+  const evidence = report.roleEvidence ?? [];
+  const rejected = report.rejectedRoles ?? [];
+  const parser = report.parserImplications ?? {};
+  return `
+    <div class="bonus-selector-proof local-949-role-decode-audit">
+      <div class="bonus-selector-proof-head">
+        <div>
+          <strong>Role local 949</strong>
+          <span>${summary.assessment?.kind ?? "n/a"}</span>
+        </div>
+        <div class="${summary.roleDecoded ? "positive" : "blocked"}">
+          ${summary.roleDecoded ? "decode structurel" : "ouvert"}
+        </div>
+      </div>
+      <div class="bonus-selector-proof-metrics">
+        ${targetMetric("Role", summary.localRole ?? "n/a")}
+        ${targetMetric("Layouts 949", summary.selector949Layouts ?? 0)}
+        ${targetMetric("Layouts 994", summary.selector994ReferenceLayouts ?? 0)}
+        ${targetMetric("Bridge", summary.bridgeReady ? "pret" : "ferme")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>949 offset 0 ${summary.selector949AtRecordHead ? "oui" : "non"}</span>
+        <span>Asset +4 ${summary.selector949HasAssetRef ? "oui" : "non"}</span>
+        <span>Tail compact ${summary.compactHasMetadataOpcodeScale ? "metadata/opcode/scale" : "non"}</span>
+        <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
+      </div>
+      <div class="suite-invariant-list">
+        ${evidence.map((item) => `
+          <span class="${item.status === "passed" || item.status === "candidate-payload" || item.status === "overloaded" ? "passed" : "failed"}">${item.id}: ${item.status}</span>
+        `).join("")}
+      </div>
+      <div class="next-evidence-actions">
+        ${rejected.map((item) => `
+          <article>
+            <span>${item.status}</span>
+            <strong>${item.role}</strong>
+            <p>${item.reason}</p>
+          </article>
+        `).join("")}
+      </div>
+      <div class="bonus-selector-signals">
+        <span>Parser: ${parser.recommendedParserRoot ?? "n/a"}</span>
+        <span>Ancre bonus: ${parser.bonusAnchorSelector ?? "n/a"}</span>
+        <span>Payload local: ${parser.localPayloadSelector ?? "n/a"}</span>
       </div>
       <p>${summary.assessment?.finding ?? ""}</p>
       <p>${summary.assessment?.nextAction ?? ""}</p>

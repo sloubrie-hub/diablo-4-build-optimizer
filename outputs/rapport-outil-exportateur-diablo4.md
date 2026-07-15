@@ -12642,3 +12642,54 @@ Validation :
 Decision :
 
 Le brouillon exploitable ne doit plus copier `selector:949 -> SF_32` dans l'intake. La chaine soumission -> gate -> preview accepte maintenant seulement le claim revise qui part de `eAttrib 994 / Bonus_Percent_Per_Power`, puis demande l'explication du role local `949`.
+
+## Audit role local 949
+
+Un audit de role local a ete ajoute pour transformer le verdict `wrapper-or-layout-candidate` en classification structurelle exploitable par un futur parser.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/build-local-949-role-decode-audit.js`
+- `work/diablo4-data-exporter/scripts/test-local-949-role-decode-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- valeur locale : `949`
+- role local : `local-record-selector-with-layout-overload`
+- layouts `949` : `2`
+- layouts `949` : `compact-metadata-scale-layout`, `wrapper-or-variant-layout`
+- layout reference `994` : `1`
+- `949` a l'offset record head : `true`
+- assetRef a `+4` : `true`
+- `994` a la meme position record head : `true`
+- tail compact : `metadataId +16`, `opcode +20`, `scale +24`
+- tail variant non compact : `true`
+- ancre externe bonus = `994` : `true`
+- `949` n'est pas l'eAttrib bonus : `true`
+- bridge : `false`
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `115` etapes
+
+Validation :
+
+- controles syntaxe Node : OK
+- test audit role local `949` : `local-949-role-decode-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `115` etapes
+- plan optimiseur : section `local949RoleDecodeAudit` presente
+- site : nouveau panneau `Role local 949`
+
+Decision :
+
+Le `949` local est maintenant classe comme selecteur de record surcharge par layout. Il n'est ni l'opcode, ni la scale, ni une preuve directe de l'eAttrib bonus ou de l'ownership `SF_32`. Le prochain parser doit partir du record `selector -> asset`, utiliser `994` comme ancre bonus, puis decoder le payload compact `949` sans ouvrir de bridge DPS tant que la semantique `SF_32`, `SF_33` et uptime reste non prouvee.

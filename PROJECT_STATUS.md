@@ -1659,3 +1659,17 @@ Build de reference :
   - plan optimiseur et site : panneau `Soumission preuve` affiche le brouillon revise et l'ancien claim suspendu
   - reliableDps modifiable : `false`
   - decision : le prochain brouillon exploitable part de l'ancre `994`; aucune preuve `selector:949 -> SF_32` directe ne doit etre copiee dans l'intake
+- audit role local `949` ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-local-949-role-decode-audit.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-local-949-role-decode-audit.js`
+  - rapport genere : `outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json`
+  - suite optimiseur : `115` etapes, statut `target-optimizer-suite-ok`
+  - verdict : `local-record-selector-with-layout-overload`
+  - role decode : `true`, confiance `high`
+  - preuve structurelle : `949` a l'offset `0`, assetRef a `+4`, comme l'ancre `994`
+  - tail compact `1663210` : `metadataId +16`, `opcode +20`, `scale +24`
+  - surcharge : `949` existe aussi en layout non compact
+  - roles rejetes : `opcode`, `scale`, `direct-bonus-eattrib`, `sf32-owner-proof`
+  - plan optimiseur et site : nouveau panneau `Role local 949`
+  - reliableDps modifiable : `false`
+  - decision : construire le prochain parser sur `selector-asset-record`; utiliser `994` comme ancre bonus et traiter le tail compact `949` comme payload local a decoder, sans bridge ni promotion

@@ -45,6 +45,7 @@ const sf32OwnerSourceHuntPlanFile = "outputs/diablo4-sf32-owner-source-hunt-plan
 const diabloToolsAttributeSourceAuditFile = "outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json";
 const selector949ReconciliationAuditFile = "outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json";
 const selector949WindowReparseAuditFile = "outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json";
+const local949RoleDecodeAuditFile = "outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json";
 const sf32OwnerParserBridgeFile = "outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json";
 const sf33TriggerSourcePacketFile = "outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json";
 const sf33TriggerParserBridgeFile = "outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json";
@@ -544,6 +545,7 @@ const sf32OwnerSourceHuntPlan = readOptionalJson(sf32OwnerSourceHuntPlanFile);
 const diabloToolsAttributeSourceAudit = readOptionalJson(diabloToolsAttributeSourceAuditFile);
 const selector949ReconciliationAudit = readOptionalJson(selector949ReconciliationAuditFile);
 const selector949WindowReparseAudit = readOptionalJson(selector949WindowReparseAuditFile);
+const local949RoleDecodeAudit = readOptionalJson(local949RoleDecodeAuditFile);
 const sf32OwnerParserBridge = readOptionalJson(sf32OwnerParserBridgeFile);
 const sf33TriggerSourcePacket = readOptionalJson(sf33TriggerSourcePacketFile);
 const sf33TriggerParserBridge = readOptionalJson(sf33TriggerParserBridgeFile);
@@ -666,6 +668,7 @@ const report = {
     diabloToolsAttributeSourceAuditFile: diabloToolsAttributeSourceAudit ? diabloToolsAttributeSourceAuditFile : null,
     selector949ReconciliationAuditFile: selector949ReconciliationAudit ? selector949ReconciliationAuditFile : null,
     selector949WindowReparseAuditFile: selector949WindowReparseAudit ? selector949WindowReparseAuditFile : null,
+    local949RoleDecodeAuditFile: local949RoleDecodeAudit ? local949RoleDecodeAuditFile : null,
     sf32OwnerParserBridgeFile: sf32OwnerParserBridge ? sf32OwnerParserBridgeFile : null,
     sf33TriggerSourcePacketFile: sf33TriggerSourcePacket ? sf33TriggerSourcePacketFile : null,
     sf33TriggerParserBridgeFile: sf33TriggerParserBridge ? sf33TriggerParserBridgeFile : null,
@@ -1075,6 +1078,16 @@ const report = {
         comparisons: selector949WindowReparseAudit.comparisons,
         revisedClaims: selector949WindowReparseAudit.revisedClaims,
         safeguards: selector949WindowReparseAudit.safeguards,
+      }
+    : null,
+  local949RoleDecodeAudit: local949RoleDecodeAudit
+    ? {
+        file: local949RoleDecodeAuditFile,
+        summary: local949RoleDecodeAudit.summary,
+        roleEvidence: local949RoleDecodeAudit.roleEvidence,
+        rejectedRoles: local949RoleDecodeAudit.rejectedRoles,
+        parserImplications: local949RoleDecodeAudit.parserImplications,
+        safeguards: local949RoleDecodeAudit.safeguards,
       }
     : null,
   sf32OwnerParserBridge: sf32OwnerParserBridge

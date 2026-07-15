@@ -27,6 +27,8 @@ const generationSteps = [
   "test-selector-949-reconciliation-audit.js",
   "build-selector-949-window-reparse-audit.js",
   "test-selector-949-window-reparse-audit.js",
+  "build-local-949-role-decode-audit.js",
+  "test-local-949-role-decode-audit.js",
   "build-external-evidence-submission-pack.js",
   "test-external-evidence-submission-pack.js",
   "build-external-evidence-submission-gate.js",
@@ -180,6 +182,7 @@ const sf32OwnerSourceHuntPlan = readJson("outputs/diablo4-sf32-owner-source-hunt
 const diabloToolsAttributeSourceAudit = readJson("outputs/diablo4-diablo-tools-attribute-source-audit/diablo-tools-attribute-source-audit.json");
 const selector949ReconciliationAudit = readJson("outputs/diablo4-selector-949-reconciliation-audit/selector-949-reconciliation-audit.json");
 const selector949WindowReparseAudit = readJson("outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json");
+const local949RoleDecodeAudit = readJson("outputs/diablo4-local-949-role-decode-audit/local-949-role-decode-audit.json");
 const sf32OwnerParserBridge = readJson("outputs/diablo4-sf32-owner-parser-bridge/sf32-owner-parser-bridge.json");
 const sf33TriggerSourcePacket = readJson("outputs/diablo4-sf33-trigger-source-packet/sf33-trigger-source-packet.json");
 const sf33TriggerParserBridge = readJson("outputs/diablo4-sf33-trigger-parser-bridge/sf33-trigger-parser-bridge.json");
@@ -327,6 +330,10 @@ assertInvariant(selector949WindowReparseAudit.summary.canModifyReliableDps === f
 assertInvariant(selector949WindowReparseAudit.summary.selector994DirectExamples >= 3, "selector 949 window reparse must keep selector 994 examples");
 assertInvariant(selector949WindowReparseAudit.summary.selector949NotBonusEAttrib === true, "selector 949 window reparse must reject 949 as bonus eAttrib");
 assertInvariant(selector949WindowReparseAudit.summary.sf32TemplateNeedsRevision === true, "selector 949 window reparse must require SF_32 template revision");
+assertInvariant(local949RoleDecodeAudit.summary.canModifyReliableDps === false, "local 949 role decode must not modify reliable DPS");
+assertInvariant(local949RoleDecodeAudit.summary.localRole === "local-record-selector-with-layout-overload", "local 949 role decode must classify overloaded record selector");
+assertInvariant(local949RoleDecodeAudit.summary.roleDecoded === true, "local 949 role decode must be structurally decoded");
+assertInvariant(local949RoleDecodeAudit.summary.bridgeReady === false, "local 949 role decode must not open bridge");
 assertInvariant(sf32OwnerParserBridge.summary.canModifyReliableDps === false, "SF_32 owner parser bridge must not modify reliable DPS");
 assertInvariant(sf32OwnerParserBridge.summary.bridgeReady === false, "real SF_32 owner parser bridge should remain blocked without accepted evidence");
 assertInvariant(sf32OwnerParserBridge.summary.reliableDpsStillBlocked === true, "SF_32 owner parser bridge must keep reliable gates blocked");
@@ -583,6 +590,10 @@ const report = {
     { id: "selector-949-window-reparse-994-examples", status: "passed", value: selector949WindowReparseAudit.summary.selector994DirectExamples },
     { id: "selector-949-window-reparse-not-bonus", status: "passed", value: selector949WindowReparseAudit.summary.selector949NotBonusEAttrib },
     { id: "selector-949-window-reparse-template-revision", status: "passed", value: selector949WindowReparseAudit.summary.sf32TemplateNeedsRevision },
+    { id: "local-949-role-decode-safe", status: "passed", value: local949RoleDecodeAudit.summary.canModifyReliableDps },
+    { id: "local-949-role-decode-role", status: "passed", value: local949RoleDecodeAudit.summary.localRole },
+    { id: "local-949-role-decode-structural", status: "passed", value: local949RoleDecodeAudit.summary.roleDecoded },
+    { id: "local-949-role-decode-bridge", status: "passed", value: local949RoleDecodeAudit.summary.bridgeReady },
     { id: "sf32-owner-parser-bridge-safe", status: "passed", value: sf32OwnerParserBridge.summary.canModifyReliableDps },
     { id: "sf32-owner-parser-bridge-blocked-real", status: "passed", value: sf32OwnerParserBridge.summary.bridgeReady },
     { id: "sf32-owner-parser-bridge-gates-blocked", status: "passed", value: sf32OwnerParserBridge.summary.reliableDpsStillBlocked },
@@ -744,6 +755,7 @@ assertInvariant(optimizerPlan.sf32OwnerSourceHuntPlan?.summary?.canModifyReliabl
 assertInvariant(optimizerPlan.diabloToolsAttributeSourceAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe DiabloTools attribute audit");
 assertInvariant(optimizerPlan.selector949ReconciliationAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 reconciliation audit");
 assertInvariant(optimizerPlan.selector949WindowReparseAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe selector 949 window reparse audit");
+assertInvariant(optimizerPlan.local949RoleDecodeAudit?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe local 949 role decode audit");
 assertInvariant(optimizerPlan.sf32OwnerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_32 owner parser bridge");
 assertInvariant(optimizerPlan.sf33TriggerSourcePacket?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger source packet");
 assertInvariant(optimizerPlan.sf33TriggerParserBridge?.summary?.canModifyReliableDps === false, "optimizer plan must embed safe SF_33 trigger parser bridge");
