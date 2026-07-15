@@ -11646,3 +11646,49 @@ Validation :
 Decision :
 
 Le paquet prepare une saisie humaine explicite mais ne l'applique jamais. Meme si le cas synthetique est pret pour saisie, la decision reste separee de l'intake reel, du bridge, du ranking et de `reliableDps`.
+
+## Audit decision reviewer preuve delta
+
+Un audit de decision reviewer a ete ajoute apres le paquet de decision. Il verifie un fichier de decision humaine s'il existe et genere un template quand il manque.
+
+Fichiers modifies ou ajoutes :
+
+- `work/diablo4-data-exporter/scripts/audit-delta-evidence-review-decision.js`
+- `work/diablo4-data-exporter/scripts/test-delta-evidence-review-decision-audit.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-plan.js`
+- `site/app.js`
+- `outputs/diablo4-delta-evidence-review-decision-audit/delta-evidence-review-decision-audit.json`
+- `outputs/diablo4-delta-evidence-review-decision-audit/delta-evidence-review-decision.template.json`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `outputs/diablo4-target-optimizer-plan/target-optimizer-plan.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- candidat : `draft-delta-proof-sf32-owner`
+- audit reel : `readyForPromotionAudit false`
+- checks : `5`
+- checks echoues reel : `5`
+- checks echoues : `decision-package-ready`, `decision-input-present`, `required-fields-complete`, `status-allowed`, `source-rechecked`
+- test synthetique approved : `readyForPromotionAudit true`, sans bridge, ranking, `reliableDps` ni promotion
+- test synthetique rejected : `decisionRejected true`, `readyForPromotionAudit false`
+- `writesRealIntake false`
+- `acceptedForBridge false`
+- `promotionReady false`
+- `canModifyReliableDps false`
+- suite optimiseur : `target-optimizer-suite-ok`, `73` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour l'audit, le test, la suite, le plan optimiseur et le site
+- test audit decision : `delta-evidence-review-decision-audit-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `73` etapes
+- plan optimiseur : section `deltaEvidenceReviewDecisionAudit` presente
+- site : nouveau panneau `Audit decision`
+
+Decision :
+
+Une decision `approved` ne modifie rien directement; elle ouvre seulement un audit de promotion separe. Une decision `rejected` documente le refus et garde le delta hors `reliableDps`.

@@ -1342,3 +1342,19 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Decision reviewer`
   - reliableDps modifiable : `false`
   - decision : preparer la saisie humaine approved/rejected sans appliquer la decision, sans bridge et sans promotion
+- audit decision reviewer preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/audit-delta-evidence-review-decision.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-review-decision-audit.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-review-decision-audit/delta-evidence-review-decision-audit.json`
+  - template genere : `outputs/diablo4-delta-evidence-review-decision-audit/delta-evidence-review-decision.template.json`
+  - suite optimiseur : `73` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - audit reel : `readyForPromotionAudit false`, `5 / 5` checks echoues
+  - checks echoues : `decision-package-ready`, `decision-input-present`, `required-fields-complete`, `status-allowed`, `source-rechecked`
+  - test synthetique approved : `readyForPromotionAudit true`, mais bridge, ranking, reliableDps et promotion restent `false`
+  - test synthetique rejected : `decisionRejected true`, `readyForPromotionAudit false`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Audit decision`
+  - reliableDps modifiable : `false`
+  - decision : approved ouvre seulement un audit de promotion separe; rejected garde le delta hors reliableDps
