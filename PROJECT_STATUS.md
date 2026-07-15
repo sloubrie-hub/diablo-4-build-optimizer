@@ -1327,3 +1327,18 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Revue preuve`
   - reliableDps modifiable : `false`
   - decision : ouvrir seulement une decision humaine separee; pending ne devient jamais approved automatiquement
+- paquet decision reviewer preuve delta ajoute
+  - script ajoute : `work/diablo4-data-exporter/scripts/build-delta-evidence-review-decision-package.js`
+  - test ajoute : `work/diablo4-data-exporter/scripts/test-delta-evidence-review-decision-package.js`
+  - rapport genere : `outputs/diablo4-delta-evidence-review-decision-package/delta-evidence-review-decision-package.json`
+  - markdown genere : `outputs/diablo4-delta-evidence-review-decision-package/delta-evidence-review-decision-package.md`
+  - suite optimiseur : `71` etapes, statut `target-optimizer-suite-ok`
+  - candidat cible : `draft-delta-proof-sf32-owner`
+  - paquet reel : `readyForDecisionInput false`, `3 / 4` checks echoues
+  - checks echoues : `review-gate-ready`, `candidate-still-pending`, `manual-review-blocker-present`
+  - test synthetique : `readyForDecisionInput true`, `targetCandidateStatus pending`, decisions `approved / rejected`
+  - ecriture intake reel : `false`
+  - accepted bridge : `false`
+  - plan optimiseur et site : nouveau panneau `Decision reviewer`
+  - reliableDps modifiable : `false`
+  - decision : preparer la saisie humaine approved/rejected sans appliquer la decision, sans bridge et sans promotion
