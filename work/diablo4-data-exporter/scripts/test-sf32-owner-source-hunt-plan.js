@@ -32,20 +32,27 @@ run("build-sf32-owner-source-hunt-plan.js", [
   "outputs/diablo4-delta-next-action-decision/delta-next-action-decision.json",
   "outputs/diablo4-sf32-owner-source-packet/sf32-owner-source-packet.json",
   "outputs/diablo4-external-evidence-submission-pack/external-evidence-submission-pack.json",
+  "outputs/diablo4-selector-949-window-reparse-audit/selector-949-window-reparse-audit.json",
   outDir,
 ]);
 
 const report = readJson(path.join(outDir, "sf32-owner-source-hunt-plan.json"));
 assertInvariant(report.summary.assetId === 1663210, "hunt plan must target asset 1663210");
-assertInvariant(report.summary.targetField === "SF_32", "hunt plan must target SF_32");
-assertInvariant(report.summary.targetSelector === "selector:949", "hunt plan must target selector:949");
+assertInvariant(report.summary.targetField === "Bonus_Percent_Per_Power / SF_32 role unresolved", "hunt plan must target revised SF_32 role");
+assertInvariant(report.summary.targetSelector === "eAttrib:994 + local-role:949", "hunt plan must target revised 994 + local 949");
+assertInvariant(report.summary.templateNeedsRevision === true, "hunt plan must require template revision");
+assertInvariant(report.summary.priorClaimSuspended === true, "hunt plan must suspend prior selector 949 claim");
 assertInvariant(report.summary.recommendedActionId === "collect-source-backed-delta-proof", "hunt plan must follow the source-backed decision");
 assertInvariant(report.summary.searches === 4, "hunt plan must expose four searches");
 assertInvariant(report.summary.highPrioritySearches === 2, "hunt plan must expose two high priority searches");
 assertInvariant(report.mustContain.includes("1663210"), "hunt plan must require asset id");
-assertInvariant(report.mustContain.includes("selector:949"), "hunt plan must require selector");
+assertInvariant(report.mustContain.includes("eAttrib:994"), "hunt plan must require 994 anchor");
+assertInvariant(report.mustContain.includes("Bonus_Percent_Per_Power"), "hunt plan must require bonus name");
+assertInvariant(report.mustContain.includes("local-role:949"), "hunt plan must require local 949 role");
 assertInvariant(report.mustContain.includes("SF_32"), "hunt plan must require SF_32");
 assertInvariant(report.summary.candidateSnippetReady === true, "hunt plan must carry the pending candidate snippet");
+assertInvariant(report.summary.candidateSnippetUsable === false, "old candidate snippet must be marked unusable");
+assertInvariant(report.supersededSubmission?.obsolete === true, "old submission must be superseded");
 assertInvariant(report.summary.writesIntake === false, "hunt plan must not write intake");
 assertInvariant(report.summary.canModifyReliableDps === false, "hunt plan must not modify reliable DPS");
 assertInvariant(report.summary.canUseForReliableDps === false, "hunt plan must not allow reliable DPS");
@@ -57,6 +64,7 @@ console.log(JSON.stringify({
   status: "sf32-owner-source-hunt-plan-test-ok",
   searches: report.summary.searches,
   candidateSnippetReady: report.summary.candidateSnippetReady,
+  candidateSnippetUsable: report.summary.candidateSnippetUsable,
   canModifyReliableDps: report.summary.canModifyReliableDps,
   promotionReady: report.summary.promotionReady,
 }, null, 2));

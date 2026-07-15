@@ -1601,6 +1601,7 @@ function renderSf32OwnerSourceHuntPlan(report) {
   const summary = report.summary ?? {};
   const searches = report.searches ?? [];
   const accept = report.acceptanceChecklist ?? [];
+  const superseded = report.supersededSubmission ?? {};
   return `
     <div class="bonus-selector-proof sf32-owner-source-hunt-plan">
       <div class="bonus-selector-proof-head">
@@ -1616,14 +1617,21 @@ function renderSf32OwnerSourceHuntPlan(report) {
         ${targetMetric("Recherches", summary.searches)}
         ${targetMetric("Priorite haute", summary.highPrioritySearches)}
         ${targetMetric("Termes requis", summary.requiredTerms)}
-        ${targetMetric("Candidat", summary.candidateSnippetReady ? "pret" : "absent")}
+        ${targetMetric("Candidat", summary.candidateSnippetUsable ? "utilisable" : summary.candidateSnippetReady ? "obsolete" : "absent")}
       </div>
       <div class="bonus-selector-signals">
         <span>${summary.targetSelector ?? "selector"} -> ${summary.targetField ?? "field"}</span>
+        <span>Template ${summary.templateNeedsRevision ? "a reviser" : "stable"}</span>
         <span>Intake ${summary.writesIntake ? "ecrit" : "protege"}</span>
         <span>Bridge ${summary.acceptedForBridge ? "ouvert" : "ferme"}</span>
         <span>Reliable DPS ${summary.canModifyReliableDps ? "modifiable" : "protege"}</span>
       </div>
+      ${superseded.obsolete ? `
+        <div class="suite-invariant-list">
+          <span class="failed">Brouillon obsolete: ${superseded.candidateId ?? "n/a"}</span>
+          <span class="failed">Ancien claim suspendu</span>
+        </div>
+      ` : ""}
       <div class="next-evidence-actions">
         ${searches.map((item) => `
           <article>

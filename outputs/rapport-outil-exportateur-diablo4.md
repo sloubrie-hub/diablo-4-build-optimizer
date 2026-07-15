@@ -12545,3 +12545,48 @@ Validation :
 Decision :
 
 La demande directe `selector:949 -> SF_32` est suspendue. La prochaine passe doit construire le parser autour de l'ancre source-backed `994` pour `Bonus_Percent_Per_Power` et traiter `949` comme role local a decoder. Le DPS fiable reste strict-only.
+
+## Revision du plan collecte source SF_32
+
+Le plan de collecte `SF_32` a ete revise pour appliquer la conclusion de reparse `949`. Il ne demande plus une preuve directe `selector:949 -> SF_32`; il conserve l'ancien brouillon pour tracabilite, mais le marque comme obsolete et non utilisable.
+
+Fichiers modifies :
+
+- `work/diablo4-data-exporter/scripts/build-sf32-owner-source-hunt-plan.js`
+- `work/diablo4-data-exporter/scripts/test-sf32-owner-source-hunt-plan.js`
+- `work/diablo4-data-exporter/scripts/build-target-optimizer-suite.js`
+- `site/app.js`
+- `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json`
+- `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.md`
+- `outputs/diablo4-target-optimizer-suite/target-optimizer-suite.json`
+- `PROJECT_STATUS.md`
+- `outputs/rapport-outil-exportateur-diablo4.md`
+
+Resultat :
+
+- cible : `asset 1663210`, `skill:1663210`
+- ancienne cible suspendue : `selector:949 -> SF_32`
+- nouvelle cible : `eAttrib:994 + local-role:949 -> Bonus_Percent_Per_Power / SF_32 role unresolved`
+- revision template requise : `true`
+- ancien claim suspendu : `true`
+- recherches : `4`, dont `2` priorite haute
+- termes requis : `5`
+- termes requis : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+- brouillon existant : `candidateSnippetReady true`, mais `candidateSnippetUsable false`
+- soumission obsolete : `true`
+- `acceptedForBridge false`
+- `canModifyReliableDps false`
+- `canUseForReliableDps false`
+- `promotionReady false`
+- suite optimiseur : `target-optimizer-suite-ok`, `113` etapes
+
+Validation :
+
+- controles syntaxe Node : OK pour le plan source `SF_32`, son test, la suite et le site
+- test plan source `SF_32` : `sf32-owner-source-hunt-plan-test-ok`
+- suite optimiseur : `target-optimizer-suite-ok`, `113` etapes
+- site : panneau `Recherche source SF_32` affiche maintenant le candidat comme obsolete
+
+Decision :
+
+Le prochain brouillon de preuve ne doit pas chercher `selector:949 -> SF_32`. Il doit prouver d'abord l'ancre `eAttrib 994 / Bonus_Percent_Per_Power`, puis expliquer le role local `949` dans la fenetre `1663210` avant toute tentative de bridge parseur ou de promotion DPS.

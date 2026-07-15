@@ -311,6 +311,8 @@ assertInvariant(sf32OwnerSourcePacket.requiredClaim?.field === "selector:949", "
 assertInvariant(sf32OwnerSourceHuntPlan.summary.canModifyReliableDps === false, "SF_32 source hunt plan must not modify reliable DPS");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.searches === 4, "SF_32 source hunt plan must expose four searches");
 assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetReady === true, "SF_32 source hunt plan must carry the pending candidate snippet");
+assertInvariant(sf32OwnerSourceHuntPlan.summary.templateNeedsRevision === true, "SF_32 source hunt plan must require template revision after 949 reparse");
+assertInvariant(sf32OwnerSourceHuntPlan.summary.candidateSnippetUsable === false, "SF_32 source hunt plan must supersede old selector 949 candidate");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.canModifyReliableDps === false, "DiabloTools attribute audit must not modify reliable DPS");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.selector949Name === "Damage_Percent_Reduction_From_Elites", "DiabloTools must map eAttrib 949 to Damage_Percent_Reduction_From_Elites");
 assertInvariant(diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib === 994, "DiabloTools must map Bonus_Percent_Per_Power to eAttrib 994");
@@ -563,6 +565,8 @@ const report = {
     { id: "sf32-owner-source-hunt-safe", status: "passed", value: sf32OwnerSourceHuntPlan.summary.canModifyReliableDps },
     { id: "sf32-owner-source-hunt-searches", status: "passed", value: sf32OwnerSourceHuntPlan.summary.searches },
     { id: "sf32-owner-source-hunt-snippet-ready", status: "passed", value: sf32OwnerSourceHuntPlan.summary.candidateSnippetReady },
+    { id: "sf32-owner-source-hunt-template-revision", status: "passed", value: sf32OwnerSourceHuntPlan.summary.templateNeedsRevision },
+    { id: "sf32-owner-source-hunt-snippet-superseded", status: "passed", value: sf32OwnerSourceHuntPlan.summary.candidateSnippetUsable },
     { id: "diablo-tools-attribute-audit-safe", status: "passed", value: diabloToolsAttributeSourceAudit.summary.canModifyReliableDps },
     { id: "diablo-tools-attribute-audit-949-name", status: "passed", value: diabloToolsAttributeSourceAudit.summary.selector949Name },
     { id: "diablo-tools-attribute-audit-bonus-eattrib", status: "passed", value: diabloToolsAttributeSourceAudit.summary.bonusPercentPerPowerEAttrib },

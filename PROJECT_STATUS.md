@@ -1634,3 +1634,15 @@ Build de reference :
   - plan optimiseur et site : nouveau panneau `Reparse fenetre 949`
   - reliableDps modifiable : `false`
   - decision : suspendre la demande directe `selector:949 -> SF_32`; utiliser `994` comme ancre bonus et traiter `949` comme role local a decoder
+- plan collecte source `SF_32` revise apres reparse `949`
+  - script modifie : `work/diablo4-data-exporter/scripts/build-sf32-owner-source-hunt-plan.js`
+  - test modifie : `work/diablo4-data-exporter/scripts/test-sf32-owner-source-hunt-plan.js`
+  - rapport regenere : `outputs/diablo4-sf32-owner-source-hunt-plan/sf32-owner-source-hunt-plan.json`
+  - suite optimiseur : `113` etapes, statut `target-optimizer-suite-ok`
+  - ancienne cible suspendue : `selector:949 -> SF_32`
+  - nouvelle cible de recherche : `eAttrib:994 + local-role:949 -> Bonus_Percent_Per_Power / SF_32 role unresolved`
+  - termes requis : `1663210`, `eAttrib:994`, `Bonus_Percent_Per_Power`, `local-role:949`, `SF_32`
+  - brouillon existant : conserve pour tracabilite, mais `candidateSnippetUsable false`
+  - plan optimiseur et site : panneau `Recherche source SF_32` affiche le candidat comme obsolete
+  - reliableDps modifiable : `false`
+  - decision : ne plus soumettre de preuve `selector:949 -> SF_32`; remplacer le brouillon par une preuve qui part de `994` puis explique le role local `949`
